@@ -42,23 +42,12 @@ set showmatch
 set list
 set listchars=tab:»-,trail:-,eol:↲,extends:»,precedes:«,nbsp:%
 set ambiwidth=double
-function! ZenkakuSpace()
-  highlight ZenkakuSpace cterm=underline ctermfg=lightblue guibg=grey
-endfunction
-if has('syntax')
-  augroup ZenkakuSpace
-    autocmd!
-    autocmd ColorScheme * call ZenkakuSpace()
-    autocmd VimEnter,WinEnter,BufRead * let w:m1=matchadd('ZenkakuSpace', '　')
-  augroup END
-  call ZenkakuSpace()
-endif
 
 " status line
 set ruler
 set laststatus=2
 let ff_table = {'dos' : 'CRLF', 'unix' : 'LF', 'mac' : 'CR' }
-function! SetStatusLine()
+fu! SetStatusLine()
   hi User1 cterm=bold ctermbg=5 ctermfg=0
   hi User2 cterm=bold ctermbg=2 ctermfg=0
   hi User3 cterm=bold ctermbg=5 ctermfg=0
@@ -80,8 +69,8 @@ function! SetStatusLine()
     let c = 5
     let mode_name = 'VISUAL'
   endif
-  return '%' . c . '*[' . mode_name . ']%* %<%F%m%r%h%w%=%p%% %l/%L %02v [%{&fenc!=""?&fenc:&enc}][%{ff_table[&ff]}]'
-endfunction
+  retu '%' . c . '*[' . mode_name . ']%* %<%F%m%r%h%w%=%p%% %l/%L %02v [%{&fenc!=""?&fenc:&enc}][%{ff_table[&ff]}]'
+endf
 set statusline=%!SetStatusLine()
 
 " explorer
@@ -125,7 +114,7 @@ if has('win32unix')
 endif
 
 " grep ---------------------------------------
-nmap <Leader>gg :call GrepCurrentExtention()<CR>
+nmap <Leader>gg :cal GrepCurrentExtention()<CR>
 nmap <Leader>ge :GrepExtFrom 
 
 " lsp
@@ -139,15 +128,15 @@ nmap s <Plug>(easymotion-bd-w)w
 nmap <Leader>w <Plug>(easymotion-bd-w)
 nmap <Leader>s <Plug>(easymotion-sn)
 
-nnoremap * *N:call HiSet()<CR>
-nnoremap # *N:call HiSet()<CR>
-nmap <Leader>q :noh<CR>:call clearmatches()<CR>
+nnoremap <silent>* *N:cal HiSet()<CR>
+nnoremap <silent># *N:cal HiSet()<CR>
+nmap <silent><Leader>q :noh<CR>:cal clearmatches()<CR>
 
 " mark --------------------------------------------------
 nmap <Leader>m :marks abcdefghijklmnopqrstuvwxyz<CR>:normal! `
-nmap mm :call Marking()<CR>
-nmap mj :call MarkHank("up")<CR>
-nmap mk :call MarkHank("down")<CR>
+nmap mm :cal Marking()<CR>
+nmap mj :cal MarkHank("up")<CR>
+nmap mk :cal MarkHank("down")<CR>
 
 " window ---------------------------------------
 nnoremap j gj
@@ -168,13 +157,13 @@ nnoremap <S-j> 2<C-w>+
 " like 'vim-auto-cursorline'
 let g:scroll_up_key = "\<C-y>"
 let g:scroll_down_key = "\<C-e>"
-nmap <silent><C-u> :call Scroll(scroll_up_key , 25)<CR>
-nmap <silent><C-d> :call Scroll(scroll_down_key , 25)<CR>
-nmap <silent><C-b> :call Scroll(scroll_up_key , 10)<CR>
-nmap <silent><C-f> :call Scroll(scroll_down_key , 10)<CR>
+nmap <silent><C-u> :cal Scroll(scroll_up_key , 25)<CR>
+nmap <silent><C-d> :cal Scroll(scroll_down_key , 25)<CR>
+nmap <silent><C-b> :cal Scroll(scroll_up_key , 10)<CR>
+nmap <silent><C-f> :cal Scroll(scroll_down_key , 10)<CR>
 
-nmap <Leader>x :call CloseBuf()<CR>
-nmap <Leader>t :call TerminalPop()<CR>
+nmap <Leader>x :cal CloseBuf()<CR>
+nmap <Leader>t :cal TerminalPop()<CR>
 
 " snip
 nmap <Leader>0 :VsnipOpen<CR>
@@ -191,9 +180,9 @@ inoremap <expr> <CR> pumvisible() ? '<C-y>' : '<CR>'
 
 " favorite ---------------------------------------
 nmap <Leader><Leader>n :Necronomicon 
-nmap <Leader><Leader>w :call RunCat()<CR>
-nmap <Leader><Leader>cc :call ChangeColor()<CR>:colorscheme<CR>
-nmap <Leader><Leader>ce :call execute('top terminal ++shell eval ' . getline('.'))<CR>
+nmap <Leader><Leader>w :cal RunCat()<CR>
+nmap <Leader><Leader>cc :cal ChangeColor()<CR>:colorscheme<CR>
+nmap <Leader><Leader>ce :cal execute('top terminal ++shell eval ' . getline('.'))<CR>
 
 " ========================================
 " Function
@@ -202,27 +191,28 @@ nmap <Leader><Leader>ce :call execute('top terminal ++shell eval ' . getline('.'
 " TODO refactor
 " zihou timer ---------------------------------------
 let s:ini_hour = localtime() / 3600
-function! Timer()
+fu! Timer()
   let l:now_hour = localtime() / 3600
   if now_hour != s:ini_hour
     let s:ini_hour = now_hour
-    call ChangeColor()
-    call Zihou()
-    call timer_start(1000, { -> RunCat() })
+    cal ChangeColor()
+    cal Zihou()
+    cal timer_start(1000, { -> RunCat() })
   endif
-endfunction
+endf
 
 " less color, no plugin
 " change color --------------------------------
-let s:colorscheme_arr_default = [
-    \ 'desert',
-    \ 'elflord',
-    \ 'evening',
-    \ 'habamax',
-    \ 'koehler',
-    \ 'slate',
-    \ 'torte'
-    \]
+"let s:colorscheme_arr_default = [
+"    \ 'desert',
+"    \ 'elflord',
+"    \ 'evening',
+"    \ 'habamax',
+"    \ 'koehler',
+"    \ 'slate',
+"    \ 'torte'
+"    \]
+let s:colorscheme_arr_default = ['torte']
 let s:colorscheme_arr = [
     \ 'hybrid_material',
     \ 'molokai',
@@ -231,33 +221,54 @@ let s:colorscheme_arr = [
     \ 'alduin',
     \ 'apprentice'
     \ ]
-function! ChangeColor()
+fu! ChangeColor()
   if glob('~/.vim/pack/plugins/start') != ''
     execute('colorscheme ' . s:colorscheme_arr[localtime() % len(s:colorscheme_arr)])
   else
     execute('colorscheme ' . s:colorscheme_arr_default[localtime() % len(s:colorscheme_arr_default)])
-    call SetStatusLine()
+    cal SetStatusLine()
   endif
-endfunction
-call ChangeColor()
+endf
+cal ChangeColor()
 
 " grep ----------------------------------------
-function! GrepCurrentExtention()
+fu! GrepCurrentExtention()
   echo 'grep processing in [' . expand('%:e') .'] ...'
   execute('vimgrep /' . expand('<cword>') . '/gj **/*.' . expand('%:e'))
-endfunction
+endf
 
-command! -nargs=1 GrepExtFrom call GrepExtFrom(<f-args>)
-function! GrepExtFrom(ext)
+command! -nargs=1 GrepExtFrom cal GrepExtFrom(<f-args>)
+fu! GrepExtFrom(ext)
   echo 'grep processing in [' . a:ext .'] ...'
   execute('vimgrep /' . expand('<cword>') . '/gj **/*.' . a:ext)
-endfunction
+endf
 
 " highlight -----------------------------------
-augroup QuickhlManual
-  autocmd!
-  autocmd! ColorScheme * call HlIni()
-augroup END
+" on word, bright
+aug auto_hl_cword
+  au!
+  au BufEnter,CmdwinEnter * cal HiCwordStart()
+aug END
+fu! HiCwordStart()
+  aug QuickhlCword
+    au!
+    au! CursorMoved <buffer> cal HiCwordR()
+    au! ColorScheme * cal HiCword()
+  aug END
+  cal HiCword()
+endf
+fu! HiCword()
+  exe "hi link QuickhlCword Search"
+endf
+fu! HiCwordR()
+  silent! 2match none
+  exe "2mat QuickhlCword /\\\<". expand('<cword>') . "\\\>/"
+endf
+
+aug QuickhlManual
+  au!
+  au! ColorScheme * cal HlIni()
+aug END
 let g:search_hl= [
     \ "cterm=bold ctermfg=16 ctermbg=153 gui=bold guifg=#ffffff guibg=#0a7383",
     \ "cterm=bold ctermfg=7  ctermbg=1   gui=bold guibg=#a07040 guifg=#ffffff",
@@ -274,13 +285,14 @@ let g:search_hl= [
     \ "cterm=bold ctermfg=7  ctermbg=56  gui=bold guibg=#a0b0c0 guifg=black",
     \ ]
 let g:now_hi = 0
-function! HlIni()
+fu! HlIni()
   for v in g:search_hl
     exe "hi UserSearchHi" . index(g:search_hl, v) . " " . v
   endfor
-endfunction
+endf
+cal HlIni()
 
-function! HiSet() abort
+fu! HiSet() abort
   let cw = expand('<cword>')
   let already = ''
   for x in getmatches()
@@ -289,18 +301,18 @@ function! HiSet() abort
     endif
   endfor
   if already != ''
-    call matchdelete(already)
-    return
+    cal matchdelete(already)
+    retu
   endif
-  call matchadd("UserSearchHi" . g:now_hi, cw)
+  cal matchadd("UserSearchHi" . g:now_hi, cw)
   let g:now_hi = g:now_hi + 1
   if g:now_hi >= len(g:search_hl)
     let g:now_hi = 0
   endif
-endfunction
+endf
 
 " mark ----------------------------------------
-function! Marking() abort
+fu! Marking() abort
   let l:now_marks = []
   let l:words = 'abcdefghijklmnopqrstuvwxyz'
   let l:warr = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
@@ -309,9 +321,9 @@ function! Marking() abort
     let l:r = filter(split(row, ' '), {i, v -> v != ''})
     if stridx(words, r[0]) != -1 && r[1] == line('.')
       execute('delmarks ' . r[0])
-      call MarkShow()
+      cal MarkShow()
       echo 'delete mark'
-      return
+      retu
     endif
     let l:now_marks = add(now_marks, r[0])
   endfor
@@ -319,28 +331,28 @@ function! Marking() abort
   let l:can_use = filter(warr, {i, v -> stridx(join(now_marks, ''), v) == -1})
   if len(can_use) != 0
     execute('mark ' . can_use[0])
-    call MarkShow()
+    cal MarkShow()
     echo 'marked'
   else
     echo 'over limit markable char'
   endif
-endfunction
+endf
 
 " like vim-signature
-function! MarkShow() abort
-  call sign_undefine()
+fu! MarkShow() abort
+  cal sign_undefine()
   let l:words = 'abcdefghijklmnopqrstuvwxyz'
   let get_marks = ''
   try
     let get_marks = execute('marks ' . words)
   catch
-    return
+    retu
   endtry
   let l:marks = split(get_marks, '\n')
   if len(marks) == 0
-    return
+    retu
   endif
-  call remove(marks, 0)
+  cal remove(marks, 0)
   let mark_dict = {}
   let rownums = []
   for row in marks
@@ -352,126 +364,131 @@ function! MarkShow() abort
     exe "sign define " . row . " text=" . mark_dict[row] . " texthl=ErrorMsg"
     exe "sign place " . row . " line=" . row . " name=" . row . " file=" . expand("%:p")
   endfor
-endfunction
-if has('autocmd')
-  augroup sig_autocmds
-    autocmd!
-    autocmd BufEnter,CmdwinEnter * call MarkShow()
-    "BufEnter,CmdwinEnter * call MarkShow()
-  augroup END
-endif
+endf
+aug sig_aus
+  au!
+  au BufEnter,CmdwinEnter * cal MarkShow()
+aug END
 
-function! MarkHank(vector) abort
+" TODO refactor
+fu! MarkHank(vector) abort
   let l:words = 'abcdefghijklmnopqrstuvwxyz'
   let l:marks = split(execute('marks ' . words), '\n')
-  call remove(marks, 0)
+  cal remove(marks, 0)
+  let mark_dict = {}
   let rownums = []
   for row in marks
     let l:r = filter(split(row, ' '), {i, v -> v != ''})
+    let mark_dict[r[1]] = r[0]
     let rownums = add(rownums, r[1])
   endfor
   if a:vector == 'up'
-    call sort(rownums, {x, y -> x - y})
+    cal sort(rownums, {x, y -> x - y})
   endif
   if a:vector == 'down'
-    call sort(rownums, {x, y -> y - x})
+    cal sort(rownums, {x, y -> y - x})
   endif
   for rownum in rownums
     if a:vector == 'up' && rownum > line('.')
-      execute "normal! " . rownum . 'G'
+      execute "normal! `" . mark_dict[rownum]
       echo index(rownums, rownum) + 1 . "/" . len(rownums)
-      return
+      retu
     endif
     if a:vector == 'down' && rownum < line('.')
-      execute "normal! " . rownum . 'G'
+      execute "normal! `" . mark_dict[rownum]
       echo len(rownums) - index(rownums, rownum) . "/" . len(rownums)
-      return
+      retu
     endif
   endfor
   echo "last mark"
-endfunction
+endf
 
 " scroll ----------------------------------------
 " like 'comfortable-motion.vim'
 " like 'vim-auto-cursorline'
-function! Scroll(vector, delta)
-  call CursorToggle()
+fu! Scroll(vector, delta)
+  cal CursorToggle()
   let tmp = timer_start(a:delta, { -> NormalExe(a:vector) }, {'repeat': -1})
-  call timer_start(600, { -> timer_stop(tmp) })
-  call timer_start(600, { -> CursorToggle() })
-endfunction
-function! NormalExe(aa)
+  cal timer_start(600, { -> timer_stop(tmp) })
+  cal timer_start(600, { -> CursorToggle() })
+endf
+fu! NormalExe(aa)
   execute "normal! " . a:aa
-endfunction
-function! CursorToggle()
+endf
+fu! CursorToggle()
   set cursorcolumn!
   set cursorline!
-endfunction
+endf
 
 " test sandwich
-function! TestSand()
+fu! TestSand()
   let cw = "'" . expand('<cword>') . "'"
   exe "normal! dw"
   exe "star" cw "stopi"
-endfunction
+endf
+
+
+" support F
+
+
 
 " buffer --------------------------------------
-function! CloseBuf()
+fu! CloseBuf()
   let l:now_b = bufnr('%')
   bn
   execute('bd ' . now_b)
-endfunction
+endf
 
 " terminal ------------------------------------
-function! TerminalPop()
-  call popup_create(
+fu! TerminalPop()
+  cal popup_create(
         \ term_start([&shell], #{ hidden: 1, term_finish: 'close'}),
         \ #{ border: [], minwidth: &columns/2, minheight: &lines/2 })
-endfunction
+endf
 
 " favorite  -----------------------------------
-command! -nargs=* Necronomicon call Necronomicon(<f-args>)
-function! Necronomicon(...) abort
+command! -nargs=* Necronomicon cal Necronomicon(<f-args>)
+fu! Necronomicon(...) abort
   if a:0 == 0
     e ~/.uranometria/necronomicon.md
     loadview
-    return
+    retu
   elseif a:0 == 1 && a:1 == 'YogSothoth'
     execute('!sh ~/.uranometria/forge/backup.sh')
-    return
+    retu
   elseif a:0 == 2 && a:1 == 'Azathoth' && a:2 == 'kill'
     bo terminal ++shell ++close sh ~/.uranometria/forge/kill.sh
     smile
-    return
+    retu
   elseif a:0 == 1 && a:1 == 'Azathoth'
     bo terminal ++shell ++close sh ~/.uranometria/forge/omnibus.sh
     smile
-    return
+    retu
   endif
-endfunction
+endf
 
-function! Zihou()
-  call popup_create([
+fu! Zihou()
+  cal popup_create([
         \ strftime('%Y/%m/%d %H:%M (%A)', localtime()),
         \ '',
         \ 'colorscheme: ' . execute('colorscheme')
         \],
         \ #{border: [], zindex: 999, time: 3500})
-endfunction
+endf
 
-function! RunCat()
+fu! RunCat()
   let l:delay = 250
-  call timer_start(delay * 0, { -> popup_create(s:running_cat[0], #{border: [], time: delay}) })
-  call timer_start(delay * 1, { -> popup_create(s:running_cat[1], #{border: [], time: delay}) })
-  call timer_start(delay * 2, { -> popup_create(s:running_cat[2], #{border: [], time: delay}) })
-  call timer_start(delay * 3, { -> popup_create(s:running_cat[3], #{border: [], time: delay}) })
-  call timer_start(delay * 4, { -> popup_create(s:running_cat[4], #{border: [], time: delay}) })
-  call timer_start(delay * 5, { -> popup_create(s:running_cat[0], #{border: [], time: delay}) })
-  call timer_start(delay * 6, { -> popup_create(s:running_cat[1], #{border: [], time: delay}) })
-  call timer_start(delay * 7, { -> popup_create(s:running_cat[2], #{border: [], time: delay}) })
-  call timer_start(delay * 8, { -> popup_create(s:running_cat[3], #{border: [], time: delay}) })
-  call timer_start(delay * 9, { -> popup_create(s:running_cat[4], #{border: [], time: delay}) })
-endfunction
+  cal timer_start(delay * 0, { -> popup_create(s:running_cat[0], #{border: [], time: delay}) })
+  cal timer_start(delay * 1, { -> popup_create(s:running_cat[1], #{border: [], time: delay}) })
+  cal timer_start(delay * 2, { -> popup_create(s:running_cat[2], #{border: [], time: delay}) })
+  cal timer_start(delay * 3, { -> popup_create(s:running_cat[3], #{border: [], time: delay}) })
+  cal timer_start(delay * 4, { -> popup_create(s:running_cat[4], #{border: [], time: delay}) })
+  cal timer_start(delay * 5, { -> popup_create(s:running_cat[0], #{border: [], time: delay}) })
+  cal timer_start(delay * 6, { -> popup_create(s:running_cat[1], #{border: [], time: delay}) })
+  cal timer_start(delay * 7, { -> popup_create(s:running_cat[2], #{border: [], time: delay}) })
+  cal timer_start(delay * 8, { -> popup_create(s:running_cat[3], #{border: [], time: delay}) })
+  cal timer_start(delay * 9, { -> popup_create(s:running_cat[4], #{border: [], time: delay}) })
+endf
 let s:running_cat = [
     \[
     \ '                                                            ',
