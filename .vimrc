@@ -128,9 +128,9 @@ nmap s <Plug>(easymotion-bd-w)w
 nmap <Leader>w <Plug>(easymotion-bd-w)
 nmap <Leader>s <Plug>(easymotion-sn)
 
-nnoremap <silent>* *N:cal HiSet()<CR>
-nnoremap <silent># *N:cal HiSet()<CR>
-nmap <silent><Leader>q :noh<CR>:cal clearmatches()<CR>
+nnoremap <silent>* *N:cal HiSet()<CR>:cal Hitpop()<CR>
+nnoremap <silent># *N:cal HiSet()<CR>:cal Hitpop()<CR>
+nmap <silent><Leader>q :noh<CR>:cal clearmatches()<CR>:cal HiC()<CR>
 
 " mark --------------------------------------------------
 nmap <Leader>m :marks abcdefghijklmnopqrstuvwxyz<CR>:normal! `
@@ -311,6 +311,20 @@ fu! HiSet() abort
   endif
 endf
 
+" hitspop
+let g:hitpopid = ''
+fu! Hitpop()
+  cal HiC()
+  let g:hitpopid = popup_create(expand('<cword>'),
+      \ #{ border: [], pos: "topleft", line: 1, col: &columns - 15 })
+endf
+fu! HiC()
+  cal popup_clear(g:hitpopid)
+endf
+
+
+
+
 " mark ----------------------------------------
 fu! Marking() abort
   let l:now_marks = []
@@ -390,12 +404,12 @@ fu! MarkHank(vector) abort
   endif
   for rownum in rownums
     if a:vector == 'up' && rownum > line('.')
-      execute "normal! `" . mark_dict[rownum]
+      exe "normal! `" . mark_dict[rownum]
       echo index(rownums, rownum) + 1 . "/" . len(rownums)
       retu
     endif
     if a:vector == 'down' && rownum < line('.')
-      execute "normal! `" . mark_dict[rownum]
+      exe "normal! `" . mark_dict[rownum]
       echo len(rownums) - index(rownums, rownum) . "/" . len(rownums)
       retu
     endif
