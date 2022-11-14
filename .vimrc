@@ -106,8 +106,8 @@ set completeopt=menuone,noinsert,preview,popup
 let g:mapleader = "\<Space>"
 
 " file search ---------------------------------------
-nnoremap <Leader>f :echo execute('pwd')<CR>:FzfPatternExe 
-nnoremap <Leader>h :HisList<CR>:HisChoose 
+nnoremap <Leader>f :call FzfPatternExe()<CR>
+nnoremap <Leader>h :call HisList()<CR>
 nnoremap <Leader>b :ls<CR>:b 
 
 " grep ---------------------------------------
@@ -207,41 +207,45 @@ if glob('~/.vim/colors') != ''
 endif
 
 " fzf like
-let g:fzf_res = []
-command! -nargs=* FzfPatternExe cal FzfPatternExe(<f-args>)
-fu! FzfPatternExe(...) abort
-  let cmd_str = a:0 == 1 ? 'find ./* -iname "' . a:1 . '"' : 'find ./* -iname "' . a:1 . '.' . a:2 . '"'
-  echo 'searching ... [ ' . cmd_str . ' ]'
-  let g:fzf_res = split(system(cmd_str), '\n')
-  if len(g:fzf_res) == 0
+fu! FzfPatternExe() abort
+  echo execute('pwd')
+  let inarr = split(inputdialog("Enter [pattern] [ext] >>"), ' ')
+  let fzf_cmd = 'find ./* -iname "' . inarr[0] . '.' . inarr[1] . '"'
+  echo '<<'
+  echo 'searching ... [ ' . fzf_cmd . ' ]'
+  let fzf_res = split(system(fzf_cmd), '\n')
+  if len(fzf_res) == 0
     echo 'no match'
     retu
   endif
-  if len(g:fzf_res) == 1
-    exe 'e' . g:fzf_res[0]
+  if len(fzf_res) == 1
+    exe 'e' . fzf_res[0]
     retu
   endif
-  for v in g:fzf_res
-    echo index(g:fzf_res, v) . ': ' . v
+  for v in fzf_res
+    echo index(fzf_res, v) . ': ' . v
   endfor
   echo '_________________________'
-  echo 'please type :FzfChoose #'
+  let ope = inputdialog("choose >>")
+  if ope == ''
+    echo 'break'
+    retu
+  endif
+  exe 'e' . fzf_res[ope]
 endf
-command! -nargs=1 FzfChoose cal execute('e' . g:fzf_res[<f-args>])
 
 " history
-let g:his_res = []
-command! HisList cal HisList()
 fu! HisList()
-  let g:his_res = split(execute('oldfiles'), '\n')
-  for v in g:his_res
-    echo index(g:his_res, v) . ': ' . split(v, ':')[1]
-    if index(g:his_res, v) == 10
+  let his_res = split(execute('oldfiles'), '\n')
+  for v in his_res
+    echo index(his_res, v) . ': ' . split(v, ':')[1]
+    if index(his_res, v) == 10
       break
     endif
   endfor
+  let ope = inputdialog("choose >>")
+  exe 'e' . split(his_res[ope], ':')[1]
 endf
-command! -nargs=1 HisChoose cal execute('e' . split(g:his_res[<f-args>], ':')[1])
 
 " grep ----------------------------------------
 fu! GrepCurrentExtention()
