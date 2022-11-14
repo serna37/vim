@@ -447,6 +447,7 @@ fu! TerminalPop()
 endf
 
 " favorite  -----------------------------------
+" TODO for plugin
 command! -nargs=* Necronomicon cal Necronomicon(<f-args>)
 fu! Necronomicon(...) abort
   if a:0 == 0
