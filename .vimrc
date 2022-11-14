@@ -107,7 +107,7 @@ let g:mapleader = "\<Space>"
 
 " file search ---------------------------------------
 nnoremap <Leader>f :echo execute('pwd')<CR>:FzfPatternExe 
-nnoremap <Leader>h :cal HisList()<CR>
+nnoremap <Leader>h :HisList<CR>:HisChoose 
 nnoremap <Leader>b :ls<CR>:b 
 
 " grep ---------------------------------------
@@ -227,6 +227,7 @@ command! -nargs=1 FzfChoose cal execute('e' . g:fzf_res[<f-args>])
 
 " history
 let g:his_res = []
+command! HisList cal HisList()
 fu! HisList()
   let g:his_res = split(execute('oldfiles'), '\n')
   for v in g:his_res
@@ -235,8 +236,6 @@ fu! HisList()
       break
     endif
   endfor
-  echo '_________________________'
-  echo 'please type :HisChoose #'
 endf
 command! -nargs=1 HisChoose cal execute('e' . split(g:his_res[<f-args>], ':')[1])
 
