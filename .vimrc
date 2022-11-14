@@ -213,6 +213,7 @@ fu! FzfPatternExe() abort
   let fzf_cmd = 'find ./* -iname "' . inarr[0] . '.' . inarr[1] . '"'
   echo '<<'
   echo 'searching ... [ ' . fzf_cmd . ' ]'
+  echo '_________________________'
   let fzf_res = split(system(fzf_cmd), '\n')
   if len(fzf_res) == 0
     echo 'no match'
