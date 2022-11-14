@@ -1,4 +1,3 @@
-" TODO zzz sh
 " TODO qiita
 " TODO lsp, snippet, easymotion
 " ========================================
@@ -26,18 +25,21 @@ set backspace=indent,eol,start
 set whichwrap=b,s,h,l,<,>,[,],~
 
 " fold
-set foldmethod=indent
-set foldlevel=4
-set foldcolumn=3
+set foldmethod=marker
+set foldlevel=0
+set foldlevelstart=0
+set foldcolumn=1
 
 " view
 syntax on
 set title
 set showcmd
 set number
-" TODO gitbash does not work
-au ModeChanged [vV\x16]*:* let &l:rnu = mode() =~# '^[vV\x16]'
-au ModeChanged *:[vV\x16]* let &l:rnu = mode() =~# '^[vV\x16]'
+" gitbash does not work
+if !has('win32unix')
+  au ModeChanged [vV\x16]*:* let &l:rnu = mode() =~# '^[vV\x16]'
+  au ModeChanged *:[vV\x16]* let &l:rnu = mode() =~# '^[vV\x16]'
+endif
 set cursorline
 set cursorcolumn
 set showmatch
@@ -50,13 +52,11 @@ set ruler
 set laststatus=2
 let ff_table = {'dos' : 'CRLF', 'unix' : 'LF', 'mac' : 'CR' }
 fu! SetStatusLine()
-  " TODO change color
-  hi User1 cterm=bold ctermbg=5 ctermfg=0
-  hi User2 cterm=bold ctermbg=2 ctermfg=0
+  hi User1 cterm=bold ctermfg=7 ctermbg=4 gui=bold guibg=#70a040 guifg=#ffffff
+  hi User2 cterm=bold ctermfg=7 ctermbg=2 gui=bold guibg=#4070a0 guifg=#ffffff
   hi User3 cterm=bold ctermbg=5 ctermfg=0
-  hi User4 cterm=bold ctermbg=7 ctermfg=0
-  hi User5 cterm=bold ctermbg=1 ctermfg=0
-  hi User6 cterm=bold ctermbg=1 ctermfg=0
+  hi User4 cterm=bold ctermfg=7 ctermbg=56 gui=bold guibg=#a0b0c0 guifg=black
+  hi User5 cterm=bold ctermfg=7 ctermbg=5 gui=bold guibg=#0070e0 guifg=#ffffff
   if mode() =~ 'i'
     let c = 1
     let mode_name = 'INSERT'
@@ -73,7 +73,7 @@ fu! SetStatusLine()
     let c = 5
     let mode_name = 'VISUAL'
   endif
-  retu '%' . c . '*[' . mode_name . ']%* %<%F%m%r%h%w%=%6* %p%% %l/%L %02v [%{&fenc!=""?&fenc:&enc}][%{ff_table[&ff]}]*'
+  retu '%' . c . '* ' . mode_name . ' %* %<%F%m%r%h%w%=%2* %p%% %l/%L %02v [%{&fenc!=""?&fenc:&enc}][%{ff_table[&ff]}] %*'
 endf
 set statusline=%!SetStatusLine()
 
@@ -121,10 +121,15 @@ nnoremap <Leader>o :LspDefinition<CR>
 nnoremap <Leader>r :LspReferences<CR>
 
 " jump ---------------------------------------
-" TODO gitbash popup + scroll = heavy
 nnoremap <silent>* *N:cal HiSet()<CR>:cal Hitpop()<CR>
 nnoremap <silent># *N:cal HiSet()<CR>:cal Hitpop()<CR>
 nnoremap <silent><Leader>q :noh<CR>:cal clearmatches()<CR>:cal popup_clear(g:hitpopid)<CR>
+" gitbash popup + scroll = heavy
+if has('win32unix')
+  nnoremap <silent>* *N:cal HiSet()<CR>
+  nnoremap <silent># *N:cal HiSet()<CR>
+  nnoremap <silent><Leader>q :noh<CR>:cal clearmatches()<CR>
+endif
 
 " mark --------------------------------------------------
 nnoremap <Leader>m :marks abcdefghijklmnopqrstuvwxyz<CR>:normal! `
@@ -197,6 +202,9 @@ fu! ChangeColor()
   endif
 endf
 cal ChangeColor()
+if glob('~/.vim/colors') != ''
+  colorscheme molokai
+endif
 
 " fzf like
 let g:fzf_res = []
@@ -223,7 +231,7 @@ fu! HisList()
   let g:his_res = split(execute('oldfiles'), '\n')
   for v in g:his_res
     echo index(g:his_res, v) . ': ' . split(v, ':')[1]
-    if index(g:his_res, v) == 15
+    if index(g:his_res, v) == 10
       break
     endif
   endfor
@@ -328,7 +336,8 @@ fu! Marking() abort
     endif
     let l:now_marks = add(now_marks, r[0])
   endfor
-  " start from b, not a. why??
+  " duplicate with marks command result 'mark'
+  " this is why, cannot use 'm', 'a', 'r', 'k'
   let l:can_use = filter(warr, {i, v -> stridx(join(now_marks, ''), v) == -1})
   if len(can_use) != 0
     execute('mark ' . can_use[0])
@@ -339,7 +348,6 @@ fu! Marking() abort
   endif
 endf
 
-" like vim-signature
 fu! MarkShow() abort
   cal sign_undefine()
   let l:words = 'abcdefghijklmnopqrstuvwxyz'
