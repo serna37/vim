@@ -1,5 +1,6 @@
-" TODO hitspop
-
+" TODO zzz sh
+" TODO qiita
+" TODO lsp, snippet, easymotion
 " ========================================
 " Setting
 " ========================================
@@ -34,6 +35,7 @@ syntax on
 set title
 set showcmd
 set number
+" TODO gitbash does not work
 au ModeChanged [vV\x16]*:* let &l:rnu = mode() =~# '^[vV\x16]'
 au ModeChanged *:[vV\x16]* let &l:rnu = mode() =~# '^[vV\x16]'
 set cursorline
@@ -48,11 +50,13 @@ set ruler
 set laststatus=2
 let ff_table = {'dos' : 'CRLF', 'unix' : 'LF', 'mac' : 'CR' }
 fu! SetStatusLine()
+  " TODO change color
   hi User1 cterm=bold ctermbg=5 ctermfg=0
   hi User2 cterm=bold ctermbg=2 ctermfg=0
   hi User3 cterm=bold ctermbg=5 ctermfg=0
   hi User4 cterm=bold ctermbg=7 ctermfg=0
   hi User5 cterm=bold ctermbg=1 ctermfg=0
+  hi User6 cterm=bold ctermbg=1 ctermfg=0
   if mode() =~ 'i'
     let c = 1
     let mode_name = 'INSERT'
@@ -69,7 +73,7 @@ fu! SetStatusLine()
     let c = 5
     let mode_name = 'VISUAL'
   endif
-  retu '%' . c . '*[' . mode_name . ']%* %<%F%m%r%h%w%=%p%% %l/%L %02v [%{&fenc!=""?&fenc:&enc}][%{ff_table[&ff]}]'
+  retu '%' . c . '*[' . mode_name . ']%* %<%F%m%r%h%w%=%6* %p%% %l/%L %02v [%{&fenc!=""?&fenc:&enc}][%{ff_table[&ff]}]*'
 endf
 set statusline=%!SetStatusLine()
 
@@ -85,6 +89,7 @@ set incsearch
 set hlsearch
 set ignorecase
 set smartcase
+set shortmess-=S
 au QuickFixCmdPost *grep* cwindow
 
 " completion
@@ -100,89 +105,68 @@ set completeopt=menuone,noinsert,preview,popup
 " base ---------------------------------------
 let g:mapleader = "\<Space>"
 
-" exploere  ---------------------------------------
-nmap <Leader>e :30Ve<CR>
-
 " file search ---------------------------------------
-nmap <Leader>f :Files<CR>
-nmap <Leader>b :Buffers<CR>
-nmap <Leader>h :History<CR>
-if has('win32unix')
-  nmap <Leader>f :CtrlP<CR>
-  nmap <Leader>b :CtrlPBuffer<CR>
-  nmap <Leader>h :CtrlPMRUFiles<CR>
-endif
+nnoremap <Leader>f :echo execute('pwd')<CR>:FzfPatternExe 
+nnoremap <Leader>h :cal HisList()<CR>
+nnoremap <Leader>b :ls<CR>:b 
 
 " grep ---------------------------------------
-nmap <Leader>gg :cal GrepCurrentExtention()<CR>
-nmap <Leader>ge :GrepExtFrom 
+nnoremap <Leader>gg :cal GrepCurrentExtention()<CR>
+nnoremap <Leader>ge :GrepExtFrom 
 
 " lsp
-nmap <Leader>j :LspHover<CR>
-nmap <Leader>p :LspPeekDefinition<CR>
-nmap <Leader>o :LspDefinition<CR>
-nmap <Leader>r :LspReferences<CR>
+nnoremap <Leader>j :LspHover<CR>
+nnoremap <Leader>p :LspPeekDefinition<CR>
+nnoremap <Leader>o :LspDefinition<CR>
+nnoremap <Leader>r :LspReferences<CR>
 
 " jump ---------------------------------------
-nmap s <Plug>(easymotion-bd-w)w
-nmap <Leader>w <Plug>(easymotion-bd-w)
-nmap <Leader>s <Plug>(easymotion-sn)
-
+" TODO gitbash popup + scroll = heavy
 nnoremap <silent>* *N:cal HiSet()<CR>:cal Hitpop()<CR>
 nnoremap <silent># *N:cal HiSet()<CR>:cal Hitpop()<CR>
-nmap <silent><Leader>q :noh<CR>:cal clearmatches()<CR>:cal HiC()<CR>
+nnoremap <silent><Leader>q :noh<CR>:cal clearmatches()<CR>:cal popup_clear(g:hitpopid)<CR>
 
 " mark --------------------------------------------------
-nmap <Leader>m :marks abcdefghijklmnopqrstuvwxyz<CR>:normal! `
-nmap mm :cal Marking()<CR>
-nmap mj :cal MarkHank("up")<CR>
-nmap mk :cal MarkHank("down")<CR>
+nnoremap <Leader>m :marks abcdefghijklmnopqrstuvwxyz<CR>:normal! `
+nnoremap mm :cal Marking()<CR>
+nnoremap mj :cal MarkHank("up")<CR>
+nnoremap mk :cal MarkHank("down")<CR>
 
 " window ---------------------------------------
 nnoremap j gj
 nnoremap k gk
 
-" like 'simeji/winresizer'
+" TODO netrw cannot move
 nnoremap <C-h> <C-w>h
 nnoremap <C-l> <C-w>l
 nnoremap <C-k> <C-w>k
 nnoremap <C-j> <C-w>j
 
-nnoremap <S-h> 2<C-w><
-nnoremap <S-l> 2<C-w>>
-nnoremap <S-k> 2<C-w>-
-nnoremap <S-j> 2<C-w>+
+nnoremap <S-h> 4<C-w><
+nnoremap <S-l> 4<C-w>>
+nnoremap <S-k> 4<C-w>-
+nnoremap <S-j> 4<C-w>+
 
-" like 'comfortable-motion.vim'
-" like 'vim-auto-cursorline'
 let g:scroll_up_key = "\<C-y>"
 let g:scroll_down_key = "\<C-e>"
-nmap <silent><C-u> :cal Scroll(scroll_up_key , 25)<CR>
-nmap <silent><C-d> :cal Scroll(scroll_down_key , 25)<CR>
-nmap <silent><C-b> :cal Scroll(scroll_up_key , 10)<CR>
-nmap <silent><C-f> :cal Scroll(scroll_down_key , 10)<CR>
+nnoremap <silent><C-u> :cal Scroll(scroll_up_key , 25)<CR>
+nnoremap <silent><C-d> :cal Scroll(scroll_down_key , 25)<CR>
+nnoremap <silent><C-b> :cal Scroll(scroll_up_key , 10)<CR>
+nnoremap <silent><C-f> :cal Scroll(scroll_down_key , 10)<CR>
 
-nmap <Leader>x :cal CloseBuf()<CR>
-nmap <Leader>t :cal TerminalPop()<CR>
-
-" snip
-nmap <Leader>0 :VsnipOpen<CR>
+nnoremap <Leader>x :cal CloseBuf()<CR>
+nnoremap <Leader>t :cal TerminalPop()<CR>
 
 " edit ---------------------------------------
-"nmap za <Plug>(sandwich-add)
-"nmap zd <Plug>(sandwich-delete)
-"nmap zr <Plug>(sandwich-replace)
-
-" asyncomplete
-imap <expr> <Tab> pumvisible() ? '<C-n>' : vsnip#available(1) ? '<Plug>(vsnip-expand-or-jump)' : '<C-n>'
+imap <expr> <Tab> '<C-n>'
 inoremap <expr> <S-Tab> pumvisible() ? '<C-p>' : '<S-Tab>'
 inoremap <expr> <CR> pumvisible() ? '<C-y>' : '<CR>'
 
 " favorite ---------------------------------------
-nmap <Leader><Leader>n :Necronomicon 
-nmap <Leader><Leader>w :cal RunCat()<CR>
-nmap <Leader><Leader>cc :cal ChangeColor()<CR>:colorscheme<CR>
-nmap <Leader><Leader>ce :cal execute('top terminal ++shell eval ' . getline('.'))<CR>
+nnoremap <Leader><Leader>n :Necronomicon 
+nnoremap <Leader><Leader>w :cal RunCat()<CR>
+nnoremap <Leader><Leader>cc :cal ChangeColor()<CR>:colorscheme<CR>
+nnoremap <Leader><Leader>ce :cal execute('top terminal ++shell eval ' . getline('.'))<CR>
 
 " ========================================
 " Function
@@ -201,28 +185,11 @@ fu! Timer()
   endif
 endf
 
-" less color, no plugin
 " change color --------------------------------
-"let s:colorscheme_arr_default = [
-"    \ 'desert',
-"    \ 'elflord',
-"    \ 'evening',
-"    \ 'habamax',
-"    \ 'koehler',
-"    \ 'slate',
-"    \ 'torte'
-"    \]
 let s:colorscheme_arr_default = ['torte']
-let s:colorscheme_arr = [
-    \ 'hybrid_material',
-    \ 'molokai',
-    \ 'jellybeans',
-    \ 'afterglow',
-    \ 'alduin',
-    \ 'apprentice'
-    \ ]
+let s:colorscheme_arr = ['hybrid_material', 'molokai']
 fu! ChangeColor()
-  if glob('~/.vim/pack/plugins/start') != ''
+  if glob('~/.vim/colors') != ''
     execute('colorscheme ' . s:colorscheme_arr[localtime() % len(s:colorscheme_arr)])
   else
     execute('colorscheme ' . s:colorscheme_arr_default[localtime() % len(s:colorscheme_arr_default)])
@@ -230,6 +197,40 @@ fu! ChangeColor()
   endif
 endf
 cal ChangeColor()
+
+" fzf like
+let g:fzf_res = []
+command! -nargs=* FzfPatternExe cal FzfPatternExe(<f-args>)
+fu! FzfPatternExe(...) abort
+  if a:0 == 1
+    let g:fzf_res = split(system('find ./* -iname "'.a:1.'"'), '\n')
+  elseif a:0 >= 2
+    let g:fzf_res = split(system('find ./* -iname "'.a:1.'.'.a:2.'"'), '\n')
+  else
+    retu
+  endif
+  for v in g:fzf_res
+    echo index(g:fzf_res, v) . ': ' . v
+  endfor
+  echo '_________________________'
+  echo 'please type :FzfChoose #'
+endf
+command! -nargs=1 FzfChoose cal execute('e' . g:fzf_res[<f-args>])
+
+" history
+let g:his_res = []
+fu! HisList()
+  let g:his_res = split(execute('oldfiles'), '\n')
+  for v in g:his_res
+    echo index(g:his_res, v) . ': ' . split(v, ':')[1]
+    if index(g:his_res, v) == 15
+      break
+    endif
+  endfor
+  echo '_________________________'
+  echo 'please type :HisChoose #'
+endf
+command! -nargs=1 HisChoose cal execute('e' . split(g:his_res[<f-args>], ':')[1])
 
 " grep ----------------------------------------
 fu! GrepCurrentExtention()
@@ -253,18 +254,19 @@ fu! HiCwordStart()
   aug QuickhlCword
     au!
     au! CursorMoved <buffer> cal HiCwordR()
-    au! ColorScheme * cal HiCword()
+    au! ColorScheme * execute("hi link QuickhlCword CursorLine")
   aug END
-  cal HiCword()
+  execute("hi link QuickhlCword CursorLine")
 endf
-fu! HiCword()
-  exe "hi link QuickhlCword Search"
-endf
+"fu! HiCword()
+"  execute("hi link QuickhlCword CursorLine")
+"endf
 fu! HiCwordR()
   silent! 2match none
-  exe "2mat QuickhlCword /\\\<". expand('<cword>') . "\\\>/"
+  exe "2mat QuickhlCword /\\\<". escape(expand('<cword>'), '\/~ .*^[''$') . "\\\>/"
 endf
 
+" on search, multi highlight
 aug QuickhlManual
   au!
   au! ColorScheme * cal HlIni()
@@ -294,36 +296,21 @@ cal HlIni()
 
 fu! HiSet() abort
   let cw = expand('<cword>')
-  let already = ''
-  for x in getmatches()
-    if x["pattern"] == cw
-      let already = x["id"]
-    endif
-  endfor
-  if already != ''
-    cal matchdelete(already)
+  let already = filter(getmatches(), {i, v -> v['pattern'] == cw})
+  if len(already) > 0
+    cal matchdelete(already[0]['id'])
     retu
   endif
   cal matchadd("UserSearchHi" . g:now_hi, cw)
-  let g:now_hi = g:now_hi + 1
-  if g:now_hi >= len(g:search_hl)
-    let g:now_hi = 0
-  endif
+  let g:now_hi = g:now_hi >= len(g:search_hl)-1 ? 0 : g:now_hi + 1
 endf
 
 " hitspop
 let g:hitpopid = ''
 fu! Hitpop()
-  cal HiC()
-  let g:hitpopid = popup_create(expand('<cword>'),
-      \ #{ border: [], pos: "topleft", line: 1, col: &columns - 15 })
-endf
-fu! HiC()
   cal popup_clear(g:hitpopid)
+  let g:hitpopid = popup_create(expand('<cword>'), #{ border: [], pos: "topleft", line: 1, col: &columns - 15 })
 endf
-
-
-
 
 " mark ----------------------------------------
 fu! Marking() abort
@@ -387,7 +374,14 @@ aug END
 " TODO refactor
 fu! MarkHank(vector) abort
   let l:words = 'abcdefghijklmnopqrstuvwxyz'
-  let l:marks = split(execute('marks ' . words), '\n')
+  let get_marks = ''
+  try
+    let get_marks = execute('marks ' . words)
+  catch
+    echo 'no marks'
+    retu
+  endtry
+  let l:marks = split(get_marks, '\n')
   cal remove(marks, 0)
   let mark_dict = {}
   let rownums = []
@@ -418,8 +412,6 @@ fu! MarkHank(vector) abort
 endf
 
 " scroll ----------------------------------------
-" like 'comfortable-motion.vim'
-" like 'vim-auto-cursorline'
 fu! Scroll(vector, delta)
   cal CursorToggle()
   let tmp = timer_start(a:delta, { -> NormalExe(a:vector) }, {'repeat': -1})
@@ -434,18 +426,6 @@ fu! CursorToggle()
   set cursorline!
 endf
 
-" test sandwich
-fu! TestSand()
-  let cw = "'" . expand('<cword>') . "'"
-  exe "normal! dw"
-  exe "star" cw "stopi"
-endf
-
-
-" support F
-
-
-
 " buffer --------------------------------------
 fu! CloseBuf()
   let l:now_b = bufnr('%')
@@ -455,9 +435,7 @@ endf
 
 " terminal ------------------------------------
 fu! TerminalPop()
-  cal popup_create(
-        \ term_start([&shell], #{ hidden: 1, term_finish: 'close'}),
-        \ #{ border: [], minwidth: &columns/2, minheight: &lines/2 })
+  cal popup_create(term_start([&shell], #{ hidden: 1, term_finish: 'close'}), #{ border: [], minwidth: &columns/2, minheight: &lines/2 })
 endf
 
 " favorite  -----------------------------------
@@ -482,12 +460,7 @@ fu! Necronomicon(...) abort
 endf
 
 fu! Zihou()
-  cal popup_create([
-        \ strftime('%Y/%m/%d %H:%M (%A)', localtime()),
-        \ '',
-        \ 'colorscheme: ' . execute('colorscheme')
-        \],
-        \ #{border: [], zindex: 999, time: 3500})
+  cal popup_create([strftime('%Y/%m/%d %H:%M (%A)', localtime()), '', 'colorscheme: ' . execute('colorscheme')], #{border: [], zindex: 999, time: 3500})
 endf
 
 fu! RunCat()
