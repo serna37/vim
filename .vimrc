@@ -85,6 +85,7 @@ set incsearch
 set hlsearch
 set ignorecase
 set smartcase
+set shortmess-=S
 au QuickFixCmdPost *grep* cwindow
 
 " completion
