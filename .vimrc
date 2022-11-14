@@ -210,6 +210,10 @@ endif
 fu! FzfPatternExe() abort
   echo execute('pwd')
   let inarr = split(inputdialog("Enter [pattern] [ext] >>"), ' ')
+  if len(inarr) !=  2
+    echo 'break'
+    retu
+  endif
   let fzf_cmd = 'find ./* -iname "' . inarr[0] . '.' . inarr[1] . '"'
   echo '<<'
   echo 'searching ... [ ' . fzf_cmd . ' ]'
@@ -274,9 +278,7 @@ fu! HiCwordStart()
   aug END
   execute("hi link QuickhlCword CursorLine")
 endf
-"fu! HiCword()
-"  execute("hi link QuickhlCword CursorLine")
-"endf
+
 fu! HiCwordR()
   silent! 2match none
   exe "2mat QuickhlCword /\\\<". escape(expand('<cword>'), '\/~ .*^[''$') . "\\\>/"
