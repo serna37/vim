@@ -210,11 +210,15 @@ endif
 let g:fzf_res = []
 command! -nargs=* FzfPatternExe cal FzfPatternExe(<f-args>)
 fu! FzfPatternExe(...) abort
-  if a:0 == 1
-    let g:fzf_res = split(system('find ./* -iname "'.a:1.'"'), '\n')
-  elseif a:0 >= 2
-    let g:fzf_res = split(system('find ./* -iname "'.a:1.'.'.a:2.'"'), '\n')
-  else
+  let cmd_str = a:0 == 1 ? 'find ./* -iname "' . a:1 . '"' : 'find ./* -iname "' . a:1 . '.' . a:2 . '"'
+  echo 'searching ... [ ' . cmd_str . ' ]'
+  let g:fzf_res = split(system(cmd_str), '\n')
+  if len(g:fzf_res) == 0
+    echo 'no match'
+    retu
+  endif
+  if len(g:fzf_res) == 1
+    exe 'e' . g:fzf_res[0]
     retu
   endif
   for v in g:fzf_res
