@@ -35,6 +35,7 @@ syntax on
 set title
 set showcmd
 set number
+" TODO
 " gitbash does not work
 if !has('win32unix')
   au ModeChanged [vV\x16]*:* let &l:rnu = mode() =~# '^[vV\x16]'
@@ -53,7 +54,7 @@ set laststatus=2
 let ff_table = {'dos' : 'CRLF', 'unix' : 'LF', 'mac' : 'CR' }
 fu! SetStatusLine()
   hi User1 cterm=bold ctermfg=7 ctermbg=4 gui=bold guibg=#70a040 guifg=#ffffff
-  hi User2 cterm=bold ctermfg=7 ctermbg=2 gui=bold guibg=#4070a0 guifg=#ffffff
+  hi User2 cterm=bold ctermfg=2 ctermbg=0 gui=bold guibg=#4070a0 guifg=#ffffff
   hi User3 cterm=bold ctermbg=5 ctermfg=0
   hi User4 cterm=bold ctermfg=7 ctermbg=56 gui=bold guibg=#a0b0c0 guifg=black
   hi User5 cterm=bold ctermfg=7 ctermbg=5 gui=bold guibg=#0070e0 guifg=#ffffff
@@ -105,20 +106,24 @@ set completeopt=menuone,noinsert,preview,popup
 " base ---------------------------------------
 let g:mapleader = "\<Space>"
 
+nnoremap <Tab> 10j
+nnoremap <S-Tab> 10k
+
 " file search ---------------------------------------
 nnoremap <Leader>f :call FzfPatternExe()<CR>
 nnoremap <Leader>h :call HisList()<CR>
 nnoremap <Leader>b :ls<CR>:b 
 
 " grep ---------------------------------------
-nnoremap <Leader>gg :cal GrepCurrentExtention()<CR>
+nnoremap <Leader>gg :GrepExtFrom<CR>
 nnoremap <Leader>ge :GrepExtFrom 
 
 " lsp
-nnoremap <Leader>j :LspHover<CR>
-nnoremap <Leader>p :LspPeekDefinition<CR>
-nnoremap <Leader>o :LspDefinition<CR>
-nnoremap <Leader>r :LspReferences<CR>
+" TODO
+"nnoremap <Leader>j :LspHover<CR>
+"nnoremap <Leader>p :LspPeekDefinition<CR>
+"nnoremap <Leader>o :LspDefinition<CR>
+"nnoremap <Leader>r :LspReferences<CR>
 
 " jump ---------------------------------------
 nnoremap <silent>* *N:cal HiSet()<CR>:cal Hitpop()<CR>
@@ -147,6 +152,7 @@ nnoremap <C-l> <C-w>l
 nnoremap <C-k> <C-w>k
 nnoremap <C-j> <C-w>j
 
+" TODO want do pure L, H, M
 nnoremap <S-h> 4<C-w><
 nnoremap <S-l> 4<C-w>>
 nnoremap <S-k> 4<C-w>-
@@ -209,34 +215,89 @@ endif
 " fzf like
 fu! FzfPatternExe() abort
   echo execute('pwd')
-  let inarr = split(inputdialog("Enter [pattern] [ext] >>"), ' ')
+  let inarr = split(inputdialog("Enter [ext] [pattern]>>"), ' ')
   if len(inarr) !=  2
     echo 'break'
     retu
   endif
-  let fzf_cmd = 'find ./* -iname "' . inarr[0] . '.' . inarr[1] . '"'
-  echo '<<'
+  let fzf_cmd = 'find ./* -iname "*' . inarr[1] . '*.' . inarr[0] . '"'
   echo 'searching ... [ ' . fzf_cmd . ' ]'
-  echo '_________________________'
   let fzf_res = split(system(fzf_cmd), '\n')
-  if len(fzf_res) == 0
-    echo 'no match'
-    retu
-  endif
-  if len(fzf_res) == 1
-    exe 'e' . fzf_res[0]
-    retu
-  endif
+  echo '_________________________'
   for v in fzf_res
     echo index(fzf_res, v) . ': ' . v
   endfor
   echo '_________________________'
-  let ope = inputdialog("choose >>")
-  if ope == ''
-    echo 'break'
-    retu
+  let ope = len(fzf_res) == 0 ? '' : inputdialog("choose >>")
+  exe ope == '' ? 'echo "break"' : 'e' . fzf_res[ope]
+endf
+
+fu! FzfStart()
+  " clear map to escape
+  mapclear
+  let g:fzf_pwd_prefix = execute('pwd')
+  let g:fzf_enter_keyword = []
+  let g:fzf_find_result = []
+  let g:fzf_enter_win = 0
+  let g:fzf_choose_win = 0
+  let g:fzf_hidden_win = popup_create('', #{zindex: 100, filter: function('s:FzfRefreshResult')})
+  call s:FzfCreateChooseWindow()
+  call s:FzfCreateEnterWindow()
+endf
+fu! s:FzfCreateEnterWindow()
+  let g:fzf_enter_win = popup_create(g:fzf_pwd_prefix . '>>' . join(g:fzf_enter_keyword, ''), #{ border: [], zindex: 99, minwidth: &columns/2, maxwidth: &columns/2, maxheight: 1, line: &columns/4-&columns/20 })
+endf
+fu! s:FzfCreateChooseWindow()
+  let ctx = {'idx': 0, 'files': g:fzf_find_result}
+  let g:fzf_choose_win = popup_menu(g:fzf_find_result, #{ border: [], zindex: 98, minwidth: &columns/2, maxwidth: &columns/2, minheight: 2, maxheight: &lines/2, filter: function('s:FzfChoose', [ctx]) })
+endf
+" TODO 2回目の起動で、FzfRefreshResultが再定義できない？とエラーになる
+" TODO また、E118: 関数の引数が多過ぎます: <SNR>30_FzfRefreshResult と出る
+fu! s:FzfRefreshResult(winid, key) abort
+  if a:key is# "\<CR>" || a:key is# "\<Esc>"
+    call popup_close(g:fzf_enter_win)
+    call popup_close(g:fzf_choose_win)
+    call timer_start(0, { -> s:FzfCreateChooseWindow() })
+    call popup_close(g:fzf_hidden_win)
+    " back keymap
+    source "~/.vimrc"
+    return popup_filter_menu(a:winid, a:key)
+  elseif a:key is# "\<BS>"
+    unlet g:fzf_enter_keyword[len(g:fzf_enter_keyword)-1]
+  else
+    let g:fzf_enter_keyword = add(g:fzf_enter_keyword, a:key)
   endif
-  exe 'e' . fzf_res[ope]
+  call popup_close(g:fzf_enter_win)
+  call timer_start(0, { -> s:FzfCreateEnterWindow() })
+  if len(g:fzf_enter_keyword) > 2 " TODO 2回目以降は、コマンドでなく配列の文字をフィルタした方がよい
+    let g:fzf_find_result = split(system('find ./* -iname "*' . join(g:fzf_enter_keyword, '') . '*"'), '\n')
+    call popup_close(g:fzf_choose_win)
+    call timer_start(0, { -> s:FzfCreateChooseWindow() })
+  endif
+  return popup_filter_menu(a:winid, a:key)
+endf
+fu! s:FzfChoose(ctx, winid, key) abort
+  if a:key is# 'j'
+    if a:ctx.idx < len(a:ctx.files)-1
+      let a:ctx.idx = a:ctx.idx+1
+    endif
+  elseif a:key is# 'k'
+    if a:ctx.idx > 0
+      let a:ctx.idx = a:ctx.idx-1
+    endif
+  elseif a:key is# "\<CR>"
+    return s:fzf_open(a:winid, 'e', a:ctx.files[a:ctx.idx])
+  elseif a:key is# "\<C-v>"
+    return s:fzf_open(a:winid, 'vnew', a:ctx.files[a:ctx.idx])
+  elseif a:key is# "\<C-t>"
+    return s:fzf_open(a:winid, 'tabnew', a:ctx.files[a:ctx.idx])
+  endif
+  return popup_filter_menu(a:winid, a:key)
+endf
+fu! s:fzf_open(winid, op, f) abort
+  cal popup_close(a:winid)
+  exe a:op a:f
+  return 1
 endf
 
 " history
@@ -249,19 +310,15 @@ fu! HisList()
     endif
   endfor
   let ope = inputdialog("choose >>")
-  exe 'e' . split(his_res[ope], ':')[1]
+  exe ope == '' ? 'echo "break"' : 'e' . split(his_res[ope], ':')[1]
 endf
 
 " grep ----------------------------------------
-fu! GrepCurrentExtention()
-  echo 'grep processing in [' . expand('%:e') .'] ...'
-  execute('vimgrep /' . expand('<cword>') . '/gj **/*.' . expand('%:e'))
-endf
-
-command! -nargs=1 GrepExtFrom cal GrepExtFrom(<f-args>)
-fu! GrepExtFrom(ext)
-  echo 'grep processing in [' . a:ext .'] ...'
-  execute('vimgrep /' . expand('<cword>') . '/gj **/*.' . a:ext)
+command! -nargs=* GrepExtFrom cal GrepExtFrom(<f-args>)
+fu! GrepExtFrom(...)
+  let ext = a:0 == 1 ? a:1 : expand('%:e')
+  echo 'grep processing in [' . ext .'] ...'
+  execute('vimgrep /' . expand('<cword>') . '/gj **/*.' . ext)
 endf
 
 " highlight -----------------------------------
@@ -572,4 +629,5 @@ let s:running_cat = [
     \ '                                        :I+                 ',
     \]
 \]
+call timer_start(18000, { -> Timer() }, {'repeat': -1})
 
