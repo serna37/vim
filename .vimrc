@@ -333,7 +333,8 @@ fu! s:FzfChoose(ctx, winid, key) abort
 endf
 fu! s:fzf_open(winid, op, f) abort
   cal popup_close(a:winid)
-  exe a:op a:f
+  " escape for Budders
+  exe a:op split(a:f,'"')[0]
   return 1
 endf
 
