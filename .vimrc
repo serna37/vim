@@ -141,6 +141,7 @@ endif
 
 " mark --------------------------------------------------
 nnoremap <Leader>m :marks abcdefghijklmnopqrstuvwxyz<CR>:normal! `
+nnoremap <Leader>m :call MarkMenu()<CR>
 nnoremap mm :cal Marking()<CR>
 nnoremap mj :cal MarkHank("up")<CR>
 nnoremap mk :cal MarkHank("down")<CR>
@@ -252,6 +253,7 @@ let g:fzf_find_result_tmp = split(system(g:fzf_find_cmd), '\n')
 echo 'find files in ['.g:fzf_searched_dir.'] and chache is complete!!'
 endf
 
+" TODO refactor
 fu! FzfStart()
   " clear map to escape
   mapclear
@@ -423,12 +425,56 @@ fu! Hitpop()
 endf
 
 " mark ----------------------------------------
-fu! Marking() abort
-  let l:now_marks = []
+fu! MarkMenu()
+let marks_this = []
+let markdicarr = []
+"for v in split(execute('marks abcdefghijklmnopqrstuvwxyz'), '\n')[1:]
   let l:words = 'abcdefghijklmnopqrstuvwxyz'
+  let get_marks = ''
+  try
+    let get_marks = execute('marks ' . words)
+  catch
+  echo 'no marks'
+    retu
+  endtry
+for v in split(get_marks , '\n')[1:]
+  cal add(markdicarr, {'linenum': str2nr(filter(split(v, ' '), { i,v -> v != '' })[1]), 'val': v})
+endfor
+cal sort(markdicarr, { x, y -> x['linenum'] - y['linenum'] })
+let marks_this = map(markdicarr, { i,v -> v['val'] })
+  cal popup_menu(marks_this, #{ title: 'choose marks', border: [], zindex: 100, minwidth: &columns/2, maxwidth: &columns/2, minheight: 2, maxheight: &lines/2, filter: function('MarkChoose', [{'idx': 0, 'files': marks_this}]) })
+endf
+
+fu! MarkChoose(ctx, winid, key) abort
+  if a:key is# 'j'
+    if a:ctx.idx < len(a:ctx.files)-1
+      let a:ctx.idx = a:ctx.idx+1
+    endif
+  elseif a:key is# 'k'
+    if a:ctx.idx > 0
+      let a:ctx.idx = a:ctx.idx-1
+    endif
+  elseif a:key is# "\<CR>"
+    execute('normal!`' . a:ctx.files[a:ctx.idx][1])
+  endif
+  return popup_filter_menu(a:winid, a:key)
+endf
+
+fu! Marking() abort
+  let l:words = 'abcdefghijklmnopqrstuvwxyz'
+  let get_marks = ''
+  try
+    let get_marks = execute('marks ' . words)
+  catch
+  execute('mark a')
+    cal MarkShow()
+    echo 'marked'
+    retu
+  endtry
+  let l:now_marks = []
   let l:warr = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
         \ 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
-  for row in split(execute('marks'), '\n')
+  for row in split(get_marks , '\n')[1:]
     let l:r = filter(split(row, ' '), {i, v -> v != ''})
     if stridx(words, r[0]) != -1 && r[1] == line('.')
       execute('delmarks ' . r[0])
@@ -438,8 +484,6 @@ fu! Marking() abort
     endif
     let l:now_marks = add(now_marks, r[0])
   endfor
-  " duplicate with marks command result 'mark'
-  " this is why, cannot use 'm', 'a', 'r', 'k'
   let l:can_use = filter(warr, {i, v -> stridx(join(now_marks, ''), v) == -1})
   if len(can_use) != 0
     execute('mark ' . can_use[0])
@@ -571,7 +615,7 @@ fu! Necronomicon(...) abort
 endf
 
 fu! Zihou()
-  cal popup_create([strftime('%Y/%m/%d %H:%M (%A)', localtime()), '', 'colorscheme: ' . execute('colorscheme')[1:]], #{border: [], zindex: 999, time: 3500})
+  cal popup_create([strftime('%Y/%m/%d %H:%M (%A)', localtime()), '', 'colorscheme: ' . execute('colorscheme')[1:]], #{border: [], zindex: 51, time: 3500})
 endf
 
 fu! RunCat()
