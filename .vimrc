@@ -111,11 +111,11 @@ nnoremap <Tab> 10j
 nnoremap <S-Tab> 10k
 
 " file search ---------------------------------------
-nnoremap <Leader>f :call FzfPatternExe()<CR>
+"nnoremap <Leader>f :call FzfPatternExe()<CR>
 nnoremap <leader>f :call FzfStart()<CR>
 nnoremap <Leader>c :call FzfReFind()<CR>
-nnoremap <Leader>h :call HisList()<CR>
-nnoremap <Leader>b :ls<CR>:b 
+"nnoremap <Leader>h :call HisList()<CR>
+"nnoremap <Leader>b :ls<CR>:b 
 
 " grep ---------------------------------------
 nnoremap <Leader>gg :GrepExtFrom<CR>
@@ -140,7 +140,7 @@ if has('win32unix')
 endif
 
 " mark --------------------------------------------------
-nnoremap <Leader>m :marks abcdefghijklmnopqrstuvwxyz<CR>:normal! `
+"nnoremap <Leader>m :marks abcdefghijklmnopqrstuvwxyz<CR>:normal! `
 nnoremap <Leader>m :call MarkMenu()<CR>
 nnoremap mm :cal Marking()<CR>
 nnoremap mj :cal MarkHank("up")<CR>
@@ -168,9 +168,9 @@ nnoremap <silent><C-d> :cal Scroll(scroll_down_key , 25)<CR>
 nnoremap <silent><C-b> :cal Scroll(scroll_up_key , 10)<CR>
 nnoremap <silent><C-f> :cal Scroll(scroll_down_key , 10)<CR>
 
-nnoremap <Leader>x :cal CloseBuf()<CR>
-nnoremap <Leader>t :cal TerminalPop()<CR>
-
+"nnoremap <Leader>x :cal CloseBuf()<CR>
+"nnoremap <Leader>t :cal TerminalPop()<CR>
+nnoremap <silent><Leader>t :call popup_create(term_start([&shell], #{ hidden: 1, term_finish: 'close'}), #{ border: [], minwidth: &columns/2, minheight: &lines/2 })<CR>
 " edit ---------------------------------------
 imap <expr> <Tab> '<C-n>'
 inoremap <expr> <S-Tab> pumvisible() ? '<C-p>' : '<S-Tab>'
@@ -582,16 +582,16 @@ fu! CursorToggle()
 endf
 
 " buffer --------------------------------------
-fu! CloseBuf()
-  let l:now_b = bufnr('%')
-  bn
-  execute('bd ' . now_b)
-endf
+"fu! CloseBuf()
+"  let l:now_b = bufnr('%')
+"  bn
+"  execute('bd ' . now_b)
+"endf
 
 " terminal ------------------------------------
-fu! TerminalPop()
-  cal popup_create(term_start([&shell], #{ hidden: 1, term_finish: 'close'}), #{ border: [], minwidth: &columns/2, minheight: &lines/2 })
-endf
+"fu! TerminalPop()
+"  cal popup_create(term_start([&shell], #{ hidden: 1, term_finish: 'close'}), #{ border: [], minwidth: &columns/2, minheight: &lines/2 })
+"endf
 
 " favorite  -----------------------------------
 " TODO for plugin
@@ -615,6 +615,7 @@ fu! Necronomicon(...) abort
   endif
 endf
 
+" TODO call only once
 fu! Zihou()
   cal popup_create([strftime('%Y/%m/%d %H:%M (%A)', localtime()), '', 'colorscheme: ' . execute('colorscheme')[1:]], #{border: [], zindex: 51, time: 3500})
 endf
