@@ -355,8 +355,9 @@ endf
 command! -nargs=* GrepExtFrom cal GrepExtFrom(<f-args>)
 fu! GrepExtFrom(...)
   let ext = a:0 == 1 ? a:1 : expand('%:e')
-  echo 'grep processing in [' . ext .'] ...'
-  execute('vimgrep /' . expand('<cword>') . '/gj **/*.' . ext)
+"  echo 'grep processing in [' . ext .'] ...'
+"  execute('vimgrep /' . expand('<cword>') . '/gj **/*.' . ext)
+  cgetexpr system('grep -n ' . expand('<cword>') . ' **/*.' . ext) | cw
 endf
 
 " highlight -----------------------------------
