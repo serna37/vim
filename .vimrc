@@ -106,11 +106,14 @@ set completeopt=menuone,noinsert,preview,popup
 " base ---------------------------------------
 let g:mapleader = "\<Space>"
 
+fu! s:my_key_map()
 nnoremap <Tab> 10j
 nnoremap <S-Tab> 10k
 
 " file search ---------------------------------------
 nnoremap <Leader>f :call FzfPatternExe()<CR>
+nnoremap <leader>f :call FzfStart()<CR>
+nnoremap <Leader>c :call FzfReFind()<CR>
 nnoremap <Leader>h :call HisList()<CR>
 nnoremap <Leader>b :ls<CR>:b 
 
@@ -152,11 +155,10 @@ nnoremap <C-l> <C-w>l
 nnoremap <C-k> <C-w>k
 nnoremap <C-j> <C-w>j
 
-" TODO want do pure L, H, M
-nnoremap <S-h> 4<C-w><
-nnoremap <S-l> 4<C-w>>
-nnoremap <S-k> 4<C-w>-
-nnoremap <S-j> 4<C-w>+
+nnoremap <Left> 4<C-w><
+nnoremap <Right> 4<C-w>>
+nnoremap <Up> 4<C-w>-
+nnoremap <Down> 4<C-w>+
 
 let g:scroll_up_key = "\<C-y>"
 let g:scroll_down_key = "\<C-e>"
@@ -178,6 +180,8 @@ nnoremap <Leader><Leader>n :Necronomicon
 nnoremap <Leader><Leader>w :cal RunCat()<CR>
 nnoremap <Leader><Leader>cc :cal ChangeColor()<CR>:colorscheme<CR>
 nnoremap <Leader><Leader>ce :cal execute('top terminal ++shell eval ' . getline('.'))<CR>
+endf
+cal s:my_key_map()
 
 " ========================================
 " Function
@@ -232,50 +236,81 @@ fu! FzfPatternExe() abort
   exe ope == '' ? 'echo "break"' : 'e' . fzf_res[ope]
 endf
 
+cd ~/git
+let g:fzf_find_cmd = 'find . -type f -name "*" -not -path "*.git/*" -not -path "*.class"'
+let g:fzf_searched_dir = execute('pwd')[1:] " first char is ^@, so trim
+let g:fzf_find_result_tmp = split(system(g:fzf_find_cmd), '\n')
+
+fu! FzfReFind()
+let g:fzf_searched_dir = execute('pwd')[1:]
+echo 'find files in ['.g:fzf_searched_dir.'] and chache ...'
+cal timer_start(0, { -> FzfReFindBackGround() })
+endf
+
+fu! FzfReFindBackGround()
+let g:fzf_find_result_tmp = split(system(g:fzf_find_cmd), '\n')
+echo 'find files in ['.g:fzf_searched_dir.'] and chache is complete!!'
+endf
+
 fu! FzfStart()
   " clear map to escape
   mapclear
-  let g:fzf_pwd_prefix = execute('pwd')
+  let g:fzf_searching_zone = '(*^-^) NO TYPE: buffers & MRU[10] | (*^-^) type to fuzzy search [' . g:fzf_searched_dir . ']'
+  let g:fzf_pwd_prefix = 'pwd: ' . execute('pwd')[1:]
   let g:fzf_enter_keyword = []
-  let g:fzf_find_result = []
-  let g:fzf_enter_win = 0
-  let g:fzf_choose_win = 0
-  let g:fzf_hidden_win = popup_create('', #{zindex: 100, filter: function('s:FzfRefreshResult')})
-  call s:FzfCreateChooseWindow()
-  call s:FzfCreateEnterWindow()
+  let g:fzf_find_result = map(split(execute('ls'), '\n'), { i,v -> filter(split(v, ' '), { i,v -> v != '' })[2] }) + map(split(execute('oldfiles'), '\n')[0:9], { i,v -> split(v, ': ')[1] })
+  "let g:fzf_find_result_tmp = map(split(execute('ls'), '\n'), { i,v -> filter(split(v, ' '), { i,v -> v != '' })[2] }) + map(split(execute('oldfiles'), '\n')[0:9], { i,v -> split(v, ': ')[1] })
+  let g:fzf_enter_win = popup_create(g:fzf_pwd_prefix . '>>' . join(g:fzf_enter_keyword, ''), #{ title: 'type or backspace. past: <Space>   choose: <Enter>',  border: [], zindex: 99, minwidth: &columns/2, maxwidth: &columns/2, maxheight: 1, line: &columns/4-&columns/24 })
+  "let g:fzf_choose_win = 0
+  let g:fzf_choose_win = popup_menu(g:fzf_find_result, #{ title: g:fzf_searching_zone, border: [], zindex: 98, minwidth: &columns/2, maxwidth: &columns/2, minheight: 2, maxheight: &lines/2, filter: function('s:FzfChoose', [{'idx': 0, 'files': g:fzf_find_result}]) })
+  let g:fzf_hidden_win = popup_create('', #{zindex: 100, line: &columns/4-&columns/20+1, filter: function('s:FzfRefreshResult')})
+  "call s:FzfCreateChooseWindow()
+  "call s:FzfCreateEnterWindow()
 endf
-fu! s:FzfCreateEnterWindow()
-  let g:fzf_enter_win = popup_create(g:fzf_pwd_prefix . '>>' . join(g:fzf_enter_keyword, ''), #{ border: [], zindex: 99, minwidth: &columns/2, maxwidth: &columns/2, maxheight: 1, line: &columns/4-&columns/20 })
-endf
-fu! s:FzfCreateChooseWindow()
-  let ctx = {'idx': 0, 'files': g:fzf_find_result}
-  let g:fzf_choose_win = popup_menu(g:fzf_find_result, #{ border: [], zindex: 98, minwidth: &columns/2, maxwidth: &columns/2, minheight: 2, maxheight: &lines/2, filter: function('s:FzfChoose', [ctx]) })
-endf
-" TODO 2回目の起動で、FzfRefreshResultが再定義できない？とエラーになる
-" TODO また、E118: 関数の引数が多過ぎます: <SNR>30_FzfRefreshResult と出る
+"fu! s:FzfCreateEnterWindow()
+"  let g:fzf_enter_win = popup_create(g:fzf_pwd_prefix . '>>' . join(g:fzf_enter_keyword, ''), #{ border: [], zindex: 99, minwidth: &columns/2, maxwidth: &columns/2, maxheight: 1, line: &columns/4-&columns/20 })
+"endf
+"fu! s:FzfCreateChooseWindow()
+"  let ctx = {'idx': 0, 'files': g:fzf_find_result}
+"  let g:fzf_choose_win = popup_menu(g:fzf_find_result, #{ border: [], zindex: 98, minwidth: &columns/2, maxwidth: &columns/2, minheight: 2, maxheight: &lines/2, filter: function('s:FzfChoose', [{'idx': 0, 'files': g:fzf_find_result}]) })
+"endf
 fu! s:FzfRefreshResult(winid, key) abort
   if a:key is# "\<CR>" || a:key is# "\<Esc>"
     call popup_close(g:fzf_enter_win)
-    call popup_close(g:fzf_choose_win)
-    call timer_start(0, { -> s:FzfCreateChooseWindow() })
+"    call popup_close(g:fzf_choose_win)
+"    call timer_start(0, { -> s:FzfCreateChooseWindow() })
     call popup_close(g:fzf_hidden_win)
     " back keymap
-    source "~/.vimrc"
-    return popup_filter_menu(a:winid, a:key)
-  elseif a:key is# "\<BS>"
+    cal s:my_key_map()
+    return 1
+    "popup_filter_menu(a:winid, a:key)
+  elseif a:key is# "\<Space>"
+for i in range(0,strlen(@")-1)
+    let g:fzf_enter_keyword = add(g:fzf_enter_keyword, strpart(@",i,1))
+endfor
+  elseif a:key is# "\<BS>" && len(g:fzf_enter_keyword) > 0
     unlet g:fzf_enter_keyword[len(g:fzf_enter_keyword)-1]
+  elseif a:key is# "\<BS>" && len(g:fzf_enter_keyword) == 0
+    retu 1
   else
     let g:fzf_enter_keyword = add(g:fzf_enter_keyword, a:key)
   endif
-  call popup_close(g:fzf_enter_win)
-  call timer_start(0, { -> s:FzfCreateEnterWindow() })
-  if len(g:fzf_enter_keyword) > 2 " TODO 2回目以降は、コマンドでなく配列の文字をフィルタした方がよい
-    let g:fzf_find_result = split(system('find ./* -iname "*' . join(g:fzf_enter_keyword, '') . '*"'), '\n')
-    call popup_close(g:fzf_choose_win)
-    call timer_start(0, { -> s:FzfCreateChooseWindow() })
+  cal setbufline(winbufnr(g:fzf_enter_win), 1, g:fzf_pwd_prefix . '>>' . join(g:fzf_enter_keyword, ''))
+  "if len(g:fzf_enter_keyword) == 2
+"    cal timer_start(0, { -> s:fzf_find() })
+  "endif
+    "cal setbufline(winbufnr(g:fzf_choose_win), 1, map(g:fzf_find_result, { i,v -> '' }))
+    let g:fzf_find_result = len(g:fzf_enter_keyword) != 0 ? matchfuzzy(g:fzf_find_result_tmp, join(g:fzf_enter_keyword, '')) : map(split(execute('ls'), '\n'), { i,v -> filter(split(v, ' '), { i,v -> v != '' })[2] }) + map(split(execute('oldfiles'), '\n')[0:9], { i,v -> split(v, ': ')[1] })
+  if len(g:fzf_find_result) <= 30
+    cal setbufline(winbufnr(g:fzf_choose_win), 1, map(range(1,30), { i,v -> '' }))
   endif
-  return popup_filter_menu(a:winid, a:key)
+  cal setbufline(winbufnr(g:fzf_choose_win), 1, g:fzf_find_result[0:30]) " re view only first 30 files
+  return a:key is# "x" || a:key is# "\<Space>" ? 1 : popup_filter_menu(a:winid, a:key)
 endf
+"fu! s:fzf_find()
+"  let g:fzf_find_result_tmp = map(split(execute('ls'), '\n'), { i,v -> filter(split(v, ' '), { i,v -> v != '' })[2] }) + map(split(execute('oldfiles'), '\n')[0:9], { i,v -> split(v, ': ')[1] })
+"  let g:fzf_find_result_tmp = g:fzf_find_result_tmp + split(system('find ./* -iname "*' . join(g:fzf_enter_keyword, '') . '*"'), '\n')
+"endf
 fu! s:FzfChoose(ctx, winid, key) abort
   if a:key is# 'j'
     if a:ctx.idx < len(a:ctx.files)-1
@@ -536,7 +571,7 @@ fu! Necronomicon(...) abort
 endf
 
 fu! Zihou()
-  cal popup_create([strftime('%Y/%m/%d %H:%M (%A)', localtime()), '', 'colorscheme: ' . execute('colorscheme')], #{border: [], zindex: 999, time: 3500})
+  cal popup_create([strftime('%Y/%m/%d %H:%M (%A)', localtime()), '', 'colorscheme: ' . execute('colorscheme')[1:]], #{border: [], zindex: 999, time: 3500})
 endf
 
 fu! RunCat()
