@@ -236,6 +236,9 @@ let g:fzf_find_result_tmp = []
 fu! FzfStart()
   " clear map to escape
   nmapclear
+  if stridx(execute('pwd')[1:], g:fzf_searched_dir) == -1 || len(g:fzf_find_result_tmp) == 0
+    cal s:fzf_re_find()
+  endif
   let g:fzf_mode = 'his'
   let g:fzf_searching_zone = '(*^-^) BUF & MRU'
   let g:fzf_pwd_prefix = 'pwd:[' . execute('pwd')[1:] . ']>>'
@@ -249,6 +252,14 @@ endf
 fu! s:fzf_create_choose_win()
   let g:fzf_c_idx = 0
   let g:fzf_choose_win = popup_menu(g:fzf_find_result, #{ title: g:fzf_searching_zone, border: [], zindex: 98, minwidth: &columns/2, maxwidth: &columns/2, minheight: 2, maxheight: &lines/2, filter: function('s:fzf_choose') })
+endf
+
+fu! s:fzf_re_find()
+  cal RunCat()
+  let g:fzf_find_result_tmp = []
+  let g:fzf_searched_dir = execute('pwd')[1:]
+  echo 'find files in ['.g:fzf_searched_dir.'] and chache ...'
+  cal job_start(g:fzf_find_cmd, {'out_cb': function('s:fzf_find_start'), 'close_cb': function('s:fzf_find_end')})
 endf
 
 fu! s:fzf_find_start(ch, msg) abort
@@ -271,10 +282,7 @@ fu! s:fzf_refresh_result(winid, key) abort
     cal s:my_key_map()
     return 1
   elseif a:key is# "\<C-f>"
-    cal RunCat()
-    let g:fzf_searched_dir = execute('pwd')[1:]
-    echo 'find files in ['.g:fzf_searched_dir.'] and chache ...'
-    cal job_start(g:fzf_find_cmd, {'out_cb': function('s:fzf_find_start'), 'close_cb': function('s:fzf_find_end')})
+    cal s:fzf_re_find()
   elseif a:key is# "\<Space>"
     for i in range(0,strlen(@")-1)
       let g:fzf_enter_keyword = add(g:fzf_enter_keyword, strpart(@",i,1))
@@ -599,7 +607,7 @@ fu! RunCatStop()
 endf
 fu! RunCat()
   let g:cat_stop = 0
-  let g:runcat = popup_create(s:running_cat[0], #{line: 1, border: [], zindex: 999})
+  let g:runcat = popup_create(s:running_cat[0], #{line: 1, border: [], zindex: 1})
   cal s:RunCatM()
 endf
 let s:running_cat = [
