@@ -109,7 +109,6 @@ nnoremap <S-Tab> 10k
 
 " file search ---------------------------------------
 nnoremap <leader>f :call FzfStart()<CR>
-nnoremap <Leader>c :call FzfReFind()<CR>
 
 " grep ---------------------------------------
 nnoremap <Leader>gg :GrepExtFrom<CR>
@@ -125,7 +124,7 @@ nnoremap <Leader>ge :GrepExtFrom
 " jump ---------------------------------------
 nnoremap <silent>* *N:cal HiSet()<CR>:cal Hitpop()<CR>
 nnoremap <silent># *N:cal HiSet()<CR>:cal Hitpop()<CR>
-nnoremap <silent><Leader>q :noh<CR>:cal clearmatches()<CR>:cal popup_clear(g:hitpopid)<CR>
+nnoremap <silent><Leader>q :noh<CR>:cal clearmatches()<CR>:cal popup_close(g:hitpopid)<CR>
 " TODO gitbash popup + scroll = heavy
 if has('win32unix')
   nnoremap <silent>* *N:cal HiSet()<CR>
@@ -168,7 +167,7 @@ inoremap <expr> <CR> pumvisible() ? '<C-y>' : '<CR>'
 
 " favorite ---------------------------------------
 nnoremap <Leader><Leader>n :Necronomicon 
-nnoremap <Leader><Leader>w :cal RunCat()<CR>
+"nnoremap <Leader><Leader>w :cal RunCat()<CR>
 nnoremap <Leader><Leader>cc :cal ChangeColor()<CR>:colorscheme<CR>
 nnoremap <Leader><Leader>ce :cal execute('top terminal ++shell eval ' . getline('.'))<CR>
 endf
@@ -187,6 +186,7 @@ fu! Timer()
     cal ChangeColor()
     cal popup_create([strftime('%Y/%m/%d %H:%M (%A)', localtime()), '', 'colorscheme: ' . execute('colorscheme')[1:]], #{border: [], zindex: 51, time: 3500})
     cal timer_start(1000, { -> RunCat() })
+    cal timer_start(5000, { -> RunCatStop() })
   endif
 endf
 call timer_start(18000, { -> Timer() }, {'repeat': -1})
@@ -231,37 +231,33 @@ endf
 cd ~/git
 let g:fzf_find_cmd = 'find . -type f -name "*" -not -path "*.git/*" -not -path "*.class"'
 let g:fzf_searched_dir = execute('pwd')[1:] " first char is ^@, so trim
-let g:fzf_find_result_tmp = split(system(g:fzf_find_cmd), '\n')
+let g:fzf_find_result_tmp = []
 
-fu! FzfReFind()
-  let g:fzf_searched_dir = execute('pwd')[1:]
-  echo 'find files in ['.g:fzf_searched_dir.'] and chache ...'
-  cal timer_start(0, { -> FzfReFindBackGround() })
-endf
-
-fu! FzfReFindBackGround()
-  let g:fzf_find_result_tmp = split(system(g:fzf_find_cmd), '\n')
-  echo 'find files in ['.g:fzf_searched_dir.'] and chache is complete!!'
-endf
-
-" TODO map clear
-" TODO cache find result
 fu! FzfStart()
   " clear map to escape
-  mapclear
+  nmapclear
   let g:fzf_mode = 'his'
   let g:fzf_searching_zone = '(*^-^) BUF & MRU'
   let g:fzf_pwd_prefix = 'pwd:[' . execute('pwd')[1:] . ']>>'
   let g:fzf_enter_keyword = []
   let g:fzf_his_result = map(split(execute('ls'), '\n'), { i,v -> split(filter(split(v, ' '), { i,v -> v != '' })[2], '"')[0] }) + map(split(execute('oldfiles'), '\n'), { i,v -> split(v, ': ')[1] })
   let g:fzf_find_result = g:fzf_his_result
-  let g:fzf_enter_win = popup_create(g:fzf_pwd_prefix, #{ title: 'type or backspace / past: <Space> / MRU<>FZF: <Tab> / choose: <Enter> / end: <Esc>',  border: [], zindex: 99, minwidth: &columns/2, maxwidth: &columns/2, maxheight: 1, line: &columns/4-&columns/24, filter: function('s:fzf_refresh_result') })
+  let g:fzf_enter_win = popup_create(g:fzf_pwd_prefix, #{ title: 'Type or <BS> / past:<Space> / MRU<>FZF:<Tab> / choose:<Enter> / end:<Esc> / chache refresh:<C-f>',  border: [], zindex: 99, minwidth: &columns/2, maxwidth: &columns/2, maxheight: 1, line: &columns/4-&columns/24, filter: function('s:fzf_refresh_result') })
   cal s:fzf_create_choose_win()
 endf
 
 fu! s:fzf_create_choose_win()
   let g:fzf_c_idx = 0
   let g:fzf_choose_win = popup_menu(g:fzf_find_result, #{ title: g:fzf_searching_zone, border: [], zindex: 98, minwidth: &columns/2, maxwidth: &columns/2, minheight: 2, maxheight: &lines/2, filter: function('s:fzf_choose') })
+endf
+
+fu! s:fzf_find_start(ch, msg) abort
+  let g:fzf_find_result_tmp = add(g:fzf_find_result_tmp, a:msg)
+endf
+
+fu! s:fzf_find_end(ch) abort
+  echo 'find files in ['.g:fzf_searched_dir.'] and chache is complete!!'
+  cal RunCatStop()
 endf
 
 fu! s:fzf_refresh_result(winid, key) abort
@@ -274,6 +270,11 @@ fu! s:fzf_refresh_result(winid, key) abort
     call popup_close(g:fzf_enter_win)
     cal s:my_key_map()
     return 1
+  elseif a:key is# "\<C-f>"
+    cal RunCat()
+    let g:fzf_searched_dir = execute('pwd')[1:]
+    echo 'find files in ['.g:fzf_searched_dir.'] and chache ...'
+    cal job_start(g:fzf_find_cmd, {'out_cb': function('s:fzf_find_start'), 'close_cb': function('s:fzf_find_end')})
   elseif a:key is# "\<Space>"
     for i in range(0,strlen(@")-1)
       let g:fzf_enter_keyword = add(g:fzf_enter_keyword, strpart(@",i,1))
@@ -338,7 +339,7 @@ fu! HisList()
   exe ope == '' ? 'echo "break"' : 'e' . split(his_res[ope], ':')[1]
 endf
 
-" grep ----------------------------------------
+ " grep ----------------------------------------
 command! -nargs=* GrepExtFrom cal GrepExtFrom(<f-args>)
 fu! GrepExtFrom(...)
   let ext = a:0 == 1 ? a:1 : expand('%:e')
@@ -553,9 +554,6 @@ fu! Scroll(vector, delta)
   cal timer_start(600, { -> timer_stop(tmp) })
   cal timer_start(600, { -> CursorToggle() })
 endf
-fu! NormalExe(aa)
-  execute "normal! " . a:aa
-endf
 fu! CursorToggle()
   set cursorcolumn!
   set cursorline!
@@ -583,18 +581,26 @@ fu! Necronomicon(...) abort
   endif
 endf
 
+let g:cat_frame = 0
+fu! s:RunCatM() abort
+  cal setbufline(winbufnr(g:runcat), 1, s:running_cat[g:cat_frame])
+  let g:cat_frame = g:cat_frame + 1
+  if g:cat_frame == 5
+    let g:cat_frame = 0
+  endif
+  if g:cat_stop == 1
+    cal popup_close(g:runcat)
+    retu
+  endif
+  cal timer_start(250, { -> s:RunCatM() })
+endf
+fu! RunCatStop()
+  let g:cat_stop = 1
+endf
 fu! RunCat()
-  let l:delay = 250
-  cal timer_start(delay * 0, { -> popup_create(s:running_cat[0], #{border: [], time: delay}) })
-  cal timer_start(delay * 1, { -> popup_create(s:running_cat[1], #{border: [], time: delay}) })
-  cal timer_start(delay * 2, { -> popup_create(s:running_cat[2], #{border: [], time: delay}) })
-  cal timer_start(delay * 3, { -> popup_create(s:running_cat[3], #{border: [], time: delay}) })
-  cal timer_start(delay * 4, { -> popup_create(s:running_cat[4], #{border: [], time: delay}) })
-  cal timer_start(delay * 5, { -> popup_create(s:running_cat[0], #{border: [], time: delay}) })
-  cal timer_start(delay * 6, { -> popup_create(s:running_cat[1], #{border: [], time: delay}) })
-  cal timer_start(delay * 7, { -> popup_create(s:running_cat[2], #{border: [], time: delay}) })
-  cal timer_start(delay * 8, { -> popup_create(s:running_cat[3], #{border: [], time: delay}) })
-  cal timer_start(delay * 9, { -> popup_create(s:running_cat[4], #{border: [], time: delay}) })
+  let g:cat_stop = 0
+  let g:runcat = popup_create(s:running_cat[0], #{line: 1, border: [], zindex: 999})
+  cal s:RunCatM()
 endf
 let s:running_cat = [
     \[
