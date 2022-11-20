@@ -1,7 +1,8 @@
+" vim:set foldmethod=marker:
 " ========================================
 " Setting
 " ========================================
-
+" {{{
 " base editor
 scriptencoding utf-8
 "set ff=unix
@@ -21,13 +22,11 @@ set virtualedit=onemore
 set clipboard+=unnamed
 set backspace=indent,eol,start
 set whichwrap=b,s,h,l,<,>,[,],~
-
 " fold
 set foldmethod=marker
 set foldlevel=0
 set foldlevelstart=0
 set foldcolumn=1
-
 " view
 syntax on
 set title
@@ -44,7 +43,6 @@ set showmatch
 set list
 set listchars=tab:»-,trail:-,eol:↲,extends:»,precedes:«,nbsp:%
 set ambiwidth=double
-
 " status line
 set ruler
 set laststatus=2
@@ -74,14 +72,12 @@ fu! SetStatusLine()
   retu '%' . c . '* ' . mode_name . ' %* %<%F%m%r%h%w%=%2* %p%% %l/%L %02v [%{&fenc!=""?&fenc:&enc}][%{ff_table[&ff]}] %*'
 endf
 set statusline=%!SetStatusLine()
-
 " explorer
 set splitright
 filetype plugin on
 let g:netrw_liststyle = 3
 let g:netrw_altv = 1
 let g:netrw_winsize = 70
-
 " search
 set incsearch
 set hlsearch
@@ -89,153 +85,82 @@ set ignorecase
 set smartcase
 set shortmess-=S
 au QuickFixCmdPost *grep* cwindow
-
 " completion
 set wildmenu
 set wildmode=full
 set complete=.,w,b,u,U,k,kspell,s,i,d,t
 set completeopt=menuone,noinsert,preview,popup
+"}}}
 
 " ========================================
 " KeyMap
 " ========================================
-
-" base ---------------------------------------
 let g:mapleader = "\<Space>"
-
-fu! s:my_key_map()
-nnoremap <Tab> 10j
-nnoremap <S-Tab> 10k
-
-" file search ---------------------------------------
-nnoremap <leader>f :call FzfStart()<CR>
-
-" grep ---------------------------------------
-nnoremap <Leader>gg :GrepExtFrom<CR>
-nnoremap <Leader>ge :GrepExtFrom 
-
-" lsp
-" TODO
-"nnoremap <Leader>j :LspHover<CR>
-"nnoremap <Leader>p :LspPeekDefinition<CR>
-"nnoremap <Leader>o :LspDefinition<CR>
-"nnoremap <Leader>r :LspReferences<CR>
-
-" jump ---------------------------------------
+fu! s:my_key_map() " {{{
+" search ---------------------------------------
 nnoremap <silent>* *N:cal HiSet()<CR>:cal Hitpop()<CR>
 nnoremap <silent># *N:cal HiSet()<CR>:cal Hitpop()<CR>
 nnoremap <silent><Leader>q :noh<CR>:cal clearmatches()<CR>:cal popup_close(g:hitpopid)<CR>
-" TODO gitbash popup + scroll = heavy
-if has('win32unix')
+if has('win32unix') " TODO gitbash popup + scroll = heavy
   nnoremap <silent>* *N:cal HiSet()<CR>
   nnoremap <silent># *N:cal HiSet()<CR>
   nnoremap <silent><Leader>q :noh<CR>:cal clearmatches()<CR>
 endif
-
-" mark --------------------------------------------------
-"nnoremap <Leader>m :marks abcdefghijklmnopqrstuvwxyz<CR>:normal! `
-nnoremap <Leader>m :call MarkMenu()<CR>
-nnoremap mm :cal Marking()<CR>
-nnoremap mj :cal MarkHank("up")<CR>
-nnoremap mk :cal MarkHank("down")<CR>
-
-" window ---------------------------------------
+" move ---------------------------------------
 nnoremap j gj
 nnoremap k gk
-
-" TODO netrw cannot move
+nnoremap <Tab> 5j
+nnoremap <S-Tab> 5k
 nnoremap <C-h> <C-w>h
 nnoremap <C-l> <C-w>l
 nnoremap <C-k> <C-w>k
 nnoremap <C-j> <C-w>j
-
 nnoremap <Left> 4<C-w><
 nnoremap <Right> 4<C-w>>
 nnoremap <Up> 4<C-w>-
 nnoremap <Down> 4<C-w>+
-
 nnoremap <silent><C-u> :cal Scroll(0, 25)<CR>
 nnoremap <silent><C-d> :cal Scroll(1, 25)<CR>
 nnoremap <silent><C-b> :cal Scroll(0, 10)<CR>
 nnoremap <silent><C-f> :cal Scroll(1, 10)<CR>
-
-nnoremap <silent><Leader>t :call popup_create(term_start([&shell], #{ hidden: 1, term_finish: 'close'}), #{ border: [], minwidth: &columns/2, minheight: &lines/2 })<CR>
+" TODO lsp
+"nnoremap <Leader>j :LspHover<CR>
+"nnoremap <Leader>p :LspPeekDefinition<CR>
+"nnoremap <Leader>o :LspDefinition<CR>
+"nnoremap <Leader>r :LspReferences<CR>
 " edit ---------------------------------------
 imap <expr> <Tab> '<C-n>'
 inoremap <expr> <S-Tab> pumvisible() ? '<C-p>' : '<S-Tab>'
 inoremap <expr> <CR> pumvisible() ? '<C-y>' : '<CR>'
-
+" func ---------------------------------------
+nnoremap <leader>f :call FzfStart()<CR>
+nnoremap <Leader>gg :GrepExtFrom<CR>
+nnoremap <Leader>ge :GrepExtFrom 
+nnoremap <Leader>m :call MarkMenu()<CR>
+nnoremap mm :cal Marking()<CR>
+nnoremap mj :cal MarkHank("up")<CR>
+nnoremap mk :cal MarkHank("down")<CR>
+nnoremap <silent><Leader>t :call popup_create(term_start([&shell], #{ hidden: 1, term_finish: 'close'}), #{ border: [], minwidth: &columns/2, minheight: &lines/2 })<CR>
 " favorite ---------------------------------------
 nnoremap <Leader><Leader>n :Necronomicon 
-"nnoremap <Leader><Leader>w :cal RunCat()<CR>
-nnoremap <Leader><Leader>cc :cal ChangeColor()<CR>:colorscheme<CR>
-nnoremap <Leader><Leader>ce :cal execute('top terminal ++shell eval ' . getline('.'))<CR>
+nnoremap <Leader><Leader>w :cal RunCat()<CR>
+nnoremap <Leader><Leader>s :cal RunCatStop()<CR>
+nnoremap <Leader><Leader>c :cal ChangeColor()<CR>:colorscheme<CR>
+nnoremap <Leader><Leader>l :cal execute('top terminal ++shell eval ' . getline('.'))<CR>
 endf
-cal s:my_key_map()
+cal s:my_key_map() "}}}
 
 " ========================================
 " Function
 " ========================================
-
-" zihou timer ---------------------------------------
-let s:ini_hour = localtime() / 3600
-fu! Timer()
-  let l:now_hour = localtime() / 3600
-  if now_hour != s:ini_hour
-    let s:ini_hour = now_hour
-    cal ChangeColor()
-    cal popup_create([strftime('%Y/%m/%d %H:%M (%A)', localtime()), '', 'colorscheme: ' . execute('colorscheme')[1:]], #{border: [], zindex: 51, time: 3500})
-    cal timer_start(1000, { -> RunCat() })
-    cal timer_start(5000, { -> RunCatStop() })
-  endif
-endf
-call timer_start(18000, { -> Timer() }, {'repeat': -1})
-
-" change color --------------------------------
-let s:colorscheme_arr_default = ['torte']
-let s:colorscheme_arr = ['hybrid_material', 'molokai']
-fu! ChangeColor()
-  if glob('~/.vim/colors') != ''
-    execute('colorscheme ' . s:colorscheme_arr[localtime() % len(s:colorscheme_arr)])
-  else
-    execute('colorscheme ' . s:colorscheme_arr_default[localtime() % len(s:colorscheme_arr_default)])
-    cal SetStatusLine()
-  endif
-endf
-cal ChangeColor()
-if glob('~/.vim/colors') != ''
-  colorscheme molokai
-endif
-
-" TODO delete
-" fzf like
-fu! FzfPatternExe() abort
-  echo execute('pwd')
-  let inarr = split(inputdialog("Enter [ext] [pattern]>>"), ' ')
-  if len(inarr) !=  2
-    echo 'break'
-    retu
-  endif
-  let fzf_cmd = 'find ./* -iname "*' . inarr[1] . '*.' . inarr[0] . '"'
-  echo 'searching ... [ ' . fzf_cmd . ' ]'
-  let fzf_res = split(system(fzf_cmd), '\n')
-  echo '_________________________'
-  for v in fzf_res
-    echo index(fzf_res, v) . ': ' . v
-  endfor
-  echo '_________________________'
-  let ope = len(fzf_res) == 0 ? '' : inputdialog("choose >>")
-  exe ope == '' ? 'echo "break"' : 'e' . fzf_res[ope]
-endf
-
+" fzf------------------------------------------{{{
 cd ~/git
 let g:fzf_find_cmd = 'find . -type f -name "*" -not -path "*.git/*" -not -path "*.class"'
 let g:fzf_searched_dir = execute('pwd')[1:] " first char is ^@, so trim
 let g:fzf_find_result_tmp = []
 
 fu! FzfStart()
-  " clear map to escape
-  nmapclear
+  nmapclear " clear map to escape
   if stridx(execute('pwd')[1:], g:fzf_searched_dir) == -1 || len(g:fzf_find_result_tmp) == 0
     cal s:fzf_re_find()
   endif
@@ -244,7 +169,7 @@ fu! FzfStart()
   let g:fzf_pwd_prefix = 'pwd:[' . execute('pwd')[1:] . ']>>'
   let g:fzf_enter_keyword = []
   let g:fzf_his_result = map(split(execute('ls'), '\n'), { i,v -> split(filter(split(v, ' '), { i,v -> v != '' })[2], '"')[0] }) + map(split(execute('oldfiles'), '\n'), { i,v -> split(v, ': ')[1] })
-  let g:fzf_find_result = g:fzf_his_result
+  let g:fzf_find_result = g:fzf_his_result[0:29]
   let g:fzf_enter_win = popup_create(g:fzf_pwd_prefix, #{ title: 'Type or <BS> / past:<Space> / MRU<>FZF:<Tab> / choose:<Enter> / end:<Esc> / chache refresh:<C-f>',  border: [], zindex: 99, minwidth: &columns/2, maxwidth: &columns/2, maxheight: 1, line: &columns/4-&columns/24, filter: function('s:fzf_refresh_result') })
   cal s:fzf_create_choose_win()
 endf
@@ -291,7 +216,10 @@ fu! s:fzf_refresh_result(winid, key) abort
     let g:fzf_mode = g:fzf_mode == 'his' ? 'fzf' : 'his'
     let g:fzf_searching_zone = g:fzf_mode == 'his' ? '(*^-^) BUF & MRU' : '(*^-^) FZF [' . g:fzf_searched_dir . ']'
     cal popup_close(g:fzf_choose_win)
-    cal timer_start(0, { -> s:fzf_create_choose_win() })
+    let g:fzf_find_result = len(g:fzf_enter_keyword) != 0 ? matchfuzzy(g:fzf_find_result_tmp, join(g:fzf_enter_keyword, '')) : g:fzf_find_result_tmp
+    let g:fzf_find_result = g:fzf_find_result[0:29]
+    cal s:fzf_create_choose_win()
+    retu 1
   elseif a:key is# "\<BS>" && len(g:fzf_enter_keyword) > 0
     unlet g:fzf_enter_keyword[len(g:fzf_enter_keyword)-1]
   elseif a:key is# "\<BS>" && len(g:fzf_enter_keyword) == 0
@@ -330,24 +258,10 @@ endf
 fu! s:fzf_open(winid, op, f) abort
   cal popup_close(a:winid)
   exe a:op a:f
-  return 1
-endf
+  retu 1
+endf "}}}
 
-" TODO delete
-" history
-fu! HisList()
-  let his_res = split(execute('oldfiles'), '\n')
-  for v in his_res
-    echo index(his_res, v) . ': ' . split(v, ':')[1]
-    if index(his_res, v) == 10
-      break
-    endif
-  endfor
-  let ope = inputdialog("choose >>")
-  exe ope == '' ? 'echo "break"' : 'e' . split(his_res[ope], ':')[1]
-endf
-
- " grep ----------------------------------------
+ " grep ----------------------------------------{{{
 command! -nargs=* GrepExtFrom cal GrepExtFrom(<f-args>)
 fu! GrepExtFrom(...)
   let ext = a:0 == 1 ? a:1 : expand('%:e')
@@ -359,9 +273,9 @@ fu! GrepExtFrom(...)
   echo 'grep [' . expand('<cword>') . '] processing in [' . ext .'] ...'
   cgetexpr system('grep -n -r --include="*.' . ext . '" ' . expand('<cword>') . target) | cw
   echo 'grep end'
-endf
+endf "}}}
 
-" highlight -----------------------------------
+" highlight -----------------------------------{{{
 " on word, bright
 aug auto_hl_cword
   au!
@@ -425,19 +339,25 @@ let g:hitpopid = ''
 fu! Hitpop()
   cal popup_clear(g:hitpopid)
   let g:hitpopid = popup_create(expand('<cword>'), #{ border: [], pos: "topleft", line: 1, col: &columns - 15 })
+endf "}}}
+
+" mark ----------------------------------------{{{
+let g:mark_words = 'abcdefghijklmnopqrstuvwxyz'
+fu! s:get_mark() abort
+  try
+    retu execute('marks ' . g:mark_words)
+  catch
+    retu ''
+  endtry
 endf
 
-" mark ----------------------------------------
-let g:mark_words = 'abcdefghijklmnopqrstuvwxyz'
-fu! MarkMenu()
-  let markdicarr = []
-  let get_marks = ''
-  try
-    let get_marks = execute('marks ' . g:mark_words)
-  catch
+fu! MarkMenu() abort " show mark list and jump {{{
+  let get_marks = s:get_mark()
+  if get_marks == ''
     echo 'no marks'
     retu
-  endtry
+  endif
+  let markdicarr = []
   for v in split(get_marks , '\n')[1:]
     cal add(markdicarr, {'linenum': str2nr(filter(split(v, ' '), { i,v -> v != '' })[1]), 'val': v})
   endfor
@@ -455,17 +375,16 @@ fu! MarkChoose(ctx, winid, key) abort
     execute('normal!`' . a:ctx.files[a:ctx.idx][1])
   endif
   return popup_filter_menu(a:winid, a:key)
-endf
+endf "}}}
 
-fu! Marking() abort
-  try
-    let get_marks = execute('marks ' . g:mark_words)
-  catch
+fu! Marking() abort " mark auto word, toggle {{{
+  let get_marks = s:get_mark()
+  if get_marks == ''
     execute('mark a')
     cal MarkShow()
     echo 'marked'
     retu
-  endtry
+  endif
   let l:now_marks = []
   let l:warr = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
   for row in split(get_marks , '\n')[1:]
@@ -486,15 +405,14 @@ fu! Marking() abort
   else
     echo 'over limit markable char'
   endif
-endf
+endf "}}}
 
-fu! MarkShow() abort
+fu! MarkShow() abort " show marks on row {{{
   cal sign_undefine()
-  try
-    let get_marks = execute('marks ' . g:mark_words)
-  catch
+  let get_marks = s:get_mark()
+  if get_marks == ''
     retu
-  endtry
+  endif
   let l:marks = split(get_marks, '\n')
   if len(marks) == 0
     retu
@@ -515,15 +433,14 @@ endf
 aug sig_aus
   au!
   au BufEnter,CmdwinEnter * cal MarkShow()
-aug END
+aug END "}}}
 
-fu! MarkHank(vector) abort
-  try
-    let get_marks = execute('marks ' . g:mark_words)
-  catch
+fu! MarkHank(vector) abort " move to next/prev mark {{{
+  let get_marks = s:get_mark()
+  if get_marks == ''
     echo 'no marks'
     retu
-  endtry
+  endif
   let l:marks = split(get_marks, '\n')
   cal remove(marks, 0)
   let mark_dict = {}
@@ -535,8 +452,7 @@ fu! MarkHank(vector) abort
   endfor
   if a:vector == 'up'
     cal sort(rownums, {x, y -> x - y})
-  endif
-  if a:vector == 'down'
+  elseif a:vector == 'down'
     cal sort(rownums, {x, y -> y - x})
   endif
   for rownum in rownums
@@ -544,17 +460,17 @@ fu! MarkHank(vector) abort
       exe "normal! `" . mark_dict[rownum]
       echo index(rownums, rownum) + 1 . "/" . len(rownums)
       retu
-    endif
-    if a:vector == 'down' && rownum < line('.')
+    elseif a:vector == 'down' && rownum < line('.')
       exe "normal! `" . mark_dict[rownum]
       echo len(rownums) - index(rownums, rownum) . "/" . len(rownums)
       retu
     endif
   endfor
   echo "last mark"
-endf
+endf "}}}
+" }}}
 
-" scroll ----------------------------------------
+" scroll ----------------------------------------{{{
 fu! Scroll(vector, delta)
   cal CursorToggle()
   let vec = a:vector == 0 ? "\<C-y>" : "\<C-e>"
@@ -565,9 +481,9 @@ endf
 fu! CursorToggle()
   set cursorcolumn!
   set cursorline!
-endf
+endf "}}}
 
-" favorite  -----------------------------------
+" favorite  -----------------------------------{{{
 " TODO for plugin
 command! -nargs=* Necronomicon cal Necronomicon(<f-args>)
 fu! Necronomicon(...) abort
@@ -587,20 +503,48 @@ fu! Necronomicon(...) abort
     smile
     retu
   endif
-endf
+endf "}}}
 
+" zihou timer ---------------------------------------{{{
+let s:ini_hour = localtime() / 3600
+fu! Timer()
+  let l:now_hour = localtime() / 3600
+  if now_hour != s:ini_hour
+    let s:ini_hour = now_hour
+    cal ChangeColor()
+    cal popup_create([strftime('%Y/%m/%d %H:%M (%A)', localtime()), '', 'colorscheme: ' . execute('colorscheme')[1:]], #{border: [], zindex: 51, time: 3500})
+    cal timer_start(1000, { -> RunCat() })
+    cal timer_start(5000, { -> RunCatStop() })
+  endif
+endf
+call timer_start(18000, { -> Timer() }, {'repeat': -1}) "}}}
+
+" change color --------------------------------{{{
+let s:colorscheme_arr_default = ['torte']
+let s:colorscheme_arr = ['hybrid_material', 'molokai']
+fu! ChangeColor()
+  if glob('~/.vim/colors') != ''
+    execute('colorscheme ' . s:colorscheme_arr[localtime() % len(s:colorscheme_arr)])
+  else
+    execute('colorscheme ' . s:colorscheme_arr_default[localtime() % len(s:colorscheme_arr_default)])
+    cal SetStatusLine()
+  endif
+endf
+cal ChangeColor()
+if glob('~/.vim/colors') != ''
+  colorscheme molokai
+endif "}}}
+
+" running cat {{{
 let g:cat_frame = 0
 fu! s:RunCatM() abort
   cal setbufline(winbufnr(g:runcat), 1, s:running_cat[g:cat_frame])
-  let g:cat_frame = g:cat_frame + 1
-  if g:cat_frame == 5
-    let g:cat_frame = 0
-  endif
+  let g:cat_frame = g:cat_frame == 4 ? 0 : g:cat_frame + 1
   if g:cat_stop == 1
     cal popup_close(g:runcat)
     retu
   endif
-  cal timer_start(250, { -> s:RunCatM() })
+  cal timer_start(200, { -> s:RunCatM() })
 endf
 fu! RunCatStop()
   let g:cat_stop = 1
@@ -610,6 +554,7 @@ fu! RunCat()
   let g:runcat = popup_create(s:running_cat[0], #{line: 1, border: [], zindex: 1})
   cal s:RunCatM()
 endf
+
 let s:running_cat = [
     \[
     \ '                                                            ',
@@ -686,4 +631,4 @@ let s:running_cat = [
     \ '                         ?$=           :DMO:       II       ',
     \ '                                        :I+                 ',
     \]
-\]
+\] "}}}
