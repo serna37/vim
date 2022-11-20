@@ -1,5 +1,3 @@
-" TODO qiita
-" TODO lsp, snippet, easymotion
 " ========================================
 " Setting
 " ========================================
@@ -35,8 +33,7 @@ syntax on
 set title
 set showcmd
 set number
-" TODO
-" gitbash does not work
+" TODO gitbash does not work
 if !has('win32unix')
   au ModeChanged [vV\x16]*:* let &l:rnu = mode() =~# '^[vV\x16]'
   au ModeChanged *:[vV\x16]* let &l:rnu = mode() =~# '^[vV\x16]'
@@ -111,11 +108,8 @@ nnoremap <Tab> 10j
 nnoremap <S-Tab> 10k
 
 " file search ---------------------------------------
-"nnoremap <Leader>f :call FzfPatternExe()<CR>
 nnoremap <leader>f :call FzfStart()<CR>
 nnoremap <Leader>c :call FzfReFind()<CR>
-"nnoremap <Leader>h :call HisList()<CR>
-"nnoremap <Leader>b :ls<CR>:b 
 
 " grep ---------------------------------------
 nnoremap <Leader>gg :GrepExtFrom<CR>
@@ -132,7 +126,7 @@ nnoremap <Leader>ge :GrepExtFrom
 nnoremap <silent>* *N:cal HiSet()<CR>:cal Hitpop()<CR>
 nnoremap <silent># *N:cal HiSet()<CR>:cal Hitpop()<CR>
 nnoremap <silent><Leader>q :noh<CR>:cal clearmatches()<CR>:cal popup_clear(g:hitpopid)<CR>
-" gitbash popup + scroll = heavy
+" TODO gitbash popup + scroll = heavy
 if has('win32unix')
   nnoremap <silent>* *N:cal HiSet()<CR>
   nnoremap <silent># *N:cal HiSet()<CR>
@@ -161,15 +155,11 @@ nnoremap <Right> 4<C-w>>
 nnoremap <Up> 4<C-w>-
 nnoremap <Down> 4<C-w>+
 
-let g:scroll_up_key = "\<C-y>"
-let g:scroll_down_key = "\<C-e>"
-nnoremap <silent><C-u> :cal Scroll(scroll_up_key , 25)<CR>
-nnoremap <silent><C-d> :cal Scroll(scroll_down_key , 25)<CR>
-nnoremap <silent><C-b> :cal Scroll(scroll_up_key , 10)<CR>
-nnoremap <silent><C-f> :cal Scroll(scroll_down_key , 10)<CR>
+nnoremap <silent><C-u> :cal Scroll(0, 25)<CR>
+nnoremap <silent><C-d> :cal Scroll(1, 25)<CR>
+nnoremap <silent><C-b> :cal Scroll(0, 10)<CR>
+nnoremap <silent><C-f> :cal Scroll(1, 10)<CR>
 
-"nnoremap <Leader>x :cal CloseBuf()<CR>
-"nnoremap <Leader>t :cal TerminalPop()<CR>
 nnoremap <silent><Leader>t :call popup_create(term_start([&shell], #{ hidden: 1, term_finish: 'close'}), #{ border: [], minwidth: &columns/2, minheight: &lines/2 })<CR>
 " edit ---------------------------------------
 imap <expr> <Tab> '<C-n>'
@@ -188,7 +178,6 @@ cal s:my_key_map()
 " Function
 " ========================================
 
-" TODO refactor
 " zihou timer ---------------------------------------
 let s:ini_hour = localtime() / 3600
 fu! Timer()
@@ -196,10 +185,11 @@ fu! Timer()
   if now_hour != s:ini_hour
     let s:ini_hour = now_hour
     cal ChangeColor()
-    cal Zihou()
+    cal popup_create([strftime('%Y/%m/%d %H:%M (%A)', localtime()), '', 'colorscheme: ' . execute('colorscheme')[1:]], #{border: [], zindex: 51, time: 3500})
     cal timer_start(1000, { -> RunCat() })
   endif
 endf
+call timer_start(18000, { -> Timer() }, {'repeat': -1})
 
 " change color --------------------------------
 let s:colorscheme_arr_default = ['torte']
@@ -217,6 +207,7 @@ if glob('~/.vim/colors') != ''
   colorscheme molokai
 endif
 
+" TODO delete
 " fzf like
 fu! FzfPatternExe() abort
   echo execute('pwd')
@@ -243,101 +234,97 @@ let g:fzf_searched_dir = execute('pwd')[1:] " first char is ^@, so trim
 let g:fzf_find_result_tmp = split(system(g:fzf_find_cmd), '\n')
 
 fu! FzfReFind()
-let g:fzf_searched_dir = execute('pwd')[1:]
-echo 'find files in ['.g:fzf_searched_dir.'] and chache ...'
-cal timer_start(0, { -> FzfReFindBackGround() })
+  let g:fzf_searched_dir = execute('pwd')[1:]
+  echo 'find files in ['.g:fzf_searched_dir.'] and chache ...'
+  cal timer_start(0, { -> FzfReFindBackGround() })
 endf
 
 fu! FzfReFindBackGround()
-let g:fzf_find_result_tmp = split(system(g:fzf_find_cmd), '\n')
-echo 'find files in ['.g:fzf_searched_dir.'] and chache is complete!!'
+  let g:fzf_find_result_tmp = split(system(g:fzf_find_cmd), '\n')
+  echo 'find files in ['.g:fzf_searched_dir.'] and chache is complete!!'
 endf
 
-" TODO refactor
+" TODO map clear
+" TODO cache find result
 fu! FzfStart()
   " clear map to escape
   mapclear
-  let g:fzf_searching_zone = '(*^-^) NO TYPE: buffers & MRU[10] | (*^-^) type to fuzzy search [' . g:fzf_searched_dir . ']'
-  let g:fzf_pwd_prefix = 'pwd: ' . execute('pwd')[1:]
+  let g:fzf_mode = 'his'
+  let g:fzf_searching_zone = '(*^-^) BUF & MRU'
+  let g:fzf_pwd_prefix = 'pwd:[' . execute('pwd')[1:] . ']>>'
   let g:fzf_enter_keyword = []
-  let g:fzf_find_result = map(split(execute('ls'), '\n'), { i,v -> filter(split(v, ' '), { i,v -> v != '' })[2] }) + map(split(execute('oldfiles'), '\n')[0:9], { i,v -> split(v, ': ')[1] })
-  "let g:fzf_find_result_tmp = map(split(execute('ls'), '\n'), { i,v -> filter(split(v, ' '), { i,v -> v != '' })[2] }) + map(split(execute('oldfiles'), '\n')[0:9], { i,v -> split(v, ': ')[1] })
-  let g:fzf_enter_win = popup_create(g:fzf_pwd_prefix . '>>' . join(g:fzf_enter_keyword, ''), #{ title: 'type or backspace. past: <Space>   choose: <Enter>',  border: [], zindex: 99, minwidth: &columns/2, maxwidth: &columns/2, maxheight: 1, line: &columns/4-&columns/24 })
-  "let g:fzf_choose_win = 0
-  let g:fzf_choose_win = popup_menu(g:fzf_find_result, #{ title: g:fzf_searching_zone, border: [], zindex: 98, minwidth: &columns/2, maxwidth: &columns/2, minheight: 2, maxheight: &lines/2, filter: function('s:FzfChoose', [{'idx': 0, 'files': g:fzf_find_result}]) })
-  let g:fzf_hidden_win = popup_create('', #{zindex: 100, line: &columns/4-&columns/20+1, filter: function('s:FzfRefreshResult')})
-  "call s:FzfCreateChooseWindow()
-  "call s:FzfCreateEnterWindow()
+  let g:fzf_his_result = map(split(execute('ls'), '\n'), { i,v -> split(filter(split(v, ' '), { i,v -> v != '' })[2], '"')[0] }) + map(split(execute('oldfiles'), '\n'), { i,v -> split(v, ': ')[1] })
+  let g:fzf_find_result = g:fzf_his_result
+  let g:fzf_enter_win = popup_create(g:fzf_pwd_prefix, #{ title: 'type or backspace / past: <Space> / MRU<>FZF: <Tab> / choose: <Enter> / end: <Esc>',  border: [], zindex: 99, minwidth: &columns/2, maxwidth: &columns/2, maxheight: 1, line: &columns/4-&columns/24, filter: function('s:fzf_refresh_result') })
+  cal s:fzf_create_choose_win()
 endf
-"fu! s:FzfCreateEnterWindow()
-"  let g:fzf_enter_win = popup_create(g:fzf_pwd_prefix . '>>' . join(g:fzf_enter_keyword, ''), #{ border: [], zindex: 99, minwidth: &columns/2, maxwidth: &columns/2, maxheight: 1, line: &columns/4-&columns/20 })
-"endf
-"fu! s:FzfCreateChooseWindow()
-"  let ctx = {'idx': 0, 'files': g:fzf_find_result}
-"  let g:fzf_choose_win = popup_menu(g:fzf_find_result, #{ border: [], zindex: 98, minwidth: &columns/2, maxwidth: &columns/2, minheight: 2, maxheight: &lines/2, filter: function('s:FzfChoose', [{'idx': 0, 'files': g:fzf_find_result}]) })
-"endf
-fu! s:FzfRefreshResult(winid, key) abort
-  if a:key is# "\<CR>" || a:key is# "\<Esc>"
+
+fu! s:fzf_create_choose_win()
+  let g:fzf_c_idx = 0
+  let g:fzf_choose_win = popup_menu(g:fzf_find_result, #{ title: g:fzf_searching_zone, border: [], zindex: 98, minwidth: &columns/2, maxwidth: &columns/2, minheight: 2, maxheight: &lines/2, filter: function('s:fzf_choose') })
+endf
+
+fu! s:fzf_refresh_result(winid, key) abort
+  if a:key is# "\<Esc>"
     call popup_close(g:fzf_enter_win)
-"    call popup_close(g:fzf_choose_win)
-"    call timer_start(0, { -> s:FzfCreateChooseWindow() })
-    call popup_close(g:fzf_hidden_win)
-    " back keymap
+    call popup_close(g:fzf_choose_win)
     cal s:my_key_map()
     return 1
-    "popup_filter_menu(a:winid, a:key)
+  elseif a:key is# "\<CR>"
+    call popup_close(g:fzf_enter_win)
+    cal s:my_key_map()
+    return 1
   elseif a:key is# "\<Space>"
-for i in range(0,strlen(@")-1)
-    let g:fzf_enter_keyword = add(g:fzf_enter_keyword, strpart(@",i,1))
-endfor
+    for i in range(0,strlen(@")-1)
+      let g:fzf_enter_keyword = add(g:fzf_enter_keyword, strpart(@",i,1))
+    endfor
+  elseif a:key is# "\<Tab>"
+    let g:fzf_mode = g:fzf_mode == 'his' ? 'fzf' : 'his'
+    let g:fzf_searching_zone = g:fzf_mode == 'his' ? '(*^-^) BUF & MRU' : '(*^-^) FZF [' . g:fzf_searched_dir . ']'
+    cal popup_close(g:fzf_choose_win)
+    cal timer_start(0, { -> s:fzf_create_choose_win() })
   elseif a:key is# "\<BS>" && len(g:fzf_enter_keyword) > 0
     unlet g:fzf_enter_keyword[len(g:fzf_enter_keyword)-1]
   elseif a:key is# "\<BS>" && len(g:fzf_enter_keyword) == 0
-    retu 1
+    " noop
   else
     let g:fzf_enter_keyword = add(g:fzf_enter_keyword, a:key)
   endif
-  cal setbufline(winbufnr(g:fzf_enter_win), 1, g:fzf_pwd_prefix . '>>' . join(g:fzf_enter_keyword, ''))
-  "if len(g:fzf_enter_keyword) == 2
-"    cal timer_start(0, { -> s:fzf_find() })
-  "endif
-    "cal setbufline(winbufnr(g:fzf_choose_win), 1, map(g:fzf_find_result, { i,v -> '' }))
-    let g:fzf_find_result = len(g:fzf_enter_keyword) != 0 ? matchfuzzy(g:fzf_find_result_tmp, join(g:fzf_enter_keyword, '')) : map(split(execute('ls'), '\n'), { i,v -> filter(split(v, ' '), { i,v -> v != '' })[2] }) + map(split(execute('oldfiles'), '\n')[0:9], { i,v -> split(v, ': ')[1] })
-  if len(g:fzf_find_result) <= 30
-    cal setbufline(winbufnr(g:fzf_choose_win), 1, map(range(1,30), { i,v -> '' }))
+
+  if g:fzf_mode == 'his'
+    let g:fzf_find_result = len(g:fzf_enter_keyword) != 0 ? matchfuzzy(g:fzf_his_result, join(g:fzf_enter_keyword, '')) : g:fzf_his_result
+  else
+    let g:fzf_find_result = len(g:fzf_enter_keyword) != 0 ? matchfuzzy(g:fzf_find_result_tmp, join(g:fzf_enter_keyword, '')) : g:fzf_find_result_tmp
   endif
-  cal setbufline(winbufnr(g:fzf_choose_win), 1, g:fzf_find_result[0:30]) " re view only first 30 files
+
+  cal setbufline(winbufnr(g:fzf_enter_win), 1, g:fzf_pwd_prefix . join(g:fzf_enter_keyword, ''))
+  cal setbufline(winbufnr(g:fzf_choose_win), 1, map(range(1,30), { i,v -> '' }))
+  cal setbufline(winbufnr(g:fzf_choose_win), 1, g:fzf_find_result[0:29]) " re view only first 30 files
   return a:key is# "x" || a:key is# "\<Space>" ? 1 : popup_filter_menu(a:winid, a:key)
 endf
-"fu! s:fzf_find()
-"  let g:fzf_find_result_tmp = map(split(execute('ls'), '\n'), { i,v -> filter(split(v, ' '), { i,v -> v != '' })[2] }) + map(split(execute('oldfiles'), '\n')[0:9], { i,v -> split(v, ': ')[1] })
-"  let g:fzf_find_result_tmp = g:fzf_find_result_tmp + split(system('find ./* -iname "*' . join(g:fzf_enter_keyword, '') . '*"'), '\n')
-"endf
-fu! s:FzfChoose(ctx, winid, key) abort
+
+fu! s:fzf_choose(winid, key) abort
   if a:key is# 'j'
-    if a:ctx.idx < len(a:ctx.files)-1
-      let a:ctx.idx = a:ctx.idx+1
-    endif
+    let g:fzf_c_idx = g:fzf_c_idx == len(g:fzf_find_result)-1 ? len(g:fzf_find_result)-1 : g:fzf_c_idx + 1
   elseif a:key is# 'k'
-    if a:ctx.idx > 0
-      let a:ctx.idx = a:ctx.idx-1
-    endif
+    let g:fzf_c_idx = g:fzf_c_idx == 0 ? 0 : g:fzf_c_idx - 1
   elseif a:key is# "\<CR>"
-    return s:fzf_open(a:winid, 'e', a:ctx.files[a:ctx.idx])
+    return s:fzf_open(a:winid, 'e', g:fzf_find_result[g:fzf_c_idx])
   elseif a:key is# "\<C-v>"
-    return s:fzf_open(a:winid, 'vnew', a:ctx.files[a:ctx.idx])
+    return s:fzf_open(a:winid, 'vnew', g:fzf_find_result[g:fzf_c_idx])
   elseif a:key is# "\<C-t>"
-    return s:fzf_open(a:winid, 'tabnew', a:ctx.files[a:ctx.idx])
+    return s:fzf_open(a:winid, 'tabnew', g:fzf_find_result[g:fzf_c_idx])
   endif
   return popup_filter_menu(a:winid, a:key)
 endf
+
 fu! s:fzf_open(winid, op, f) abort
   cal popup_close(a:winid)
-  " escape for Budders
-  exe a:op split(a:f,'"')[0]
+  exe a:op a:f
   return 1
 endf
 
+" TODO delete
 " history
 fu! HisList()
   let his_res = split(execute('oldfiles'), '\n')
@@ -355,9 +342,14 @@ endf
 command! -nargs=* GrepExtFrom cal GrepExtFrom(<f-args>)
 fu! GrepExtFrom(...)
   let ext = a:0 == 1 ? a:1 : expand('%:e')
-"  echo 'grep processing in [' . ext .'] ...'
-"  execute('vimgrep /' . expand('<cword>') . '/gj **/*.' . ext)
-  cgetexpr system('grep -n ' . expand('<cword>') . ' **/*.' . ext) | cw
+  let pwd = system('pwd')
+  exe 'lcd %:h'
+  let gitroot = system('git rev-parse --show-superproject-working-tree --show-toplevel')
+  exe 'lcd ' . pwd
+  let target = stridx(gitroot, 'fatal: ') == -1 ? ' ' . gitroot[0:strlen(gitroot)-2] . '/*' : ' ./*'
+  echo 'grep [' . expand('<cword>') . '] processing in [' . ext .'] ...'
+  cgetexpr system('grep -n -r --include="*.' . ext . '" ' . expand('<cword>') . target) | cw
+  echo 'grep end'
 endf
 
 " highlight -----------------------------------
@@ -427,35 +419,29 @@ fu! Hitpop()
 endf
 
 " mark ----------------------------------------
+let g:mark_words = 'abcdefghijklmnopqrstuvwxyz'
 fu! MarkMenu()
-let marks_this = []
-let markdicarr = []
-"for v in split(execute('marks abcdefghijklmnopqrstuvwxyz'), '\n')[1:]
-  let l:words = 'abcdefghijklmnopqrstuvwxyz'
+  let markdicarr = []
   let get_marks = ''
   try
-    let get_marks = execute('marks ' . words)
+    let get_marks = execute('marks ' . g:mark_words)
   catch
-  echo 'no marks'
+    echo 'no marks'
     retu
   endtry
-for v in split(get_marks , '\n')[1:]
-  cal add(markdicarr, {'linenum': str2nr(filter(split(v, ' '), { i,v -> v != '' })[1]), 'val': v})
-endfor
-cal sort(markdicarr, { x, y -> x['linenum'] - y['linenum'] })
-let marks_this = map(markdicarr, { i,v -> v['val'] })
+  for v in split(get_marks , '\n')[1:]
+    cal add(markdicarr, {'linenum': str2nr(filter(split(v, ' '), { i,v -> v != '' })[1]), 'val': v})
+  endfor
+  cal sort(markdicarr, { x, y -> x['linenum'] - y['linenum'] })
+  let marks_this = map(markdicarr, { i,v -> v['val'] })
   cal popup_menu(marks_this, #{ title: 'choose marks', border: [], zindex: 100, minwidth: &columns/2, maxwidth: &columns/2, minheight: 2, maxheight: &lines/2, filter: function('MarkChoose', [{'idx': 0, 'files': marks_this}]) })
 endf
 
 fu! MarkChoose(ctx, winid, key) abort
-  if a:key is# 'j'
-    if a:ctx.idx < len(a:ctx.files)-1
-      let a:ctx.idx = a:ctx.idx+1
-    endif
-  elseif a:key is# 'k'
-    if a:ctx.idx > 0
-      let a:ctx.idx = a:ctx.idx-1
-    endif
+  if a:key is# 'j' && a:ctx.idx < len(a:ctx.files)-1
+    let a:ctx.idx = a:ctx.idx+1
+  elseif a:key is# 'k' && a:ctx.idx > 0
+    let a:ctx.idx = a:ctx.idx-1
   elseif a:key is# "\<CR>"
     execute('normal!`' . a:ctx.files[a:ctx.idx][1])
   endif
@@ -463,22 +449,19 @@ fu! MarkChoose(ctx, winid, key) abort
 endf
 
 fu! Marking() abort
-  let l:words = 'abcdefghijklmnopqrstuvwxyz'
-  let get_marks = ''
   try
-    let get_marks = execute('marks ' . words)
+    let get_marks = execute('marks ' . g:mark_words)
   catch
-  execute('mark a')
+    execute('mark a')
     cal MarkShow()
     echo 'marked'
     retu
   endtry
   let l:now_marks = []
-  let l:warr = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-        \ 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+  let l:warr = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
   for row in split(get_marks , '\n')[1:]
     let l:r = filter(split(row, ' '), {i, v -> v != ''})
-    if stridx(words, r[0]) != -1 && r[1] == line('.')
+    if stridx(g:mark_words, r[0]) != -1 && r[1] == line('.')
       execute('delmarks ' . r[0])
       cal MarkShow()
       echo 'delete mark'
@@ -498,10 +481,8 @@ endf
 
 fu! MarkShow() abort
   cal sign_undefine()
-  let l:words = 'abcdefghijklmnopqrstuvwxyz'
-  let get_marks = ''
   try
-    let get_marks = execute('marks ' . words)
+    let get_marks = execute('marks ' . g:mark_words)
   catch
     retu
   endtry
@@ -527,12 +508,9 @@ aug sig_aus
   au BufEnter,CmdwinEnter * cal MarkShow()
 aug END
 
-" TODO refactor
 fu! MarkHank(vector) abort
-  let l:words = 'abcdefghijklmnopqrstuvwxyz'
-  let get_marks = ''
   try
-    let get_marks = execute('marks ' . words)
+    let get_marks = execute('marks ' . g:mark_words)
   catch
     echo 'no marks'
     retu
@@ -570,7 +548,8 @@ endf
 " scroll ----------------------------------------
 fu! Scroll(vector, delta)
   cal CursorToggle()
-  let tmp = timer_start(a:delta, { -> NormalExe(a:vector) }, {'repeat': -1})
+  let vec = a:vector == 0 ? "\<C-y>" : "\<C-e>"
+  let tmp = timer_start(a:delta, { -> feedkeys(vec) }, {'repeat': -1})
   cal timer_start(600, { -> timer_stop(tmp) })
   cal timer_start(600, { -> CursorToggle() })
 endf
@@ -581,18 +560,6 @@ fu! CursorToggle()
   set cursorcolumn!
   set cursorline!
 endf
-
-" buffer --------------------------------------
-"fu! CloseBuf()
-"  let l:now_b = bufnr('%')
-"  bn
-"  execute('bd ' . now_b)
-"endf
-
-" terminal ------------------------------------
-"fu! TerminalPop()
-"  cal popup_create(term_start([&shell], #{ hidden: 1, term_finish: 'close'}), #{ border: [], minwidth: &columns/2, minheight: &lines/2 })
-"endf
 
 " favorite  -----------------------------------
 " TODO for plugin
@@ -614,11 +581,6 @@ fu! Necronomicon(...) abort
     smile
     retu
   endif
-endf
-
-" TODO call only once
-fu! Zihou()
-  cal popup_create([strftime('%Y/%m/%d %H:%M (%A)', localtime()), '', 'colorscheme: ' . execute('colorscheme')[1:]], #{border: [], zindex: 51, time: 3500})
 endf
 
 fu! RunCat()
@@ -711,5 +673,3 @@ let s:running_cat = [
     \ '                                        :I+                 ',
     \]
 \]
-call timer_start(18000, { -> Timer() }, {'repeat': -1})
-
