@@ -32,11 +32,8 @@ syntax on
 set title
 set showcmd
 set number
-" TODO gitbash does not work
-if !has('win32unix')
-  au ModeChanged [vV\x16]*:* let &l:rnu = mode() =~# '^[vV\x16]'
-  au ModeChanged *:[vV\x16]* let &l:rnu = mode() =~# '^[vV\x16]'
-endif
+au ModeChanged *:v* set relativenumber!
+au ModeChanged v*:* set relativenumber!
 set cursorline
 set cursorcolumn
 set showmatch
@@ -98,14 +95,9 @@ set completeopt=menuone,noinsert,preview,popup
 let g:mapleader = "\<Space>"
 fu! s:my_key_map() " {{{
 " search ---------------------------------------
-nnoremap <silent>* *N:cal HiSet()<CR>:cal Hitpop()<CR>
-nnoremap <silent># *N:cal HiSet()<CR>:cal Hitpop()<CR>
-nnoremap <silent><Leader>q :noh<CR>:cal clearmatches()<CR>:cal popup_close(g:hitpopid)<CR>
-if has('win32unix') " TODO gitbash popup + scroll = heavy
-  nnoremap <silent>* *N:cal HiSet()<CR>
-  nnoremap <silent># *N:cal HiSet()<CR>
-  nnoremap <silent><Leader>q :noh<CR>:cal clearmatches()<CR>
-endif
+nnoremap <silent>* *N:cal HiSet()<CR>
+nnoremap <silent># *N:cal HiSet()<CR>
+nnoremap <silent><Leader>q :noh<CR>:cal clearmatches()<CR>
 " move ---------------------------------------
 nnoremap j gj
 nnoremap k gk
@@ -339,13 +331,6 @@ fu! HiSet() abort
   cal HiReset('QuickhlCword')
   cal matchadd("UserSearchHi" . g:now_hi, cw, 15)
   let g:now_hi = g:now_hi >= len(g:search_hl)-1 ? 0 : g:now_hi + 1
-endf
-
-" hitspop
-let g:hitpopid = ''
-fu! Hitpop()
-  cal popup_clear(g:hitpopid)
-  let g:hitpopid = popup_create(expand('<cword>'), #{ border: [], pos: "topleft", line: 1, col: &columns - 15 })
 endf "}}}
 
 " quick-scope ---------------------------------{{{
