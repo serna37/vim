@@ -216,7 +216,11 @@ fu! s:fzf_refresh_result(winid, key) abort
     let g:fzf_mode = g:fzf_mode == 'his' ? 'fzf' : 'his'
     let g:fzf_searching_zone = g:fzf_mode == 'his' ? '(*^-^) BUF & MRU' : '(*^-^) FZF [' . g:fzf_searched_dir . ']'
     cal popup_close(g:fzf_choose_win)
-    let g:fzf_find_result = len(g:fzf_enter_keyword) != 0 ? matchfuzzy(g:fzf_find_result_tmp, join(g:fzf_enter_keyword, '')) : g:fzf_find_result_tmp
+    if g:fzf_mode == 'his'
+      let g:fzf_find_result = len(g:fzf_enter_keyword) != 0 ? matchfuzzy(g:fzf_his_result, join(g:fzf_enter_keyword, '')) : g:fzf_his_result
+    else
+      let g:fzf_find_result = len(g:fzf_enter_keyword) != 0 ? matchfuzzy(g:fzf_find_result_tmp, join(g:fzf_enter_keyword, '')) : g:fzf_find_result_tmp
+    endif
     let g:fzf_find_result = g:fzf_find_result[0:29]
     cal s:fzf_create_choose_win()
     retu 1
