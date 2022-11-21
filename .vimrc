@@ -216,11 +216,7 @@ fu! s:fzf_refresh_result(winid, key) abort
     let g:fzf_mode = g:fzf_mode == 'his' ? 'fzf' : 'his'
     let g:fzf_searching_zone = g:fzf_mode == 'his' ? '(*^-^) BUF & MRU' : '(*^-^) FZF [' . g:fzf_searched_dir . ']'
     cal popup_close(g:fzf_choose_win)
-    if g:fzf_mode == 'his'
-      let g:fzf_find_result = len(g:fzf_enter_keyword) != 0 ? matchfuzzy(g:fzf_his_result, join(g:fzf_enter_keyword, '')) : g:fzf_his_result
-    else
-      let g:fzf_find_result = len(g:fzf_enter_keyword) != 0 ? matchfuzzy(g:fzf_find_result_tmp, join(g:fzf_enter_keyword, '')) : g:fzf_find_result_tmp
-    endif
+    let g:fzf_find_result = len(g:fzf_enter_keyword) != 0 ? matchfuzzy(g:fzf_find_result_tmp, join(g:fzf_enter_keyword, '')) : g:fzf_find_result_tmp
     let g:fzf_find_result = g:fzf_find_result[0:29]
     cal s:fzf_create_choose_win()
     retu 1
@@ -289,9 +285,9 @@ fu! HiCwordStart()
   aug QuickhlCword
     au!
     au! CursorMoved <buffer> cal HiCwordR()
-    au! ColorScheme * execute("hi link QuickhlCword CursorLine")
+    au! ColorScheme * execute("hi link QuickhlCword ColorColumn")
   aug END
-  execute("hi link QuickhlCword CursorLine")
+  execute("hi link QuickhlCword ColorColumn")
 endf
 
 fu! HiCwordR()
@@ -327,14 +323,17 @@ fu! HlIni()
 endf
 cal HlIni()
 
-fu! HiSet() abort
-  let cw = expand('<cword>')
-  let already = filter(getmatches(), {i, v -> v['pattern'] == cw})
+fu! HiReset(group_name)
+  let already = filter(getmatches(), {i, v -> v['group'] == a:group_name})
   if len(already) > 0
     cal matchdelete(already[0]['id'])
-    retu
   endif
-  cal matchadd("UserSearchHi" . g:now_hi, cw)
+endf
+
+fu! HiSet() abort
+  let cw = expand('<cword>')
+  cal HiReset('QuickhlCword')
+  cal matchadd("UserSearchHi" . g:now_hi, cw, 15)
   let g:now_hi = g:now_hi >= len(g:search_hl)-1 ? 0 : g:now_hi + 1
 endf
 
@@ -344,6 +343,30 @@ fu! Hitpop()
   cal popup_clear(g:hitpopid)
   let g:hitpopid = popup_create(expand('<cword>'), #{ border: [], pos: "topleft", line: 1, col: &columns - 15 })
 endf "}}}
+
+" quick-scope ---------------------------------{{{
+aug qs_colors
+  au!
+  au ColorScheme * highlight QuickScopePrimary cterm=bold ctermfg=196 ctermbg=0 guifg=#66D9EF guibg=#000000
+  au ColorScheme * highlight QuickScopeSecondary cterm=bold ctermfg=196 ctermbg=0 guifg=#66D9EF guibg=#000000
+  au CursorMoved * cal HiFLine()
+aug END
+
+fu! HiFLine()
+  cal HiReset('QuickScopePrimary')
+  cal HiReset('QuickScopeSecondary')
+  let line = line('.')
+  let now_line = getline('.')
+  let target_arr = []
+  let offset = 0
+  while offset != -1
+    cal add(target_arr, [line, matchstrpos(now_line, '\<.', offset)[2]]) " start char col
+    let offset = matchstrpos(now_line, '.\>', offset)[2]
+  endwhile
+  cal matchaddpos("QuickScopePrimary", target_arr[0:8], 16)
+  cal matchaddpos("QuickScopeSecondary", target_arr[9:16], 16)
+endf
+" }}}
 
 " mark ----------------------------------------{{{
 let g:mark_words = 'abcdefghijklmnopqrstuvwxyz'
