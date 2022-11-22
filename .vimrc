@@ -371,7 +371,7 @@ fu! HiFLine()
       cal add(target_arr, [line, start[2]]) " start char col
     elseif start[2] > 0
       let next_char = now_line[start[2]:start[2]]
-      cal add(stridx(ashiato, next_char) == -1 ? targer_arr : target_arr_second , [line, start[2]+1])
+      cal add(stridx(ashiato, next_char) == -1 ? target_arr : target_arr_second , [line, start[2]+1])
     endif
     let offset = matchstrpos(now_line, '.\>', offset)[2]
   endwhile
