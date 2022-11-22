@@ -359,9 +359,14 @@ fu! HiFLine()
   let line = line('.')
   let now_line = getline('.')
   let target_arr = []
-  let offset = 0
+  let offset = col('.')
   while offset != -1
-    cal add(target_arr, [line, matchstrpos(now_line, '\<.', offset)[2]]) " start char col
+    let start = matchstrpos(now_line, '\<.', offset)
+    let ashiato = now_line[offset:start[2] - 1]
+    if stridx(ashiato, start[0]) != -1
+      echo 'カーソルから目的地までに文字重複あり ' . start[0]
+    endif
+    cal add(target_arr, [line, start[2]]) " start char col
     let offset = matchstrpos(now_line, '.\>', offset)[2]
   endwhile
   cal matchaddpos("QuickScopePrimary", target_arr[0:8], 16)
