@@ -339,7 +339,7 @@ endf "}}}
 aug qs_colors
   au!
   au ColorScheme * highlight QuickScopePrimary cterm=bold ctermfg=196 ctermbg=0 guifg=#66D9EF guibg=#000000
-  au ColorScheme * highlight QuickScopeSecondary cterm=bold ctermfg=196 ctermbg=0 guifg=#66D9EF guibg=#000000
+  au ColorScheme * highlight QuickScopeSecondary ctermfg=161 ctermbg=0 guifg=#66D9EF guibg=#000000
   au CursorMoved * cal HiFLine()
 aug END
 
@@ -361,19 +361,22 @@ fu! HiFLine()
   let line = line('.')
   let now_line = getline('.')
   let target_arr = []
+  let target_arr_second = []
   let col = col('.')
   let offset = col('.')
   while offset != -1
     let start = matchstrpos(now_line, '\<.', offset)
-    let ashiato = now_line[col:start[1]]
-    if stridx(ashiato, start[0]) != -1
-      echo 'カーソルから目的地までに文字重複あり ' . start[0]
+    let ashiato = now_line[col:start[1]-1]
+    if stridx(ashiato, start[0]) == -1
+      cal add(target_arr, [line, start[2]]) " start char col
+    elseif start[2] > 0
+      let next_char = now_line[start[2]:start[2]]
+      cal add(stridx(ashiato, next_char) == -1 ? targer_arr : target_arr_second , [line, start[2]+1])
     endif
-    cal add(target_arr, [line, start[2]]) " start char col
     let offset = matchstrpos(now_line, '.\>', offset)[2]
   endwhile
-  cal matchaddpos("QuickScopePrimary", target_arr[0:8], 16)
-  cal matchaddpos("QuickScopeSecondary", target_arr[9:16], 16)
+  cal matchaddpos("QuickScopePrimary", target_arr, 16)
+  cal matchaddpos("QuickScopeSecondary", target_arr_second, 16)
 endf
 " }}}
 
