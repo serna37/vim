@@ -341,7 +341,19 @@ aug qs_colors
   au CursorMoved * cal HiFLine()
 aug END
 
+let g:fmode_flg = 1
+fu! FModeToggle(...)
+  if a:0 == 1
+    let g:fmode_flg = a:1
+  else
+    let g:fmode_flg = g:fmode_flg == 1 ? 0 : 1
+  endif
+endf
+
 fu! HiFLine()
+  if g:fmode_flg == 0
+    retu
+  endif
   cal HiReset('QuickScopePrimary')
   cal HiReset('QuickScopeSecondary')
   let line = line('.')
@@ -489,10 +501,12 @@ endf "}}}
 " scroll ----------------------------------------{{{
 fu! Scroll(vector, delta)
   cal CursorToggle()
+  cal FModeToggle(0)
   let vec = a:vector == 0 ? "\<C-y>" : "\<C-e>"
   let tmp = timer_start(a:delta, { -> feedkeys(vec) }, {'repeat': -1})
   cal timer_start(600, { -> timer_stop(tmp) })
   cal timer_start(600, { -> CursorToggle() })
+  cal timer_start(600, { -> FModeToggle(1) })
 endf
 fu! CursorToggle()
   set cursorcolumn!
