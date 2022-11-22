@@ -32,8 +32,10 @@ syntax on
 set title
 set showcmd
 set number
-au ModeChanged *:v* set relativenumber!
-au ModeChanged v*:* set relativenumber!
+if has('win32unix')
+  au ModeChanged *:v* set relativenumber!
+  au ModeChanged v*:* set relativenumber!
+endif
 set cursorline
 set cursorcolumn
 set showmatch
