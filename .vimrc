@@ -32,7 +32,7 @@ syntax on
 set title
 set showcmd
 set number
-if has('win32unix')
+if !has('win32unix') " gitbash no modechange
   au ModeChanged *:v* set relativenumber!
   au ModeChanged v*:* set relativenumber!
 endif
