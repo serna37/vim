@@ -361,10 +361,11 @@ fu! HiFLine()
   let line = line('.')
   let now_line = getline('.')
   let target_arr = []
+  let col = col('.')
   let offset = col('.')
   while offset != -1
     let start = matchstrpos(now_line, '\<.', offset)
-    let ashiato = now_line[offset:start[2] - 1]
+    let ashiato = now_line[col:start[1]]
     if stridx(ashiato, start[0]) != -1
       echo 'カーソルから目的地までに文字重複あり ' . start[0]
     endif
