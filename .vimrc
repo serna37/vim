@@ -105,8 +105,8 @@ nnoremap <silent><Leader>q :noh<CR>:cal clearmatches()<CR>
 nnoremap j gj
 nnoremap k gk
 if g:marker_mode == 1
-  nnoremap <Tab> :cal MarkHank("down")<CR>
-  nnoremap <S-Tab> :cal MarkHank("up")<CR>
+  nnoremap <silent><Tab> :cal MarkHank("down")<CR>
+  nnoremap <silent><S-Tab> :cal MarkHank("up")<CR>
 else
   nnoremap <Tab> 5j
   nnoremap <S-Tab> 5k
@@ -538,11 +538,12 @@ endf "}}}
 
 fu! MarkField() abort " create short marks {{{
   let g:marker_mode = 1
-  nnoremap <Tab> :cal MarkHank("down")<CR>
-  nnoremap <S-Tab> :cal MarkHank("up")<CR>
-  let warr = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+  nnoremap <silent><Tab> :cal MarkHank("down")<CR>
+  nnoremap <silent><S-Tab> :cal MarkHank("up")<CR>
+  let warr = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y']
   let now_line = line('.')
   let col = col('.')
+  mark z
   for v in range(1, 10)
     cal cursor(now_line + v*5, 1)
     execute('mark '.warr[2*(v-1)])
