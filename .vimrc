@@ -95,6 +95,7 @@ set completeopt=menuone,noinsert,preview,popup
 " KeyMap
 " ========================================
 let g:mapleader = "\<Space>"
+let g:marker_mode = 0
 fu! s:my_key_map() " {{{
 " search ---------------------------------------
 nnoremap <silent>* *N:cal HiSet()<CR>
@@ -103,8 +104,13 @@ nnoremap <silent><Leader>q :noh<CR>:cal clearmatches()<CR>
 " move ---------------------------------------
 nnoremap j gj
 nnoremap k gk
-nnoremap <Tab> 5j
-nnoremap <S-Tab> 5k
+if g:marker_mode == 1
+  nnoremap <Tab> :cal MarkHank("down")<CR>
+  nnoremap <S-Tab> :cal MarkHank("up")<CR>
+else
+  nnoremap <Tab> 5j
+  nnoremap <S-Tab> 5k
+endif
 nnoremap <C-h> <C-w>h
 nnoremap <C-l> <C-w>l
 nnoremap <C-k> <C-w>k
@@ -127,13 +133,15 @@ imap <expr> <Tab> '<C-n>'
 inoremap <expr> <S-Tab> pumvisible() ? '<C-p>' : '<S-Tab>'
 inoremap <expr> <CR> pumvisible() ? '<C-y>' : '<CR>'
 " func ---------------------------------------
-nnoremap <leader>f :call FzfStart()<CR>
+nnoremap <leader>f :cal FzfStart()<CR>
 nnoremap <Leader>gg :GrepExtFrom<CR>
 nnoremap <Leader>ge :GrepExtFrom 
-nnoremap <Leader>m :call MarkMenu()<CR>
+nnoremap <Leader>w :cal MarkField()<CR>
+nnoremap <Leader>s :cal MarkFieldOut()<CR>
+nnoremap <Leader>m :cal MarkMenu()<CR>
 nnoremap mm :cal Marking()<CR>
-nnoremap mj :cal MarkHank("up")<CR>
-nnoremap mk :cal MarkHank("down")<CR>
+nnoremap mj :cal MarkHank("down")<CR>
+nnoremap mk :cal MarkHank("up")<CR>
 nnoremap <silent><Leader>t :call popup_create(term_start([&shell], #{ hidden: 1, term_finish: 'close'}), #{ border: [], minwidth: &columns/2, minheight: &lines/2 })<CR>
 " favorite ---------------------------------------
 nnoremap <Leader><Leader>n :Necronomicon 
@@ -338,8 +346,10 @@ endf "}}}
 " quick-scope ---------------------------------{{{
 aug qs_colors
   au!
-  au ColorScheme * highlight QuickScopePrimary cterm=bold ctermfg=196 ctermbg=0 guifg=#66D9EF guibg=#000000
-  au ColorScheme * highlight QuickScopeSecondary ctermfg=161 ctermbg=0 guifg=#66D9EF guibg=#000000
+  au ColorScheme * highlight QuickScopePrimary cterm=bold ctermfg=196 ctermbg=16 guifg=#66D9EF guibg=#000000
+  au ColorScheme * highlight QuickScopeSecondary ctermfg=161 ctermbg=16 guifg=#66D9EF guibg=#000000
+  au ColorScheme * highlight QuickScopeBack ctermfg=51 ctermbg=16 guifg=#66D9EF guibg=#000000
+  au ColorScheme * highlight QuickScopeBackSecond ctermfg=25 ctermbg=16 guifg=#66D9EF guibg=#000000
   au CursorMoved * cal HiFLine()
 aug END
 
@@ -358,6 +368,8 @@ fu! HiFLine()
   endif
   cal HiReset('QuickScopePrimary')
   cal HiReset('QuickScopeSecondary')
+  cal HiReset('QuickScopeBack')
+  cal HiReset('QuickScopeBackSecond')
   let line = line('.')
   let now_line = getline('.')
   let target_arr = []
@@ -375,23 +387,43 @@ fu! HiFLine()
     endif
     let offset = matchstrpos(now_line, '.\>', offset)[2]
   endwhile
+  " back
+  let target_arr_back = []
+  let target_arr_back_second = []
+  let now_line = getline('.')[0:col-1]
+  let offset = 0
+  while offset != -1
+    let start = matchstrpos(now_line, '\<.', offset)
+    let ashiato = now_line[start[1]+1:col]
+    if stridx(ashiato, start[0]) == -1
+      cal add(target_arr_back, [line, start[2]]) " start char col
+    elseif start[2] > 0
+      let next_char = now_line[start[2]:start[2]]
+      cal add(stridx(ashiato, next_char) == -1 ? target_arr_back : target_arr_back_second , [line, start[2]+1])
+    endif
+    let offset = matchstrpos(now_line, '.\>', offset)[2]
+  endwhile
   cal matchaddpos("QuickScopePrimary", target_arr, 16)
   cal matchaddpos("QuickScopeSecondary", target_arr_second, 16)
+  cal matchaddpos("QuickScopeBack", target_arr_back, 16)
+  cal matchaddpos("QuickScopeBackSecond", target_arr_back_second, 16)
 endf
 " }}}
 
 " mark ----------------------------------------{{{
 let g:mark_words = 'abcdefghijklmnopqrstuvwxyz'
-fu! s:get_mark() abort
+let g:mark_words_large = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+let g:mark_words_all = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+fu! s:get_mark(tar) abort
   try
-    retu execute('marks ' . g:mark_words)
+    retu execute('marks ' . a:tar)
   catch
     retu ''
   endtry
 endf
 
 fu! MarkMenu() abort " show mark list and jump {{{
-  let get_marks = s:get_mark()
+  let get_marks = s:get_mark(g:mark_words_large)
   if get_marks == ''
     echo 'no marks'
     retu
@@ -417,7 +449,7 @@ fu! MarkChoose(ctx, winid, key) abort
 endf "}}}
 
 fu! Marking() abort " mark auto word, toggle {{{
-  let get_marks = s:get_mark()
+  let get_marks = s:get_mark(g:mark_words_large)
   if get_marks == ''
     execute('mark a')
     cal MarkShow()
@@ -425,7 +457,7 @@ fu! Marking() abort " mark auto word, toggle {{{
     retu
   endif
   let l:now_marks = []
-  let l:warr = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+  let l:warr = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
   for row in split(get_marks , '\n')[1:]
     let l:r = filter(split(row, ' '), {i, v -> v != ''})
     if stridx(g:mark_words, r[0]) != -1 && r[1] == line('.')
@@ -448,7 +480,7 @@ endf "}}}
 
 fu! MarkShow() abort " show marks on row {{{
   cal sign_undefine()
-  let get_marks = s:get_mark()
+  let get_marks = s:get_mark(g:mark_words_all)
   if get_marks == ''
     retu
   endif
@@ -475,7 +507,7 @@ aug sig_aus
 aug END "}}}
 
 fu! MarkHank(vector) abort " move to next/prev mark {{{
-  let get_marks = s:get_mark()
+  let get_marks = s:get_mark(g:mark_words_all)
   if get_marks == ''
     echo 'no marks'
     retu
@@ -489,17 +521,13 @@ fu! MarkHank(vector) abort " move to next/prev mark {{{
     let mark_dict[r[1]] = r[0]
     let rownums = add(rownums, r[1])
   endfor
-  if a:vector == 'up'
-    cal sort(rownums, {x, y -> x - y})
-  elseif a:vector == 'down'
-    cal sort(rownums, {x, y -> y - x})
-  endif
+  cal sort(rownums, a:vector == 'up' ? {x, y -> y-x} : {x, y -> x - y})
   for rownum in rownums
-    if a:vector == 'up' && rownum > line('.')
+    if a:vector == 'down' && rownum > line('.')
       exe "normal! `" . mark_dict[rownum]
       echo index(rownums, rownum) + 1 . "/" . len(rownums)
       retu
-    elseif a:vector == 'down' && rownum < line('.')
+    elseif a:vector == 'up' && rownum < line('.')
       exe "normal! `" . mark_dict[rownum]
       echo len(rownums) - index(rownums, rownum) . "/" . len(rownums)
       retu
@@ -507,6 +535,31 @@ fu! MarkHank(vector) abort " move to next/prev mark {{{
   endfor
   echo "last mark"
 endf "}}}
+
+fu! MarkField() abort " create short marks {{{
+  let g:marker_mode = 1
+  nnoremap <Tab> :cal MarkHank("down")<CR>
+  nnoremap <S-Tab> :cal MarkHank("up")<CR>
+  let warr = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+  let now_line = line('.')
+  let col = col('.')
+  for v in range(1, 10)
+    cal cursor(now_line + v*5, 1)
+    execute('mark '.warr[2*(v-1)])
+    cal cursor(now_line + v*-5, 1)
+    execute('mark '.warr[2*(v-1)-1])
+  endfor
+  cal cursor(now_line, col)
+  cal MarkShow()
+endf
+fu! MarkFieldOut()
+  let g:marker_mode = 0
+  nnoremap <Tab> 5j
+  nnoremap <S-Tab> 5k
+  execute('delmarks '.g:mark_words)
+  cal MarkShow()
+endf
+"}}}
 " }}}
 
 " scroll ----------------------------------------{{{
