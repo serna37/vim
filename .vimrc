@@ -543,12 +543,17 @@ fu! MarkField() abort " create short marks {{{
   let warr = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y']
   let now_line = line('.')
   let col = col('.')
+  let last = line('$')
   mark z
   for v in range(1, 10)
-    cal cursor(now_line + v*5, 1)
-    execute('mark '.warr[2*(v-1)])
-    cal cursor(now_line + v*-5, 1)
-    execute('mark '.warr[2*(v-1)-1])
+    if now_line + v*5 <= last
+      cal cursor(now_line + v*5, 1)
+      execute('mark '.warr[2*(v-1)])
+    endif
+    if now_line + v*-5 > 0
+      cal cursor(now_line + v*-5, 1)
+      execute('mark '.warr[2*(v-1)-1])
+    endif
   endfor
   cal cursor(now_line, col)
   cal MarkShow()
