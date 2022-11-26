@@ -78,10 +78,9 @@ set completeopt=menuone,noinsert,preview,popup
 let g:mapleader = "\<Space>"
 fu! s:my_key_map() " {{{
 " search ---------------------------------------
-nnoremap <silent>* *N:cal HiSet()<CR>
-nnoremap <silent># *N:cal HiSet()<CR>
-" TODO now off quick highlight .... maybe not need ... 
-nnoremap <silent><Leader>q :noh<CR>:cal clearmatches()<CR>
+nnoremap <silent>* *N
+nnoremap <silent># *N
+nnoremap <silent><Leader>q :noh<CR>
 " move ---------------------------------------
 nnoremap j gj
 nnoremap k gk
@@ -120,6 +119,7 @@ nnoremap <silent><Leader>m :cal MarkMenu()<CR>
 nnoremap <silent>mm :cal Marking()<CR>
 nnoremap <silent>mj :cal MarkHank("down", g:mark_words_manual)<CR>
 nnoremap <silent>mk :cal MarkHank("up", g:mark_words_manual)<CR>
+nnoremap <silent>mw :cal HiSet()<CR>
 " favorite ---------------------------------------
 nnoremap <silent><Leader>t :call popup_create(term_start([&shell], #{ hidden: 1, term_finish: 'close'}), #{ border: [], minwidth: &columns/2, minheight: &lines/2 })<CR>
 nnoremap <Leader><Leader>n :Necronomicon 
@@ -256,29 +256,30 @@ fu! GrepExtFrom(...)
 endf "}}}
 
 " highlight -----------------------------------{{{
+" TODO cword highlight disable
 " on word, bright
-aug auto_hl_cword
-  au!
+"aug auto_hl_cword
+"  au!
 "  au BufEnter,CmdwinEnter * cal HiCwordStart()
-aug END
-fu! HiCwordStart()
-  aug QuickhlCword
-    au!
-    au! CursorMoved <buffer> cal HiCwordR()
-    au! ColorScheme * execute("hi link QuickhlCword ColorColumn")
-  aug END
-  execute("hi link QuickhlCword ColorColumn")
-endf
-
-fu! HiCwordR()
-  silent! 2match none
-  exe "2mat QuickhlCword /\\\<". escape(expand('<cword>'), '\/~ .*^[''$') . "\\\>/"
-endf
+"aug END
+"fu! HiCwordStart()
+"  aug QuickhlCword
+"    au!
+"    au! CursorMoved <buffer> cal HiCwordR()
+"    au! ColorScheme * execute("hi link QuickhlCword ColorColumn")
+"  aug END
+"  execute("hi link QuickhlCword ColorColumn")
+"endf
+"
+"fu! HiCwordR()
+"  silent! 2match none
+"  exe "2mat QuickhlCword /\\\<". escape(expand('<cword>'), '\/~ .*^[''$') . "\\\>/"
+"endf
 
 " on search, multi highlight
 aug QuickhlManual
   au!
-"  au! ColorScheme * cal HlIni()
+  au! ColorScheme * cal HlIni()
 aug END
 let g:search_hl= [
     \ "cterm=bold ctermfg=16 ctermbg=153 gui=bold guifg=#ffffff guibg=#0a7383",
@@ -301,7 +302,7 @@ fu! HlIni()
     exe "hi UserSearchHi" . index(g:search_hl, v) . " " . v
   endfor
 endf
-"cal HlIni()
+cal HlIni()
 
 fu! HiReset(group_name)
   let already = filter(getmatches(), {i, v -> v['group'] == a:group_name})
@@ -311,9 +312,9 @@ fu! HiReset(group_name)
 endf
 
 fu! HiSet() abort
-"  cal HiReset('QuickhlCword')
-"  cal matchadd("UserSearchHi" . g:now_hi, expand('<cword>'), 15)
-"  let g:now_hi = g:now_hi >= len(g:search_hl)-1 ? 0 : g:now_hi + 1
+  cal HiReset('QuickhlCword')
+  cal matchadd("UserSearchHi" . g:now_hi, expand('<cword>'), 15)
+  let g:now_hi = g:now_hi >= len(g:search_hl)-1 ? 0 : g:now_hi + 1
 endf "}}}
 
 " quick-scope ---------------------------------{{{
@@ -440,7 +441,7 @@ fu! Marking() abort " mark auto word, toggle {{{
     if stridx(g:mark_words, r[0]) != -1 && r[1] == line('.')
       execute('delmarks ' . r[0])
       cal MarkShow()
-      echo 'delete mark'
+      echo 'delete mark '.r[0]
       retu
     endif
     let l:now_marks = add(now_marks, r[0])
@@ -449,7 +450,7 @@ fu! Marking() abort " mark auto word, toggle {{{
   if len(can_use) != 0
     execute('mark ' . can_use[0])
     cal MarkShow()
-    echo 'marked'
+    echo 'marked '.can_use[0]
   else
     echo 'over limit markable char'
   endif
@@ -519,6 +520,7 @@ fu! MarkHank(vector, mchar) abort " move to next/prev mark {{{
 endf "}}}
 
 fu! MarkField() abort " create short marks {{{
+  execute('delmarks '.g:mark_words_auto)
   let warr = ['n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y']
   let now_line = line('.')
   let col = col('.')
