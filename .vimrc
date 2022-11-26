@@ -3,7 +3,6 @@
 " Setting
 " ========================================
 " {{{
-" base editor
 scriptencoding utf-8
 "set ff=unix
 "set fileencoding=utf8
@@ -29,13 +28,10 @@ set foldlevelstart=0
 set foldcolumn=1
 " view
 syntax on
+set scrolloff=5
 set title
 set showcmd
 set number
-if !has('win32unix') " gitbash no modechange
-  au ModeChanged *:v* set relativenumber!
-  au ModeChanged v*:* set relativenumber!
-endif
 set cursorline
 set cursorcolumn
 set showmatch
@@ -45,30 +41,15 @@ set ambiwidth=double
 " status line
 set ruler
 set laststatus=2
-let ff_table = {'dos' : 'CRLF', 'unix' : 'LF', 'mac' : 'CR' }
+let ff_table = {'dos' : 'CRLF', 'unix' : 'LF', 'mac' : 'CR'}
 fu! SetStatusLine()
   hi User1 cterm=bold ctermfg=7 ctermbg=4 gui=bold guibg=#70a040 guifg=#ffffff
   hi User2 cterm=bold ctermfg=2 ctermbg=0 gui=bold guibg=#4070a0 guifg=#ffffff
   hi User3 cterm=bold ctermbg=5 ctermfg=0
   hi User4 cterm=bold ctermfg=7 ctermbg=56 gui=bold guibg=#a0b0c0 guifg=black
   hi User5 cterm=bold ctermfg=7 ctermbg=5 gui=bold guibg=#0070e0 guifg=#ffffff
-  if mode() =~ 'i'
-    let c = 1
-    let mode_name = 'INSERT'
-  elseif mode() =~ 'n'
-    let c = 2
-    let mode_name = 'NORMAL'
-  elseif mode() =~ 'R'
-    let c = 3
-    let mode_name = 'REPLACE'
-  elseif mode() =~ 'c'
-    let c = 4
-    let mode_name = 'COMMAND'
-  else
-    let c = 5
-    let mode_name = 'VISUAL'
-  endif
-  retu '%' . c . '* ' . mode_name . ' %* %<%F%m%r%h%w%=%2* %p%% %l/%L %02v [%{&fenc!=""?&fenc:&enc}][%{ff_table[&ff]}] %*'
+  let dict = {'i': '1* INSERT', 'n': '2* NORMAL', 'R': '3* REPLACE', 'c': '4* COMMAND', 't': '4* TERMIAL', 'v': '5* VISUAL', 'V': '5* VISUAL', "\<C-v>": '5* VISUAL'}
+  retu '%' . dict[mode()] . ' %* %<%F%m%r%h%w%=%2* %p%% %l/%L %02v [%{&fenc!=""?&fenc:&enc}][%{ff_table[&ff]}] %*'
 endf
 set statusline=%!SetStatusLine()
 " explorer
@@ -95,22 +76,15 @@ set completeopt=menuone,noinsert,preview,popup
 " KeyMap
 " ========================================
 let g:mapleader = "\<Space>"
-let g:marker_mode = 0
 fu! s:my_key_map() " {{{
 " search ---------------------------------------
 nnoremap <silent>* *N:cal HiSet()<CR>
 nnoremap <silent># *N:cal HiSet()<CR>
+" TODO now off quick highlight .... maybe not need ... 
 nnoremap <silent><Leader>q :noh<CR>:cal clearmatches()<CR>
 " move ---------------------------------------
 nnoremap j gj
 nnoremap k gk
-if g:marker_mode == 1
-  nnoremap <silent><Tab> :cal MarkHank("down")<CR>
-  nnoremap <silent><S-Tab> :cal MarkHank("up")<CR>
-else
-  nnoremap <Tab> 5j
-  nnoremap <S-Tab> 5k
-endif
 nnoremap <C-h> <C-w>h
 nnoremap <C-l> <C-w>l
 nnoremap <C-k> <C-w>k
@@ -132,18 +106,22 @@ nnoremap <silent><C-f> :cal Scroll(1, 10)<CR>
 imap <expr> <Tab> '<C-n>'
 inoremap <expr> <S-Tab> pumvisible() ? '<C-p>' : '<S-Tab>'
 inoremap <expr> <CR> pumvisible() ? '<C-y>' : '<CR>'
-" func ---------------------------------------
-nnoremap <leader>f :cal FzfStart()<CR>
+" func - fzf ---------------------------------------
+nnoremap <silent><leader>f :cal FzfStart()<CR>
+" func - grep ---------------------------------------
 nnoremap <Leader>gg :GrepExtFrom<CR>
 nnoremap <Leader>ge :GrepExtFrom 
-nnoremap <Leader>w :cal MarkField()<CR>
-nnoremap <Leader>s :cal MarkFieldOut()<CR>
-nnoremap <Leader>m :cal MarkMenu()<CR>
-nnoremap mm :cal Marking()<CR>
-nnoremap mj :cal MarkHank("down")<CR>
-nnoremap mk :cal MarkHank("up")<CR>
-nnoremap <silent><Leader>t :call popup_create(term_start([&shell], #{ hidden: 1, term_finish: 'close'}), #{ border: [], minwidth: &columns/2, minheight: &lines/2 })<CR>
+" func - god speed ---------------------------------------
+nnoremap <silent><Tab> :cal MarkHank("down", g:mark_words_auto)<CR>
+nnoremap <silent><S-Tab> :cal MarkHank("up", g:mark_words_auto)<CR>
+nnoremap <silent><Leader>w :cal MarkFieldOut()<CR>:cal FModeDeactivate()<CR>
+" func - mark ---------------------------------------
+nnoremap <silent><Leader>m :cal MarkMenu()<CR>
+nnoremap <silent>mm :cal Marking()<CR>
+nnoremap <silent>mj :cal MarkHank("down", g:mark_words_manual)<CR>
+nnoremap <silent>mk :cal MarkHank("up", g:mark_words_manual)<CR>
 " favorite ---------------------------------------
+nnoremap <silent><Leader>t :call popup_create(term_start([&shell], #{ hidden: 1, term_finish: 'close'}), #{ border: [], minwidth: &columns/2, minheight: &lines/2 })<CR>
 nnoremap <Leader><Leader>n :Necronomicon 
 nnoremap <Leader><Leader>w :cal RunCat()<CR>
 nnoremap <Leader><Leader>s :cal RunCatStop()<CR>
@@ -161,7 +139,7 @@ let g:fzf_find_cmd = 'find . -type f -name "*" -not -path "*.git/*" -not -path "
 let g:fzf_searched_dir = execute('pwd')[1:] " first char is ^@, so trim
 let g:fzf_find_result_tmp = []
 
-fu! FzfStart()
+fu! FzfStart() " open window
   nmapclear " clear map to escape
   if stridx(execute('pwd')[1:], g:fzf_searched_dir) == -1 || len(g:fzf_find_result_tmp) == 0
     cal s:fzf_re_find()
@@ -175,39 +153,36 @@ fu! FzfStart()
   let g:fzf_enter_win = popup_create(g:fzf_pwd_prefix, #{ title: 'Type or <BS> / past:<Space> / MRU<>FZF:<Tab> / choose:<Enter> / end:<Esc> / chache refresh:<C-f>',  border: [], zindex: 99, minwidth: &columns/2, maxwidth: &columns/2, maxheight: 1, line: &columns/4-&columns/24, filter: function('s:fzf_refresh_result') })
   cal s:fzf_create_choose_win()
 endf
-
 fu! s:fzf_create_choose_win()
   let g:fzf_c_idx = 0
   let g:fzf_choose_win = popup_menu(g:fzf_find_result, #{ title: g:fzf_searching_zone, border: [], zindex: 98, minwidth: &columns/2, maxwidth: &columns/2, minheight: 2, maxheight: &lines/2, filter: function('s:fzf_choose') })
 endf
 
-fu! s:fzf_re_find()
+fu! s:fzf_re_find() " async find command
   cal RunCat()
   let g:fzf_find_result_tmp = []
   let g:fzf_searched_dir = execute('pwd')[1:]
   echo 'find files in ['.g:fzf_searched_dir.'] and chache ...'
   cal job_start(g:fzf_find_cmd, {'out_cb': function('s:fzf_find_start'), 'close_cb': function('s:fzf_find_end')})
 endf
-
 fu! s:fzf_find_start(ch, msg) abort
   let g:fzf_find_result_tmp = add(g:fzf_find_result_tmp, a:msg)
 endf
-
 fu! s:fzf_find_end(ch) abort
   echo 'find files in ['.g:fzf_searched_dir.'] and chache is complete!!'
   cal RunCatStop()
 endf
 
-fu! s:fzf_refresh_result(winid, key) abort
+fu! s:fzf_refresh_result(winid, key) abort " event to draw search result
   if a:key is# "\<Esc>"
-    call popup_close(g:fzf_enter_win)
-    call popup_close(g:fzf_choose_win)
+    cal popup_close(g:fzf_enter_win)
+    cal popup_close(g:fzf_choose_win)
     cal s:my_key_map()
-    return 1
+    retu 1
   elseif a:key is# "\<CR>"
     call popup_close(g:fzf_enter_win)
     cal s:my_key_map()
-    return 1
+    retu 1
   elseif a:key is# "\<C-f>"
     cal s:fzf_re_find()
   elseif a:key is# "\<Space>"
@@ -243,7 +218,7 @@ fu! s:fzf_refresh_result(winid, key) abort
   cal setbufline(winbufnr(g:fzf_enter_win), 1, g:fzf_pwd_prefix . join(g:fzf_enter_keyword, ''))
   cal setbufline(winbufnr(g:fzf_choose_win), 1, map(range(1,30), { i,v -> '' }))
   cal setbufline(winbufnr(g:fzf_choose_win), 1, g:fzf_find_result[0:29]) " re view only first 30 files
-  return a:key is# "x" || a:key is# "\<Space>" ? 1 : popup_filter_menu(a:winid, a:key)
+  retu a:key is# "x" || a:key is# "\<Space>" ? 1 : popup_filter_menu(a:winid, a:key)
 endf
 
 fu! s:fzf_choose(winid, key) abort
@@ -252,15 +227,14 @@ fu! s:fzf_choose(winid, key) abort
   elseif a:key is# 'k'
     let g:fzf_c_idx = g:fzf_c_idx == 0 ? 0 : g:fzf_c_idx - 1
   elseif a:key is# "\<CR>"
-    return s:fzf_open(a:winid, 'e', g:fzf_find_result[g:fzf_c_idx])
+    retu s:fzf_open(a:winid, 'e', g:fzf_find_result[g:fzf_c_idx])
   elseif a:key is# "\<C-v>"
-    return s:fzf_open(a:winid, 'vnew', g:fzf_find_result[g:fzf_c_idx])
+    retu s:fzf_open(a:winid, 'vnew', g:fzf_find_result[g:fzf_c_idx])
   elseif a:key is# "\<C-t>"
-    return s:fzf_open(a:winid, 'tabnew', g:fzf_find_result[g:fzf_c_idx])
+    retu s:fzf_open(a:winid, 'tabnew', g:fzf_find_result[g:fzf_c_idx])
   endif
-  return popup_filter_menu(a:winid, a:key)
+  retu popup_filter_menu(a:winid, a:key)
 endf
-
 fu! s:fzf_open(winid, op, f) abort
   cal popup_close(a:winid)
   exe a:op a:f
@@ -285,7 +259,7 @@ endf "}}}
 " on word, bright
 aug auto_hl_cword
   au!
-  au BufEnter,CmdwinEnter * cal HiCwordStart()
+"  au BufEnter,CmdwinEnter * cal HiCwordStart()
 aug END
 fu! HiCwordStart()
   aug QuickhlCword
@@ -304,7 +278,7 @@ endf
 " on search, multi highlight
 aug QuickhlManual
   au!
-  au! ColorScheme * cal HlIni()
+"  au! ColorScheme * cal HlIni()
 aug END
 let g:search_hl= [
     \ "cterm=bold ctermfg=16 ctermbg=153 gui=bold guifg=#ffffff guibg=#0a7383",
@@ -327,7 +301,7 @@ fu! HlIni()
     exe "hi UserSearchHi" . index(g:search_hl, v) . " " . v
   endfor
 endf
-cal HlIni()
+"cal HlIni()
 
 fu! HiReset(group_name)
   let already = filter(getmatches(), {i, v -> v['group'] == a:group_name})
@@ -337,10 +311,9 @@ fu! HiReset(group_name)
 endf
 
 fu! HiSet() abort
-  let cw = expand('<cword>')
-  cal HiReset('QuickhlCword')
-  cal matchadd("UserSearchHi" . g:now_hi, cw, 15)
-  let g:now_hi = g:now_hi >= len(g:search_hl)-1 ? 0 : g:now_hi + 1
+"  cal HiReset('QuickhlCword')
+"  cal matchadd("UserSearchHi" . g:now_hi, expand('<cword>'), 15)
+"  let g:now_hi = g:now_hi >= len(g:search_hl)-1 ? 0 : g:now_hi + 1
 endf "}}}
 
 " quick-scope ---------------------------------{{{
@@ -350,16 +323,26 @@ aug qs_colors
   au ColorScheme * highlight QuickScopeSecondary ctermfg=161 ctermbg=16 guifg=#66D9EF guibg=#000000
   au ColorScheme * highlight QuickScopeBack ctermfg=51 ctermbg=16 guifg=#66D9EF guibg=#000000
   au ColorScheme * highlight QuickScopeBackSecond ctermfg=25 ctermbg=16 guifg=#66D9EF guibg=#000000
-  au CursorMoved * cal HiFLine()
 aug END
 
+fu! FModeActivate()
+  aug f_scope
+    au!
+    au CursorMoved * cal HiFLine()
+  aug End
+  cal HiFLine()
+endf
+
+fu! FModeDeactivate()
+  aug f_scope
+    au!
+  aug End
+  cal clearmatches()
+endf
+
 let g:fmode_flg = 1
-fu! FModeToggle(...)
-  if a:0 == 1
-    let g:fmode_flg = a:1
-  else
-    let g:fmode_flg = g:fmode_flg == 1 ? 0 : 1
-  endif
+fu! FModeToggle(flg)
+  let g:fmode_flg = a:flg
 endf
 
 fu! HiFLine()
@@ -370,39 +353,33 @@ fu! HiFLine()
   cal HiReset('QuickScopeSecondary')
   cal HiReset('QuickScopeBack')
   cal HiReset('QuickScopeBackSecond')
+
   let line = line('.')
+  let col = col('.')
   let now_line = getline('.')
+
   let target_arr = []
   let target_arr_second = []
-  let col = col('.')
-  let offset = col('.')
-  while offset != -1
-    let start = matchstrpos(now_line, '\<.', offset)
-    let ashiato = now_line[col:start[1]-1]
-    if stridx(ashiato, start[0]) == -1
-      cal add(target_arr, [line, start[2]]) " start char col
-    elseif start[2] > 0
-      let next_char = now_line[start[2]:start[2]]
-      cal add(stridx(ashiato, next_char) == -1 ? target_arr : target_arr_second , [line, start[2]+1])
-    endif
-    let offset = matchstrpos(now_line, '.\>', offset)[2]
-  endwhile
-  " back
   let target_arr_back = []
   let target_arr_back_second = []
-  let now_line = getline('.')[0:col-1]
+
   let offset = 0
   while offset != -1
     let start = matchstrpos(now_line, '\<.', offset)
-    let ashiato = now_line[start[1]+1:col]
+    let offset = matchstrpos(now_line, '.\>', offset)[2]
+    let ashiato = start[1] >= col ? now_line[col:start[1]-1] : now_line[start[2]+1:col]
     if stridx(ashiato, start[0]) == -1
-      cal add(target_arr_back, [line, start[2]]) " start char col
+      cal add(start[1] >= col ? target_arr : target_arr_back, [line, start[2]]) " uniq char
     elseif start[2] > 0
       let next_char = now_line[start[2]:start[2]]
-      cal add(stridx(ashiato, next_char) == -1 ? target_arr_back : target_arr_back_second , [line, start[2]+1])
+      if start[1] >= col
+        cal add(stridx(ashiato, next_char) == -1 ? target_arr : target_arr_second, [line, start[2]+1]) " uniq char
+      else
+        cal add(stridx(ashiato, next_char) == -1 ? target_arr_back  : target_arr_back_second , [line, start[2]+1])
+      endif
     endif
-    let offset = matchstrpos(now_line, '.\>', offset)[2]
   endwhile
+
   cal matchaddpos("QuickScopePrimary", target_arr, 16)
   cal matchaddpos("QuickScopeSecondary", target_arr_second, 16)
   cal matchaddpos("QuickScopeBack", target_arr_back, 16)
@@ -412,8 +389,8 @@ endf
 
 " mark ----------------------------------------{{{
 let g:mark_words = 'abcdefghijklmnopqrstuvwxyz'
-let g:mark_words_large = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-let g:mark_words_all = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+let g:mark_words_manual = 'abcdefghijklm'
+let g:mark_words_auto = 'nopqrstuvwxyz'
 fu! s:get_mark(tar) abort
   try
     retu execute('marks ' . a:tar)
@@ -423,7 +400,7 @@ fu! s:get_mark(tar) abort
 endf
 
 fu! MarkMenu() abort " show mark list and jump {{{
-  let get_marks = s:get_mark(g:mark_words_large)
+  let get_marks = s:get_mark(g:mark_words_manual)
   if get_marks == ''
     echo 'no marks'
     retu
@@ -445,11 +422,11 @@ fu! MarkChoose(ctx, winid, key) abort
   elseif a:key is# "\<CR>"
     execute('normal!`' . a:ctx.files[a:ctx.idx][1])
   endif
-  return popup_filter_menu(a:winid, a:key)
+  retu popup_filter_menu(a:winid, a:key)
 endf "}}}
 
 fu! Marking() abort " mark auto word, toggle {{{
-  let get_marks = s:get_mark(g:mark_words_large)
+  let get_marks = s:get_mark(g:mark_words_manual)
   if get_marks == ''
     execute('mark a')
     cal MarkShow()
@@ -457,7 +434,7 @@ fu! Marking() abort " mark auto word, toggle {{{
     retu
   endif
   let l:now_marks = []
-  let l:warr = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+  let l:warr = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm']
   for row in split(get_marks , '\n')[1:]
     let l:r = filter(split(row, ' '), {i, v -> v != ''})
     if stridx(g:mark_words, r[0]) != -1 && r[1] == line('.')
@@ -480,24 +457,20 @@ endf "}}}
 
 fu! MarkShow() abort " show marks on row {{{
   cal sign_undefine()
-  let get_marks = s:get_mark(g:mark_words_all)
+  let get_marks = s:get_mark(g:mark_words)
   if get_marks == ''
     retu
   endif
-  let l:marks = split(get_marks, '\n')
-  if len(marks) == 0
-    retu
-  endif
-  cal remove(marks, 0)
   let mark_dict = {}
   let rownums = []
-  for row in marks
+  for row in split(get_marks, '\n')[1:]
     let l:r = filter(split(row, ' '), {i, v -> v != ''})
     let mark_dict[r[1]] = r[0]
     let rownums = add(rownums, r[1])
   endfor
   for row in rownums
-    exe "sign define " . row . " text=" . mark_dict[row] . " texthl=ErrorMsg"
+    let txt = stridx(g:mark_words_auto, mark_dict[row]) != -1 ? "-" : mark_dict[row]
+    exe "sign define " . row . " text=" . txt . " texthl=ErrorMsg"
     exe "sign place " . row . " line=" . row . " name=" . row . " file=" . expand("%:p")
   endfor
 endf
@@ -506,22 +479,31 @@ aug sig_aus
   au BufEnter,CmdwinEnter * cal MarkShow()
 aug END "}}}
 
-fu! MarkHank(vector) abort " move to next/prev mark {{{
-  let get_marks = s:get_mark(g:mark_words_all)
+fu! MarkHank(vector, mchar) abort " move to next/prev mark {{{
+  let get_marks = s:get_mark(a:mchar)
   if get_marks == ''
+    if a:mchar == g:mark_words_auto " if auto mark & out of range, create marks
+      cal MarkField()
+      cal FModeActivate()
+      retu
+    endif
     echo 'no marks'
     retu
   endif
-  let l:marks = split(get_marks, '\n')
-  cal remove(marks, 0)
-  let mark_dict = {}
+  let mark_dict = {} " [linenum: mark char]
   let rownums = []
-  for row in marks
+  for row in split(get_marks, '\n')[1:]
     let l:r = filter(split(row, ' '), {i, v -> v != ''})
     let mark_dict[r[1]] = r[0]
     let rownums = add(rownums, r[1])
   endfor
   cal sort(rownums, a:vector == 'up' ? {x, y -> y-x} : {x, y -> x - y})
+  if a:mchar == g:mark_words_auto " if auto mark & out of range, create marks
+    if line('.') <= rownums[a:vector == 'up' ? -1 : 0] || rownums[a:vector == 'up' ? 0 : -1] <= line('.')
+      cal MarkField()
+      retu
+    endif
+  endif
   for rownum in rownums
     if a:vector == 'down' && rownum > line('.')
       exe "normal! `" . mark_dict[rownum]
@@ -537,15 +519,12 @@ fu! MarkHank(vector) abort " move to next/prev mark {{{
 endf "}}}
 
 fu! MarkField() abort " create short marks {{{
-  let g:marker_mode = 1
-  nnoremap <silent><Tab> :cal MarkHank("down")<CR>
-  nnoremap <silent><S-Tab> :cal MarkHank("up")<CR>
-  let warr = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y']
+  let warr = ['n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y']
   let now_line = line('.')
   let col = col('.')
   let last = line('$')
   mark z
-  for v in range(1, 10)
+  for v in range(1, 6)
     if now_line + v*5 <= last
       cal cursor(now_line + v*5, 1)
       execute('mark '.warr[2*(v-1)])
@@ -557,30 +536,28 @@ fu! MarkField() abort " create short marks {{{
   endfor
   cal cursor(now_line, col)
   cal MarkShow()
+  echo 'mode [marker] expand'
 endf
 fu! MarkFieldOut()
-  let g:marker_mode = 0
-  nnoremap <Tab> 5j
-  nnoremap <S-Tab> 5k
-  execute('delmarks '.g:mark_words)
+  execute('delmarks '.g:mark_words_auto)
   cal MarkShow()
+  echo '[marker] mode out'
 endf
 "}}}
 " }}}
 
 " scroll ----------------------------------------{{{
 fu! Scroll(vector, delta)
-  cal CursorToggle()
-  cal FModeToggle(0)
+  cal ScrollToggle(0)
   let vec = a:vector == 0 ? "\<C-y>" : "\<C-e>"
   let tmp = timer_start(a:delta, { -> feedkeys(vec) }, {'repeat': -1})
   cal timer_start(600, { -> timer_stop(tmp) })
-  cal timer_start(600, { -> CursorToggle() })
-  cal timer_start(600, { -> FModeToggle(1) })
+  cal timer_start(600, { -> ScrollToggle(1) })
 endf
-fu! CursorToggle()
+fu! ScrollToggle(flg)
   set cursorcolumn!
   set cursorline!
+  cal FModeToggle(a:flg)
 endf "}}}
 
 " favorite  -----------------------------------{{{
