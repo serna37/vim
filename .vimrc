@@ -97,10 +97,12 @@ nnoremap <silent><C-d> :cal Scroll(1, 25)<CR>
 nnoremap <silent><C-b> :cal Scroll(0, 10)<CR>
 nnoremap <silent><C-f> :cal Scroll(1, 10)<CR>
 " TODO lsp
-"nnoremap <Leader>j :LspHover<CR>
-"nnoremap <Leader>p :LspPeekDefinition<CR>
-"nnoremap <Leader>o :LspDefinition<CR>
-"nnoremap <Leader>r :LspReferences<CR>
+nnoremap <Leader>j :LspHover<CR>
+nnoremap <Leader>p :LspPeekDefinition<CR>
+nnoremap <Leader>o :LspDefinition<CR>
+nnoremap <Leader>r :LspReferences<CR>
+nnoremap <buffer> <expr><c-j> lsp#scroll(+4)
+nnoremap <buffer> <expr><c-k> lsp#scroll(-4)
 " edit ---------------------------------------
 imap <expr> <Tab> '<C-n>'
 inoremap <expr> <S-Tab> pumvisible() ? '<C-p>' : '<S-Tab>'
@@ -466,6 +468,7 @@ fu! Marking() abort " mark auto word, toggle {{{
   for row in split(get_marks , '\n')[1:]
     let l:r = filter(split(row, ' '), {i, v -> v != ''})
     if stridx(g:mark_words, r[0]) != -1 && r[1] == line('.')
+      cal MarkSignDel()
       execute('delmarks ' . r[0])
       cal MarkShow()
       echo 'delete mark '.r[0]
@@ -475,6 +478,7 @@ fu! Marking() abort " mark auto word, toggle {{{
   endfor
   let l:can_use = filter(warr, {i, v -> stridx(join(now_marks, ''), v) == -1})
   if len(can_use) != 0
+    cal MarkSignDel()
     execute('mark ' . can_use[0])
     cal MarkShow()
     echo 'marked '.can_use[0]
@@ -483,8 +487,25 @@ fu! Marking() abort " mark auto word, toggle {{{
   endif
 endf "}}}
 
+fu! MarkSignDel()
+  let get_marks = s:get_mark(g:mark_words)
+  if get_marks == ''
+    retu
+  endif
+  let mark_dict = {}
+  let rownums = []
+  for row in split(get_marks, '\n')[1:]
+    let l:r = filter(split(row, ' '), {i, v -> v != ''})
+    let mark_dict[r[1]] = r[0]
+    let rownums = add(rownums, r[1])
+  endfor
+  for row in rownums
+    exe "sign unplace " . row . " file=" . expand("%:p")
+    exe "sign define " . row
+  endfor
+endf
+
 fu! MarkShow() abort " show marks on row {{{
-  cal sign_undefine()
   let get_marks = s:get_mark(g:mark_words)
   if get_marks == ''
     retu
@@ -550,6 +571,7 @@ fu! MarkHank(vector, mchar) abort " move to next/prev mark {{{
 endf "}}}
 
 fu! MarkField() abort " create short marks {{{
+  cal MarkSignDel()
   execute('delmarks '.g:mark_words_auto)
   let warr = ['n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y']
   let now_line = line('.')
@@ -571,6 +593,7 @@ fu! MarkField() abort " create short marks {{{
   echo 'mode [marker] expand'
 endf
 fu! MarkFieldOut()
+  cal MarkSignDel()
   execute('delmarks '.g:mark_words_auto)
   cal MarkShow()
   echo '[marker] mode out'
