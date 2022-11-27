@@ -97,12 +97,21 @@ nnoremap <silent><C-d> :cal Scroll(1, 25)<CR>
 nnoremap <silent><C-b> :cal Scroll(0, 10)<CR>
 nnoremap <silent><C-f> :cal Scroll(1, 10)<CR>
 " TODO lsp
-nnoremap <Leader>j :LspHover<CR>
-nnoremap <Leader>p :LspPeekDefinition<CR>
-nnoremap <Leader>o :LspDefinition<CR>
-nnoremap <Leader>r :LspReferences<CR>
-nnoremap <buffer> <expr><c-j> lsp#scroll(+4)
-nnoremap <buffer> <expr><c-k> lsp#scroll(-4)
+"nnoremap <Leader>j :LspHover<CR>
+"nnoremap <Leader>p :LspPeekDefinition<CR>
+"nnoremap <Leader>o :LspDefinition<CR>
+"nnoremap <Leader>r :LspReferences<CR>
+"nnoremap <buffer> <expr><c-j> lsp#scroll(+4)
+"nnoremap <buffer> <expr><c-k> lsp#scroll(-4)
+" language ----------------------------------------
+" TODO 多いし、対話にしてもいいかも
+nnoremap <Leader>lp :LspPeekDefinition<CR>
+nnoremap <Leader>lrf :LspReferences<CR>
+nnoremap <Leader>ldf :LspDefinition<CR>
+nnoremap <Leader>ldd :LspHover<CR>
+nnoremap <Leader>lrn :LspRename<CR>
+nnoremap <Leader>lrun :echo 'TODO'<CR>
+nnoremap <Leader>lsh :cal execute('top terminal ++shell eval ' . getline('.'))<CR>
 " edit ---------------------------------------
 imap <expr> <Tab> '<C-n>'
 inoremap <expr> <S-Tab> pumvisible() ? '<C-p>' : '<S-Tab>'
@@ -127,7 +136,6 @@ nnoremap <Leader><Leader>n :Necronomicon
 nnoremap <Leader><Leader>w :cal RunCat()<CR>
 nnoremap <Leader><Leader>s :cal RunCatStop()<CR>
 nnoremap <Leader><Leader>c :cal ChangeColor()<CR>:colorscheme<CR>
-nnoremap <Leader><Leader>l :cal execute('top terminal ++shell eval ' . getline('.'))<CR>
 endf
 cal s:my_key_map() "}}}
 
@@ -243,24 +251,39 @@ fu! s:fzf_open(winid, op, f) abort
 endf "}}}
 
 " grep ----------------------------------------{{{
-fu! GrepChoseMode()
+fu! GrepChoseMode() abort
+  echo 'mode 0: This File'
   echo 'mode 1: FULL AUTO [current ext, current word, current git root(no git -> current directory)]'
   echo 'mode 2: MANUAL EXT [Manual ext, current word, current git root(no git -> current directory)]'
   echo 'mode 3: ALL MANUAL [Manual ext, Manual word, Manual directory]'
   let mode = inputdialog("Enter [mode]>>")
+  if mode == ''
+    retu
+  endif
   echo '<<'
   cal GrepExtFrom(mode)
 endf
-fu! GrepExtFrom(mode)
-  if a:mode == 1 " current ext, current word, current git root(no git -> current directory)
+fu! GrepExtFrom(mode) abort
+  if a:mode == 0 " this file
+    echo 'grep from this file.'
+    let word = inputdialog("Enter [word]>>")
+    echo '<<'
+    echo 'grep [' . word . '] processing in [' . expand('%') . '] ...'
+    cgetexpr system('grep -n "' . word . '" ' . expand('%')) | cw
+    cal execute('vimgrep /' . word . '/gj %') | cw
+    echo 'grep end'
+    retu
+  elseif a:mode == 1 " current ext, current word, current git root(no git -> current directory)
     let ext = expand('%:e')
     let word = expand('<cword>')
     let target = CurrentGitRoot()
   elseif a:mode == 2 " manual ext, current word, current git root(no git -> current directory)
+    echo 'grep ['.expand('<cword>').'] from repo/*. choose [ext]'
     let ext = inputdialog("Enter [ext]>>")
     let word = expand('<cword>')
     let target = CurrentGitRoot()
-  else " manual ext, manual word, manual directory
+  elseif a:mode == 3 " manual ext, manual word, manual directory
+    echo 'grep. choose [ext] [word] [target]'
     let pwd = system('pwd')
     let ext = inputdialog("Enter [ext]>>")
     echo '<<'
@@ -487,23 +510,22 @@ fu! Marking() abort " mark auto word, toggle {{{
   endif
 endf "}}}
 
-fu! MarkSignDel()
+fu! MarkSignDel() " delete sign on mark
   let get_marks = s:get_mark(g:mark_words)
   if get_marks == ''
     retu
   endif
   let mark_dict = {}
-  let rownums = []
   for row in split(get_marks, '\n')[1:]
     let l:r = filter(split(row, ' '), {i, v -> v != ''})
-    let mark_dict[r[1]] = r[0]
-    let rownums = add(rownums, r[1])
+    let mark_dict[r[0]] = r[1]
   endfor
-  for row in rownums
-    exe "sign unplace " . row . " file=" . expand("%:p")
-    exe "sign undefine " . row
+  for mchar in keys(mark_dict)
+    let id = stridx(g:mark_words, mchar) + 1
+    exe "sign unplace " . id . " file=" . expand("%:p")
+    exe "sign undefine " . mchar
   endfor
-endf
+endf "}}}
 
 fu! MarkShow() abort " show marks on row {{{
   let get_marks = s:get_mark(g:mark_words)
@@ -511,17 +533,16 @@ fu! MarkShow() abort " show marks on row {{{
     retu
   endif
   let mark_dict = {}
-  let rownums = []
   for row in split(get_marks, '\n')[1:]
     let l:r = filter(split(row, ' '), {i, v -> v != ''})
-    let mark_dict[r[1]] = r[0]
-    let rownums = add(rownums, r[1])
+    let mark_dict[r[0]] = r[1]
   endfor
-  for row in rownums
-    let txt = stridx(g:mark_words_auto, mark_dict[row]) != -1 ? ">>" : mark_dict[row]
-    let txthl = stridx(g:mark_words_auto, mark_dict[row]) != -1 ? "CursorLineNr" : "ErrorMsg"
-    exe "sign define " . row . " text=" . txt . " texthl=" . txthl
-    exe "sign place " . row . " line=" . row . " name=" . row . " file=" . expand("%:p")
+  for mchar in keys(mark_dict)
+    let id = stridx(g:mark_words, mchar) + 1
+    let txt = stridx(g:mark_words_auto, mchar) != -1 ? ">>" : mchar
+    let txthl = stridx(g:mark_words_auto, mchar) != -1 ? "CursorLineNr" : "ErrorMsg"
+    exe "sign define " . mchar . " text=" . txt . " texthl=" . txthl
+    exe "sign place " . id . " line=" . mark_dict[mchar] . " name=" . mchar . " file=" . expand("%:p")
   endfor
 endf
 aug sig_aus
