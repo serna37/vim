@@ -338,7 +338,8 @@ fu! HiReset(group_name)
 endf
 
 fu! HiSet() abort
-  cal HiReset('QuickhlCword')
+  " TODO reset cword highlight
+  "cal HiReset('QuickhlCword')
   cal matchadd("UserSearchHi" . g:now_hi, expand('<cword>'), 15)
   let g:now_hi = g:now_hi >= len(g:search_hl)-1 ? 0 : g:now_hi + 1
 endf "}}}
