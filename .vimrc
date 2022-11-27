@@ -108,8 +108,7 @@ inoremap <expr> <CR> pumvisible() ? '<C-y>' : '<CR>'
 " func - fzf ---------------------------------------
 nnoremap <silent><leader>f :cal FzfStart()<CR>
 " func - grep ---------------------------------------
-nnoremap <Leader>gg :GrepExtFrom<CR>
-nnoremap <Leader>ge :GrepExtFrom 
+nnoremap <silent><Leader>g :cal GrepChoseMode()<CR>
 " func - god speed ---------------------------------------
 nnoremap <silent><Tab> :cal MarkHank("down", g:mark_words_auto)<CR>
 nnoremap <silent><S-Tab> :cal MarkHank("up", g:mark_words_auto)<CR>
@@ -241,18 +240,45 @@ fu! s:fzf_open(winid, op, f) abort
   retu 1
 endf "}}}
 
- " grep ----------------------------------------{{{
-command! -nargs=* GrepExtFrom cal GrepExtFrom(<f-args>)
-fu! GrepExtFrom(...)
-  let ext = a:0 == 1 ? a:1 : expand('%:e')
+" grep ----------------------------------------{{{
+fu! GrepChoseMode()
+  echo 'mode 1: FULL AUTO [current ext, current word, current git root(no git -> current directory)]'
+  echo 'mode 2: MANUAL EXT [Manual ext, current word, current git root(no git -> current directory)]'
+  echo 'mode 3: ALL MANUAL [Manual ext, Manual word, Manual directory]'
+  let mode = inputdialog("Enter [mode]>>")
+  echo '<<'
+  cal GrepExtFrom(mode)
+endf
+fu! GrepExtFrom(mode)
+  if a:mode == 1 " current ext, current word, current git root(no git -> current directory)
+    let ext = expand('%:e')
+    let word = expand('<cword>')
+    let target = CurrentGitRoot()
+  elseif a:mode == 2 " manual ext, current word, current git root(no git -> current directory)
+    let ext = inputdialog("Enter [ext]>>")
+    let word = expand('<cword>')
+    let target = CurrentGitRoot()
+  else " manual ext, manual word, manual directory
+    let pwd = system('pwd')
+    let ext = inputdialog("Enter [ext]>>")
+    echo '<<'
+    let word = inputdialog("Enter [word]>>")
+    echo '<<'
+    let target = inputdialog("Enter [target (like ./*) pwd:".pwd."]>>")
+    let target = target == '' ? './*' : target
+    echo '<<'
+  endif
+  echo 'grep [' . word . '] processing in [' . target . '] [' . ext . '] ...'
+  cgetexpr system('grep -n -r --include="*.' . ext . '" "' . word . '" ' . target) | cw
+  echo 'grep end'
+endf
+
+fu! CurrentGitRoot() " current git root(no git -> current directory)
   let pwd = system('pwd')
   exe 'lcd %:h'
   let gitroot = system('git rev-parse --show-superproject-working-tree --show-toplevel')
   exe 'lcd ' . pwd
-  let target = stridx(gitroot, 'fatal: ') == -1 ? ' ' . gitroot[0:strlen(gitroot)-2] . '/*' : ' ./*'
-  echo 'grep [' . expand('<cword>') . '] processing in [' . ext .'] ...'
-  cgetexpr system('grep -n -r --include="*.' . ext . '" ' . expand('<cword>') . target) | cw
-  echo 'grep end'
+  retu stridx(gitroot, 'fatal: ') == -1 ? gitroot[0:strlen(gitroot)-2] . '/*' : './*'
 endf "}}}
 
 " highlight -----------------------------------{{{
@@ -470,8 +496,9 @@ fu! MarkShow() abort " show marks on row {{{
     let rownums = add(rownums, r[1])
   endfor
   for row in rownums
-    let txt = stridx(g:mark_words_auto, mark_dict[row]) != -1 ? "-" : mark_dict[row]
-    exe "sign define " . row . " text=" . txt . " texthl=ErrorMsg"
+    let txt = stridx(g:mark_words_auto, mark_dict[row]) != -1 ? ">>" : mark_dict[row]
+    let txthl = stridx(g:mark_words_auto, mark_dict[row]) != -1 ? "CursorLineNr" : "ErrorMsg"
+    exe "sign define " . row . " text=" . txt . " texthl=" . txthl
     exe "sign place " . row . " line=" . row . " name=" . row . " file=" . expand("%:p")
   endfor
 endf
@@ -483,7 +510,7 @@ aug END "}}}
 fu! MarkHank(vector, mchar) abort " move to next/prev mark {{{
   let get_marks = s:get_mark(a:mchar)
   if get_marks == ''
-    if a:mchar == g:mark_words_auto " if auto mark & out of range, create marks
+    if a:mchar == g:mark_words_auto " expand marks
       cal MarkField()
       cal FModeActivate()
       retu
@@ -501,6 +528,8 @@ fu! MarkHank(vector, mchar) abort " move to next/prev mark {{{
   cal sort(rownums, a:vector == 'up' ? {x, y -> y-x} : {x, y -> x - y})
   if a:mchar == g:mark_words_auto " if auto mark & out of range, create marks
     if line('.') <= rownums[a:vector == 'up' ? -1 : 0] || rownums[a:vector == 'up' ? 0 : -1] <= line('.')
+      let do = a:vector == 'up' ? "5k" : "5j"
+      execute("normal! " . do)
       cal MarkField()
       retu
     endif
