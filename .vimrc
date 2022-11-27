@@ -501,7 +501,7 @@ fu! MarkSignDel()
   endfor
   for row in rownums
     exe "sign unplace " . row . " file=" . expand("%:p")
-    exe "sign define " . row
+    exe "sign undefine " . row
   endfor
 endf
 
