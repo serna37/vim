@@ -360,7 +360,8 @@ endf
 fu! HiSet() abort
   " TODO reset cword highlight
   "cal HiReset('QuickhlCword')
-  cal matchadd("UserSearchHi" . g:now_hi, expand('<cword>'), 15)
+  let cw = expand('<cword>')
+  windo cal matchadd("UserSearchHi" . g:now_hi, cw, 15)
   let g:now_hi = g:now_hi >= len(g:search_hl)-1 ? 0 : g:now_hi + 1
 endf "}}}
 
@@ -373,28 +374,19 @@ aug qs_colors
   au ColorScheme * highlight QuickScopeBackSecond ctermfg=25 ctermbg=16 guifg=#66D9EF guibg=#000000
 aug END
 
-let g:fscope_mode = 0
 fu! FModeActivate()
-  if g:fscope_mode == 1
-    retu
-  endif
   aug f_scope
     au!
     au CursorMoved * cal HiFLine()
   aug End
-  let g:fscope_mode = 1
   cal HiFLine()
 endf
 
 fu! FModeDeactivate()
-  if g:fscope_mode == 0
-    retu
-  endif
   aug f_scope
     au!
   aug End
-  let g:fscope_mode = 0
-  cal clearmatches()
+  windo cal clearmatches()
 endf
 
 let g:fmode_flg = 1
