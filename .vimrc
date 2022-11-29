@@ -357,11 +357,13 @@ fu! HiReset(group_name)
   endif
 endf
 
-fu! HiSet() abort
+fu! HiSet() abort " set highlight on all window in tab
   " TODO reset cword highlight
   "cal HiReset('QuickhlCword')
+  let current_win = win_getid()
   let cw = expand('<cword>')
   windo cal matchadd("UserSearchHi" . g:now_hi, cw, 15)
+  cal win_gotoid(current_win) " return current window
   let g:now_hi = g:now_hi >= len(g:search_hl)-1 ? 0 : g:now_hi + 1
 endf "}}}
 
@@ -386,7 +388,9 @@ fu! FModeDeactivate()
   aug f_scope
     au!
   aug End
-  windo cal clearmatches()
+  let current_win = win_getid()
+  windo cal clearmatches() " reset highlight on all window in tab
+  cal win_gotoid(current_win) " return current window
 endf
 
 let g:fmode_flg = 1
