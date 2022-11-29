@@ -75,6 +75,7 @@ set completeopt=menuone,noinsert,preview,popup
 " ========================================
 " KeyMap
 " ========================================
+" {{{
 let g:mapleader = "\<Space>"
 " search ---------------------------------------
 nnoremap <silent>* *N
@@ -135,6 +136,7 @@ nnoremap <Leader><Leader>n :Necronomicon
 nnoremap <Leader><Leader>w :cal RunCat()<CR>
 nnoremap <Leader><Leader>s :cal RunCatStop()<CR>
 nnoremap <Leader><Leader>c :cal ChangeColor()<CR>:colorscheme<CR>
+"}}}
 
 " ========================================
 " Function
@@ -510,7 +512,7 @@ fu! Marking() abort " mark auto word, toggle {{{
   endif
 endf "}}}
 
-fu! MarkSignDel() " delete sign on mark
+fu! MarkSignDel() " delete sign on mark {{{
   let get_marks = s:get_mark(g:mark_words)
   if get_marks == ''
     retu
@@ -617,9 +619,9 @@ fu! MarkFieldOut()
   execute('delmarks '.g:mark_words_auto)
   cal MarkShow()
   echo '[marker] mode out'
-endf
+endf "}}}
+
 "}}}
-" }}}
 
 " scroll ----------------------------------------{{{
 fu! Scroll(vector, delta)
