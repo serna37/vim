@@ -76,7 +76,6 @@ set completeopt=menuone,noinsert,preview,popup
 " KeyMap
 " ========================================
 let g:mapleader = "\<Space>"
-fu! s:my_key_map() " {{{
 " search ---------------------------------------
 nnoremap <silent>* *N
 nnoremap <silent># *N
@@ -121,8 +120,8 @@ nnoremap <silent><leader>f :cal FzfStart()<CR>
 " func - grep ---------------------------------------
 nnoremap <silent><Leader>g :cal GrepChoseMode()<CR>
 " func - god speed ---------------------------------------
-nnoremap <silent><Tab> :cal MarkHank("down", g:mark_words_auto)<CR>
-nnoremap <silent><S-Tab> :cal MarkHank("up", g:mark_words_auto)<CR>
+nnoremap <silent><Tab> :cal MarkHank("down", g:mark_words_auto)<CR>:cal FModeActivate()<CR>
+nnoremap <silent><S-Tab> :cal MarkHank("up", g:mark_words_auto)<CR>:cal FModeActivate()<CR>
 nnoremap <silent><Leader>w :cal MarkFieldOut()<CR>:cal FModeDeactivate()<CR>
 " func - mark ---------------------------------------
 nnoremap <silent><Leader>m :cal MarkMenu()<CR>
@@ -136,8 +135,6 @@ nnoremap <Leader><Leader>n :Necronomicon
 nnoremap <Leader><Leader>w :cal RunCat()<CR>
 nnoremap <Leader><Leader>s :cal RunCatStop()<CR>
 nnoremap <Leader><Leader>c :cal ChangeColor()<CR>:colorscheme<CR>
-endf
-cal s:my_key_map() "}}}
 
 " ========================================
 " Function
@@ -149,7 +146,6 @@ let g:fzf_searched_dir = execute('pwd')[1:] " first char is ^@, so trim
 let g:fzf_find_result_tmp = []
 
 fu! FzfStart() " open window
-  nmapclear " clear map to escape
   if stridx(execute('pwd')[1:], g:fzf_searched_dir) == -1 || len(g:fzf_find_result_tmp) == 0
     cal s:fzf_re_find()
   endif
@@ -160,11 +156,13 @@ fu! FzfStart() " open window
   let g:fzf_his_result = map(split(execute('ls'), '\n'), { i,v -> split(filter(split(v, ' '), { i,v -> v != '' })[2], '"')[0] }) + map(split(execute('oldfiles'), '\n'), { i,v -> split(v, ': ')[1] })
   let g:fzf_find_result = g:fzf_his_result[0:29]
   let g:fzf_enter_win = popup_create(g:fzf_pwd_prefix, #{ title: 'Type or <BS> / past:<Space> / MRU<>FZF:<Tab> / choose:<Enter> / end:<Esc> / chache refresh:<C-f>',  border: [], zindex: 99, minwidth: &columns/2, maxwidth: &columns/2, maxheight: 1, line: &columns/4-&columns/24, filter: function('s:fzf_refresh_result') })
+  cal win_execute(g:fzf_enter_win, "mapclear <buffer>")
   cal s:fzf_create_choose_win()
 endf
 fu! s:fzf_create_choose_win()
   let g:fzf_c_idx = 0
   let g:fzf_choose_win = popup_menu(g:fzf_find_result, #{ title: g:fzf_searching_zone, border: [], zindex: 98, minwidth: &columns/2, maxwidth: &columns/2, minheight: 2, maxheight: &lines/2, filter: function('s:fzf_choose') })
+  cal win_execute(g:fzf_enter_win, "mapclear <buffer>")
 endf
 
 fu! s:fzf_re_find() " async find command
@@ -186,11 +184,9 @@ fu! s:fzf_refresh_result(winid, key) abort " event to draw search result
   if a:key is# "\<Esc>"
     cal popup_close(g:fzf_enter_win)
     cal popup_close(g:fzf_choose_win)
-    cal s:my_key_map()
     retu 1
   elseif a:key is# "\<CR>"
     call popup_close(g:fzf_enter_win)
-    cal s:my_key_map()
     retu 1
   elseif a:key is# "\<C-f>"
     cal s:fzf_re_find()
@@ -269,7 +265,6 @@ fu! GrepExtFrom(mode) abort
     let word = inputdialog("Enter [word]>>")
     echo '<<'
     echo 'grep [' . word . '] processing in [' . expand('%') . '] ...'
-    cgetexpr system('grep -n "' . word . '" ' . expand('%')) | cw
     cal execute('vimgrep /' . word . '/gj %') | cw
     echo 'grep end'
     retu
@@ -378,18 +373,27 @@ aug qs_colors
   au ColorScheme * highlight QuickScopeBackSecond ctermfg=25 ctermbg=16 guifg=#66D9EF guibg=#000000
 aug END
 
+let g:fscope_mode = 0
 fu! FModeActivate()
+  if g:fscope_mode == 1
+    retu
+  endif
   aug f_scope
     au!
     au CursorMoved * cal HiFLine()
   aug End
+  let g:fscope_mode = 1
   cal HiFLine()
 endf
 
 fu! FModeDeactivate()
+  if g:fscope_mode == 0
+    retu
+  endif
   aug f_scope
     au!
   aug End
+  let g:fscope_mode = 0
   cal clearmatches()
 endf
 
@@ -555,7 +559,6 @@ fu! MarkHank(vector, mchar) abort " move to next/prev mark {{{
   if get_marks == ''
     if a:mchar == g:mark_words_auto " expand marks
       cal MarkField()
-      cal FModeActivate()
       retu
     endif
     echo 'no marks'
