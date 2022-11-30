@@ -97,22 +97,31 @@ nnoremap <silent><C-d> :cal Scroll(1, 25)<CR>
 nnoremap <silent><C-b> :cal Scroll(0, 10)<CR>
 nnoremap <silent><C-f> :cal Scroll(1, 10)<CR>
 " language ----------------------------------------
-nnoremap <Leader>gd <plug>(lsp-definition)
-nnoremap <Leader>gr <plug>(lsp-references)
-nnoremap <Leader>hd <plug>(lsp-peek-definition)
-nnoremap <Leader>hh <plug>(lsp-hover)
-nnoremap <Leader>rr <plug>(lsp-rename)
-nnoremap <Leader>, <plug>(lsp-previous-diagnostic)
-nnoremap <Leader>. <plug>(lsp-next-diagnostic)
-nnoremap <expr><c-j> lsp#scroll(+4)
-nnoremap <expr><c-k> lsp#scroll(-4)
+nnoremap <Leader>lgd <Plug>(coc-definition)
+nnoremap <Leader>lgr <plug>(coc-references)
+nnoremap <silent><Leader>ldd :call CocAction('doHover')<CR>
+nnoremap <Leader>lrr <plug>(coc-rename)
+nnoremap <Leader>lff <Plug>(coc-format)
+nnoremap <Leader>, <plug>(coc-diagnostic-next)
+nnoremap <Leader>. <plug>(coc-diagnostic-prev)
 " TODO 実行まだ
 nnoremap <Leader>run :echo 'TODO'<CR>
 nnoremap <Leader>sh :cal execute('top terminal ++shell eval ' . getline('.'))<CR>
 " edit ---------------------------------------
-imap <expr> <Tab> '<C-n>'
-inoremap <expr> <S-Tab> pumvisible() ? '<C-p>' : '<S-Tab>'
+inoremap " ""<C-o>h
+inoremap ' ''<C-o>h
+inoremap ( ()<C-o>h
+inoremap { {}<C-o>h
+vnoremap <C-j> "zx"zp`[V`]
+vnoremap <C-k> "zx<Up>"zP`[V`]
 inoremap <expr> <CR> pumvisible() ? '<C-y>' : '<CR>'
+inoremap <expr> <Tab> '<C-n>'
+inoremap <expr> <S-Tab> pumvisible() ? '<C-p>' : '<S-Tab>'
+if glob('~/.vim/pack/plugins/start/coc.nvim') != '' " for coc
+  inoremap <expr> <CR> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
+  inoremap <expr> <Tab> coc#pum#visible() ? coc#pum#next(1) : "\<Tab>"
+  inoremap <expr> <S-Tab> coc#pum#visible() ? coc#pum#prev(1) : "\<S-Tab>"
+endif
 " func - fzf ---------------------------------------
 nnoremap <silent><leader>f :cal FzfStart()<CR>
 " func - grep ---------------------------------------
@@ -538,7 +547,7 @@ fu! MarkShow() abort " show marks on row {{{
   endfor
   for mchar in keys(mark_dict)
     let id = stridx(g:mark_words, mchar) + 1
-    let txt = stridx(g:mark_words_auto, mchar) != -1 ? ">>" : mchar
+    let txt = stridx(g:mark_words_auto, mchar) != -1 ? "==" : mchar
     let txthl = stridx(g:mark_words_auto, mchar) != -1 ? "CursorLineNr" : "ErrorMsg"
     exe "sign define " . mchar . " text=" . txt . " texthl=" . txthl
     exe "sign place " . id . " line=" . mark_dict[mchar] . " name=" . mchar . " file=" . expand("%:p")
@@ -635,24 +644,14 @@ fu! ScrollToggle(flg)
 endf "}}}
 
 " favorite  -----------------------------------{{{
-" TODO for plugin
 command! -nargs=* Necronomicon cal Necronomicon(<f-args>)
 fu! Necronomicon(...) abort
   if a:0 == 0
-    e ~/.uranometria/necronomicon.md
-    loadview
-    retu
-  elseif a:0 == 1 && a:1 == 'YogSothoth'
-    execute('!sh ~/.uranometria/forge/backup.sh')
-    retu
-  elseif a:0 == 2 && a:1 == 'Azathoth' && a:2 == 'kill'
-    bo terminal ++shell ++close sh ~/.uranometria/forge/kill.sh
-    smile
-    retu
+    e ~/necronomicon.md
   elseif a:0 == 1 && a:1 == 'Azathoth'
-    bo terminal ++shell ++close sh ~/.uranometria/forge/omnibus.sh
-    smile
-    retu
+    sp ~/forge/cheat_sheet.md
+  elseif a:0 == 1 && a:1 == 'YogSothoth'
+    execute('bo terminal ++shell sh ~/forge/backup.sh')
   endif
 endf "}}}
 
@@ -783,3 +782,21 @@ let s:running_cat = [
     \ '                                        :I+                 ',
     \]
 \] "}}}
+
+" plugins --------------------------------------------{{{
+let s:repos = [
+    \ 'neoclide/coc.nvim',
+\ ]
+" TODO have to install nodejs, yarn
+" TODO need call coc#util#install()
+" CocInstall coc-tsserver
+command! PlugInstall cal PlugInstall()
+command! PlugUnInstall cal PlugUnInstall()
+fu! PlugInstall(...)
+  let cmd = "repos=('".join(s:repos,"' '")."') && mkdir -p ~/.vim/pack/plugins/start && cd ~/.vim/pack/plugins/start && for v in ${repos[@]};do git clone --depth 1 https://github.com/${v} ;done"
+  execute("bo terminal ++shell " . cmd)
+endf
+fu! PlugUnInstall(...)
+  execute("bo terminal ++shell echo 'start' && rm -rf ~/.vim/pack && echo 'end'")
+endf
+" }}}
