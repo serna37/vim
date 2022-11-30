@@ -96,22 +96,19 @@ nnoremap <silent><C-u> :cal Scroll(0, 25)<CR>
 nnoremap <silent><C-d> :cal Scroll(1, 25)<CR>
 nnoremap <silent><C-b> :cal Scroll(0, 10)<CR>
 nnoremap <silent><C-f> :cal Scroll(1, 10)<CR>
-" TODO lsp
-"nnoremap <Leader>j :LspHover<CR>
-"nnoremap <Leader>p :LspPeekDefinition<CR>
-"nnoremap <Leader>o :LspDefinition<CR>
-"nnoremap <Leader>r :LspReferences<CR>
-"nnoremap <buffer> <expr><c-j> lsp#scroll(+4)
-"nnoremap <buffer> <expr><c-k> lsp#scroll(-4)
 " language ----------------------------------------
-" TODO 多いし、対話にしてもいいかも
-nnoremap <Leader>lp :LspPeekDefinition<CR>
-nnoremap <Leader>lrf :LspReferences<CR>
-nnoremap <Leader>ldf :LspDefinition<CR>
-nnoremap <Leader>ldd :LspHover<CR>
-nnoremap <Leader>lrn :LspRename<CR>
-nnoremap <Leader>lrun :echo 'TODO'<CR>
-nnoremap <Leader>lsh :cal execute('top terminal ++shell eval ' . getline('.'))<CR>
+nnoremap <Leader>gd <plug>(lsp-definition)
+nnoremap <Leader>gr <plug>(lsp-references)
+nnoremap <Leader>hd <plug>(lsp-peek-definition)
+nnoremap <Leader>hh <plug>(lsp-hover)
+nnoremap <Leader>rr <plug>(lsp-rename)
+nnoremap <Leader>, <plug>(lsp-previous-diagnostic)
+nnoremap <Leader>. <plug>(lsp-next-diagnostic)
+nnoremap <expr><c-j> lsp#scroll(+4)
+nnoremap <expr><c-k> lsp#scroll(-4)
+" TODO 実行まだ
+nnoremap <Leader>run :echo 'TODO'<CR>
+nnoremap <Leader>sh :cal execute('top terminal ++shell eval ' . getline('.'))<CR>
 " edit ---------------------------------------
 imap <expr> <Tab> '<C-n>'
 inoremap <expr> <S-Tab> pumvisible() ? '<C-p>' : '<S-Tab>'
