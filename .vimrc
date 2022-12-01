@@ -112,8 +112,11 @@ inoremap " ""<C-o>h
 inoremap ' ''<C-o>h
 inoremap ( ()<C-o>h
 inoremap { {}<C-o>h
+inoremap <C-h> <C-o>h
+inoremap <C-l> <C-o>l
 vnoremap <C-j> "zx"zp`[V`]
 vnoremap <C-k> "zx<Up>"zP`[V`]
+" completion ---------------------------------------
 inoremap <expr> <CR> pumvisible() ? '<C-y>' : '<CR>'
 inoremap <expr> <Tab> '<C-n>'
 inoremap <expr> <S-Tab> pumvisible() ? '<C-p>' : '<S-Tab>'
