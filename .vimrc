@@ -28,6 +28,7 @@ set foldlevelstart=0
 set foldcolumn=1
 " view
 syntax on
+set background=dark
 set scrolloff=5
 set title
 set showcmd
@@ -663,7 +664,7 @@ call timer_start(18000, { -> Timer() }, {'repeat': -1}) "}}}
 
 " change color --------------------------------{{{
 let s:colorscheme_arr_default = ['torte']
-let s:colorscheme_arr = ['hybrid_material', 'molokai']
+let s:colorscheme_arr = ['onedark', 'hybrid_material', 'molokai']
 fu! ChangeColor()
   if glob('~/.vim/colors') != ''
     execute('colorscheme ' . s:colorscheme_arr[localtime() % len(s:colorscheme_arr)])
@@ -673,9 +674,7 @@ fu! ChangeColor()
   endif
 endf
 cal ChangeColor()
-if glob('~/.vim/colors') != ''
-  colorscheme molokai
-endif "}}}
+"}}}
 
 " running cat ----------------------------------------{{{
 let g:cat_frame = 0
