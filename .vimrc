@@ -552,7 +552,7 @@ fu! MarkShow() abort " show marks on row {{{
   endfor
   for mchar in keys(mark_dict)
     let id = stridx(g:mark_words, mchar) + 1
-    let txt = stridx(g:mark_words_auto, mchar) != -1 ? "==" : mchar
+    let txt = stridx(g:mark_words_auto, mchar) != -1 ? "=" : mchar
     let txthl = stridx(g:mark_words_auto, mchar) != -1 ? "CursorLineNr" : "ErrorMsg"
     exe "sign define " . mchar . " text=" . txt . " texthl=" . txthl
     exe "sign place " . id . " line=" . mark_dict[mchar] . " name=" . mchar . " file=" . expand("%:p")
