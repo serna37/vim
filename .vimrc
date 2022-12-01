@@ -803,14 +803,14 @@ fu! Necronomicon(...) abort
   elseif a:0 == 1 && a:1 == 'Azathoth'
     cal Initiation()
   elseif a:0 == 1 && a:1 == 'YogSothoth'
-    let backup_cmd = "cd ~/backup; LIMIT=12; PREFIX=ふしぎなおくりもの; FOLDER_NAME=${PREFIX}".strftime("%Y-%m-%d")."; if [ ! -e ./${FOLDER_NAME} ]; then; mkdir ${FOLDER_NAME}; fi; cp -rf ~/work ${FOLDER_NAME}; cp -rf ~/forge ${FOLDER_NAME}; CNT=`ls -l | grep ^d | wc -l`; if [ ${CNT} -gt ${LIMIT} ]; then; ls -d */ | sort | head -n $((CNT-LIMIT)) | xargs rm -rf; fi"
+    let backup_cmd = "cd ~/backup; LIMIT=12; PREFIX=ふしぎなおくりもの; FOLDER_NAME=${PREFIX}".strftime("%Y-%m-%d")."; if [ ! -e ./${FOLDER_NAME} ]; then mkdir ${FOLDER_NAME}; fi; cp -rf ~/work ${FOLDER_NAME}; cp -rf ~/forge ${FOLDER_NAME}; CNT=`ls -l | grep ^d | wc -l`; if [ ${CNT} -gt ${LIMIT} ]; then ls -d */ | sort | head -n $((CNT-LIMIT)) | xargs rm -rf; fi"
     execute("bo terminal ++shell echo 'start' && ".backup_cmd." && echo 'end'")
   endif
 endf "}}}
 
 " init ----------------------------------{{{
 fu! Initiation()
-bo terminal ++shell mkdir -p ~/forge ~/work ~/backup && touch ~/work/necronomicon.md && if [ -e ~/forge/cheat_sheet.md ]; then; rm ~/forge/cheat_sheet.md; fi && touch ~/forge/cheat_sheet.md
+bo terminal ++shell mkdir -p ~/forge ~/work ~/backup && touch ~/work/necronomicon.md && if [ -e ~/forge/cheat_sheet.md ]; then rm ~/forge/cheat_sheet.md; fi && touch ~/forge/cheat_sheet.md
 let cheat_sheet = [
 \ "# CheatSheet",
 \ "",
