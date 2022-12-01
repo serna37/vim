@@ -307,7 +307,7 @@ fu! CurrentGitRoot() " current git root(no git -> current directory)
   exe 'lcd %:h'
   let gitroot = system('git rev-parse --show-superproject-working-tree --show-toplevel')
   exe 'lcd ' . pwd
-  retu stridx(gitroot, 'fatal: ') == -1 ? gitroot[0:strlen(gitroot)-2] . '/*' : './*'
+  retu !v:shell_error ? gitroot[0:strlen(gitroot)-2] . '/*' : './*'
 endf "}}}
 
 " highlight -----------------------------------{{{
