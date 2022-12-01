@@ -662,7 +662,7 @@ fu! Timer()
 endf
 call timer_start(18000, { -> Timer() }, {'repeat': -1}) "}}}
 
-" change color --------------------------------{{{
+" color --------------------------------{{{
 let s:colorscheme_arr_default = ['torte']
 let s:colorscheme_arr = ['onedark', 'hybrid_material', 'molokai']
 fu! ChangeColor()
@@ -674,6 +674,11 @@ fu! ChangeColor()
   endif
 endf
 cal ChangeColor()
+
+fu! ColorInstall()
+  let cmd = "mkdir -p ~/.vim/colors && cd ~/.vim/colors && curl https://raw.githubusercontent.com/serna37/vim-color/master/hybrid_material.vim > hybrid_material.vim && curl https://raw.githubusercontent.com/serna37/vim-color/master/molokai.vim > molokai.vim && curl https://raw.githubusercontent.com/serna37/vim-color/master/onedark.vim > onedark.vim"
+  execute("bo terminal ++shell echo 'start' && ".cmd." && echo 'end'")
+endf
 "}}}
 
 " running cat ----------------------------------------{{{
@@ -809,11 +814,12 @@ bo terminal ++shell mkdir -p ~/forge ~/work ~/backup && touch ~/work/necronomico
 let cheat_sheet = [
 \ "# CheatSheet",
 \ "",
-\ "# Plugin",
+\ "# Install",
 \ "- command PlugInstall : install plugin",
 \ "- >> call coc#util#install()",
 \ "- >> CocInstall coc-tsserver",
 \ "- command PlugUnInstall : uninstall plugin, uninstall language-server",
+\ "- call ColorInstall() : install colorscheme",
 \ "",
 \ "# Language",
 \ "- Space lgd : go to definition",
