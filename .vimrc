@@ -644,19 +644,6 @@ fu! ScrollToggle(flg)
   cal FModeToggle(a:flg)
 endf "}}}
 
-" favorite  -----------------------------------{{{
-command! -nargs=* Necronomicon cal Necronomicon(<f-args>)
-fu! Necronomicon(...) abort
-  if a:0 == 0
-    e ~/work/necronomicon.md
-  elseif a:0 == 1 && a:1 == 'Azathoth'
-    cal Initiation()
-  elseif a:0 == 1 && a:1 == 'YogSothoth'
-    let backup_cmd = "cd ~/backup; LIMIT=12; PREFIX=ふしぎなおくりもの; FOLDER_NAME=${PREFIX}".strftime("%Y-%m-%d")."; if [ ! -e ./${FOLDER_NAME} ]; then; mkdir ${FOLDER_NAME}; fi; cp -rf ~/work ${FOLDER_NAME}; cp -rf ~/forge ${FOLDER_NAME}; CNT=`ls -l | grep ^d | wc -l`; if [ ${CNT} -gt ${LIMIT} ]; then; ls -d */ | sort | head -n $((CNT-LIMIT)) | xargs rm -rf; fi"
-    execute('bo terminal ++shell '.backup_cmd)
-  endif
-endf "}}}
-
 " zihou timer ---------------------------------------{{{
 let s:ini_hour = localtime() / 3600
 fu! Timer()
@@ -687,7 +674,7 @@ if glob('~/.vim/colors') != ''
   colorscheme molokai
 endif "}}}
 
-" running cat {{{
+" running cat ----------------------------------------{{{
 let g:cat_frame = 0
 fu! s:RunCatM() abort
   cal setbufline(winbufnr(g:runcat), 1, s:running_cat[g:cat_frame])
@@ -790,8 +777,6 @@ let s:repos = [
     \ 'neoclide/coc.nvim',
 \ ]
 " TODO have to install nodejs, yarn
-" TODO need call coc#util#install()
-" CocInstall coc-tsserver
 command! PlugInstall cal PlugInstall()
 command! PlugUnInstall cal PlugUnInstall()
 fu! PlugInstall(...)
@@ -803,14 +788,41 @@ fu! PlugUnInstall(...)
 endf
 " }}}
 
+" favorite  -----------------------------------{{{
+command! -nargs=* Necronomicon cal Necronomicon(<f-args>)
+fu! Necronomicon(...) abort
+  if a:0 == 0
+    e ~/work/necronomicon.md
+  elseif a:0 == 1 && a:1 == 'Azathoth'
+    cal Initiation()
+  elseif a:0 == 1 && a:1 == 'YogSothoth'
+    let backup_cmd = "cd ~/backup; LIMIT=12; PREFIX=ふしぎなおくりもの; FOLDER_NAME=${PREFIX}".strftime("%Y-%m-%d")."; if [ ! -e ./${FOLDER_NAME} ]; then; mkdir ${FOLDER_NAME}; fi; cp -rf ~/work ${FOLDER_NAME}; cp -rf ~/forge ${FOLDER_NAME}; CNT=`ls -l | grep ^d | wc -l`; if [ ${CNT} -gt ${LIMIT} ]; then; ls -d */ | sort | head -n $((CNT-LIMIT)) | xargs rm -rf; fi"
+    execute("bo terminal ++shell echo 'start' && ".backup_cmd." && echo 'end'")
+  endif
+endf "}}}
+
 " init ----------------------------------{{{
 fu! Initiation()
-bo terminal ++shell mkdir -p ~/forge ~/work ~/backup && touch ~/work/necronomicon.md && if [ -e ~/forge/cheat_sheet.md ]; then; rm ~/forge/cheat_sheet.md; fi
+bo terminal ++shell mkdir -p ~/forge ~/work ~/backup && touch ~/work/necronomicon.md && if [ -e ~/forge/cheat_sheet.md ]; then; rm ~/forge/cheat_sheet.md; fi && touch ~/forge/cheat_sheet.md
 let cheat_sheet = [
+\ "# CheatSheet",
 \ "",
 \ "# Plugin",
 \ "- command PlugInstall : install plugin",
+\ "- >> call coc#util#install()",
+\ "- >> CocInstall coc-tsserver",
 \ "- command PlugUnInstall : uninstall plugin, uninstall language-server",
+\ "",
+\ "# Language",
+\ "- Space lgd : go to definition",
+\ "- Space lgr : find references",
+\ "- Space ldd : hover document",
+\ "- Space lrr : rename",
+\ "- Space lff : format",
+\ "- Space , : prev diagnostic",
+\ "- Space . : next diagnostic",
+\ "- Space run : run",
+\ "- Space sh : run current line as shell",
 \ "",
 \ "# Window",
 \ "- ↑↓←→ : resize window",
@@ -845,17 +857,6 @@ let cheat_sheet = [
 \ "- Space Space s : stop cat",
 \ "- Space Space c : change colorscheme",
 \ "- Space * 3 : this cheat_sheet",
-\ "",
-\ "# Language",
-\ "- Space lgd : go to definition",
-\ "- Space lgr : find references",
-\ "- Space ldd : hover document",
-\ "- Space lrr : rename",
-\ "- Space lff : format",
-\ "- Space , : prev diagnostic",
-\ "- Space . : next diagnostic",
-\ "- Space run : run",
-\ "- Space sh : run current line as shell"
 \ ]
 for v in cheat_sheet
   cal system('echo "'.v.'" >> ~/forge/cheat_sheet.md')
