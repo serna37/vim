@@ -819,14 +819,18 @@ fu! Necronomicon(...) abort
     let mode = inputdialog("choose mode>>")
     echo "<<"
     if mode == "c"
-      cal ChangeColor()
-      echo execute("colorscheme")[1:]
+      cal feedkeys("\<CR>")
+      cal feedkeys(":cal ChangeColor()\<CR>")
+      cal feedkeys(":colorscheme\<CR>")
     elseif mode == "ss"
-      cal execute("15sp ~/forge/static_snippets.sh")
+      cal feedkeys(":15sp ~/forge/static_snippets.sh\<CR>")
+      cal feedkeys("\<CR>")
     elseif mode == "r"
-      cal RunCat()
+      cal feedkeys("\<CR>")
+      cal feedkeys(":cal RunCat()\<CR>")
     elseif mode == "rs"
-      cal RunCatStop()
+      cal feedkeys("\<CR>")
+      cal feedkeys(":cal RunCatStop()\<CR>")
     endif
   endif
 endf
