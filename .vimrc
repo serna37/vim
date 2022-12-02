@@ -818,9 +818,7 @@ fu! Necronomicon(...) abort
     let backup_cmd = "cd ~/backup; LIMIT=12; PREFIX=ふしぎなおくりもの; FOLDER_NAME=${PREFIX}".strftime("%Y-%m-%d")."; if [ ! -e ./${FOLDER_NAME} ]; then mkdir ${FOLDER_NAME}; fi; cp -rf ~/work ${FOLDER_NAME}; cp -rf ~/forge ${FOLDER_NAME}; CNT=`ls -l | grep ^d | wc -l`; if [ ${CNT} -gt ${LIMIT} ]; then ls -d */ | sort | head -n $((CNT-LIMIT)) | xargs rm -rf; fi"
     execute("bo terminal ++shell echo 'start' && ".backup_cmd." && echo 'end'")
   elseif a:1 == 'n'
-    " TODO wip
     echo "c: change colorscheme"
-    echo "hlep: cheat sheet"
     echo "ss: static snippet"
     echo "r: run cat"
     echo "rs: stop cat"
@@ -829,8 +827,6 @@ fu! Necronomicon(...) abort
     if mode == "c"
       cal ChangeColor()
       echo execute("colorscheme")[1:]
-    elseif mode == "help"
-      cal execute("15sp ~/forge/cheat_sheet.md")
     elseif mode == "ss"
       cal execute("15sp ~/forge/static_snippets.sh")
     elseif mode == "r"
@@ -908,7 +904,7 @@ let cheat_sheet = [
 \ "# Favorit",
 \ "- Space n : Necronomicon",
 \ "-   :Necronomicon > open necronomicon",
-\ "-   :Necronomicon Azathoth > open necronomicon",
+\ "-   :Necronomicon Azathoth > initiation",
 \ "-   :Necronomicon YogSothoth > backup",
 \ "-   :Necronomicon n > other funcs",
 \ "- Space Space Space : this",
