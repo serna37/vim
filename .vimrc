@@ -224,6 +224,9 @@ fu! s:fzf_refresh_result(winid, key) abort " event to draw search result
     unlet g:fzf_enter_keyword[len(g:fzf_enter_keyword)-1]
   elseif a:key is# "\<BS>" && len(g:fzf_enter_keyword) == 0
     " noop
+  elseif strtrans(a:key) == "<80><fd>`"
+    " noop (for polyglot bug adhoc)
+    retu
   else
     let g:fzf_enter_keyword = add(g:fzf_enter_keyword, a:key)
   endif
