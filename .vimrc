@@ -843,8 +843,6 @@ cal system("mkdir -p ~/forge ~/work ~/backup && touch ~/work/necronomicon.md")
 cal system("if [ -e ~/forge/cheat_sheet.md ]; then rm ~/forge/cheat_sheet.md; fi && touch ~/forge/cheat_sheet.md")
 cal system("if [ ! -e ~/forge/static_snippets.sh ]; then touch ~/forge/static_snippets.sh; fi")
 let cheat_sheet = [
-\ "# CheatSheet",
-\ "",
 \ "# Install",
 \ "- call ColorInstall() : install colorscheme",
 \ "- command PlugInstall : install plugin (need nodejs, yarn)",
