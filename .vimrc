@@ -817,7 +817,6 @@ fu! Necronomicon(...) abort
     echo "r  : run cat"
     echo "rs : stop cat"
     let mode = inputdialog("choose mode>>")
-    echo "<<"
     if mode == "c"
       cal feedkeys("\<CR>")
       cal feedkeys(":cal ChangeColor()\<CR>")
@@ -909,6 +908,14 @@ let cheat_sheet = [
 \ ]
 for v in cheat_sheet
   cal system('echo "'.v.'" >> ~/forge/cheat_sheet.md')
+endfor
+let static_snippets_ini = [
+\ "# git",
+\ "git add . && git commit -m 'upd' && git push",
+\ "",
+\ ]
+for v in static_snippets_ini
+  cal system('echo "'.v.'" >> ~/forge/static_snippets.sh')
 endfor
 echo 'initiation end'
 echo 'help to Space*3'
