@@ -2,7 +2,7 @@
 " ========================================
 " Setting
 " ========================================
-" 
+" {{{
 scriptencoding utf-8
 "set ff=unix
 "set fileencoding=utf8
@@ -71,12 +71,12 @@ set wildmenu
 set wildmode=full
 set complete=.,w,b,u,U,k,kspell,s,i,d,t
 set completeopt=menuone,noinsert,preview,popup
-
+" }}}
 
 " ========================================
 " KeyMap
 " ========================================
-" 
+" {{{
 let g:mapleader = "\<Space>"
 " search ---------------------------------------
 nnoremap <silent>* *N
@@ -148,12 +148,12 @@ nnoremap <Leader><Leader><Leader> :15sp ~/forge/cheat_sheet.md<CR>
 nnoremap <Leader><Leader>w :cal RunCat()<CR>
 nnoremap <Leader><Leader>s :cal RunCatStop()<CR>
 nnoremap <Leader><Leader>c :cal ChangeColor()<CR>:colorscheme<CR>
-
+" }}}
 
 " ========================================
 " Function
 " ========================================
-" fzf------------------------------------------
+" fzf------------------------------------------{{{
 let g:not_path_arr = ['"*.vim/*"', '"*.git/*"', '"*.npm/*"', '"*.yarn/*"', '"*.m2/*"', '"*.class"', '"*.vscode/*"', '"*.config/*"', '"*Applications/*"', '"*Library/*"', '"*Music/*"', '"*Pictures/*"', '"*Movies/*"', '"*AppData/*"', '"*OneDrive/*"', '"*Videos/*"']
 let g:fzf_find_cmd = 'find . -type f -name "*" -not -path ' . join(g:not_path_arr, ' -not -path ')
 let g:fzf_searched_dir = execute('pwd')[1:] " first char is ^@, so trim
@@ -261,9 +261,9 @@ fu! s:fzf_open(winid, op, f) abort
   cal popup_close(a:winid)
   exe a:op a:f
   retu 1
-endf 
+  endf " }}}
 
-" grep ----------------------------------------
+  " grep ----------------------------------------{{{
 fu! GrepChoseMode() abort
   echo 'mode 0: This File'
   echo 'mode 1: FULL AUTO [current ext, current word, current git root(no git -> current directory)]'
@@ -316,9 +316,9 @@ fu! CurrentGitRoot() " current git root(no git -> current directory)
   let gitroot = system('git rev-parse --show-superproject-working-tree --show-toplevel')
   exe 'lcd ' . pwd
   retu !v:shell_error ? gitroot[0:strlen(gitroot)-2] . '/*' : './*'
-endf 
+endf " }}}
 
-" highlight -----------------------------------
+" highlight -----------------------------------{{{
 " TODO cword highlight disable
 " on word, bright
 "aug auto_hl_cword
@@ -382,9 +382,9 @@ fu! HiSet() abort " set highlight on all window in tab
   windo cal matchadd("UserSearchHi" . g:now_hi, cw, 15)
   cal win_gotoid(current_win) " return current window
   let g:now_hi = g:now_hi >= len(g:search_hl)-1 ? 0 : g:now_hi + 1
-endf 
+endf " }}}
 
-" quick-scope ---------------------------------
+" quick-scope ---------------------------------{{{
 aug qs_colors
   au!
   au ColorScheme * highlight QuickScopePrimary cterm=bold ctermfg=196 ctermbg=16 guifg=#66D9EF guibg=#000000
@@ -455,9 +455,9 @@ fu! HiFLine()
   cal matchaddpos("QuickScopeBack", target_arr_back, 16)
   cal matchaddpos("QuickScopeBackSecond", target_arr_back_second, 16)
 endf
-" 
+" }}}
 
-" mark ----------------------------------------
+" mark ----------------------------------------{{{
 let g:mark_words = 'abcdefghijklmnopqrstuvwxyz'
 let g:mark_words_manual = 'abcdefghijklm'
 let g:mark_words_auto = 'nopqrstuvwxyz'
@@ -469,7 +469,7 @@ fu! s:get_mark(tar) abort
   endtry
 endf
 
-fu! MarkMenu() abort " show mark list and jump 
+fu! MarkMenu() abort " show mark list and jump {{{
   let get_marks = s:get_mark(g:mark_words_manual)
   if get_marks == ''
     echo 'no marks'
@@ -493,9 +493,9 @@ fu! MarkChoose(ctx, winid, key) abort
     execute('normal!`' . a:ctx.files[a:ctx.idx][1])
   endif
   retu popup_filter_menu(a:winid, a:key)
-endf 
+endf " }}}
 
-fu! Marking() abort " mark auto word, toggle 
+fu! Marking() abort " mark auto word, toggle {{{
   let get_marks = s:get_mark(g:mark_words_manual)
   if get_marks == ''
     execute('mark a')
@@ -525,9 +525,9 @@ fu! Marking() abort " mark auto word, toggle
   else
     echo 'over limit markable char'
   endif
-endf 
+endf" }}}
 
-fu! MarkSignDel() " delete sign on mark 
+fu! MarkSignDel() " delete sign on mark {{{
   let get_marks = s:get_mark(g:mark_words)
   if get_marks == ''
     retu
@@ -542,9 +542,9 @@ fu! MarkSignDel() " delete sign on mark
     exe "sign unplace " . id . " file=" . expand("%:p")
     exe "sign undefine " . mchar
   endfor
-endf 
+endf " }}}
 
-fu! MarkShow() abort " show marks on row 
+fu! MarkShow() abort " show marks on row {{{
   let get_marks = s:get_mark(g:mark_words)
   if get_marks == ''
     retu
@@ -565,9 +565,9 @@ endf
 aug sig_aus
   au!
   au BufEnter,CmdwinEnter * cal MarkShow()
-aug END 
+aug END " }}}
 
-fu! MarkHank(vector, mchar) abort " move to next/prev mark 
+fu! MarkHank(vector, mchar) abort " move to next/prev mark {{{
   let get_marks = s:get_mark(a:mchar)
   if get_marks == ''
     if a:mchar == g:mark_words_auto " expand marks
@@ -605,9 +605,9 @@ fu! MarkHank(vector, mchar) abort " move to next/prev mark
     endif
   endfor
   echo "last mark"
-endf 
+endf " }}}
 
-fu! MarkField() abort " create short marks 
+fu! MarkField() abort " create short marks {{{
   cal MarkSignDel()
   execute('delmarks '.g:mark_words_auto)
   let warr = ['n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y']
@@ -634,11 +634,10 @@ fu! MarkFieldOut()
   execute('delmarks '.g:mark_words_auto)
   cal MarkShow()
   echo '[marker] mode out'
-endf 
+endf " }}}
+" }}}
 
-
-
-" scroll ----------------------------------------
+" scroll ----------------------------------------{{{
 fu! Scroll(vector, delta)
   cal ScrollToggle(0)
   let vec = a:vector == 0 ? "\<C-y>" : "\<C-e>"
@@ -650,9 +649,9 @@ fu! ScrollToggle(flg)
   set cursorcolumn!
   set cursorline!
   cal FModeToggle(a:flg)
-endf 
+endf " }}}
 
-" zihou timer ---------------------------------------
+" zihou timer ---------------------------------------{{{
 let s:ini_hour = localtime() / 3600
 fu! Timer()
   let l:now_hour = localtime() / 3600
@@ -664,9 +663,9 @@ fu! Timer()
     cal timer_start(5000, { -> RunCatStop() })
   endif
 endf
-call timer_start(18000, { -> Timer() }, {'repeat': -1}) 
+call timer_start(18000, { -> Timer() }, {'repeat': -1}) " }}}
 
-" color --------------------------------
+" color --------------------------------{{{
 let s:colorscheme_arr_default = ['torte']
 let s:colorscheme_arr = ['onedark', 'hybrid_material', 'molokai']
 fu! ChangeColor()
@@ -682,10 +681,9 @@ cal ChangeColor()
 fu! ColorInstall()
   let cmd = "mkdir -p ~/.vim/colors && cd ~/.vim/colors && curl https://raw.githubusercontent.com/serna37/vim-color/master/hybrid_material.vim > hybrid_material.vim && curl https://raw.githubusercontent.com/serna37/vim-color/master/molokai.vim > molokai.vim && curl https://raw.githubusercontent.com/serna37/vim-color/master/onedark.vim > onedark.vim"
   execute("bo terminal ++shell echo 'start' && ".cmd." && echo 'end'")
-endf
+endf " }}}
 
-
-" running cat ----------------------------------------
+" running cat ----------------------------------------{{{
 let g:cat_frame = 0
 fu! s:RunCatM() abort
   cal setbufline(winbufnr(g:runcat), 1, s:running_cat[g:cat_frame])
@@ -781,9 +779,9 @@ let s:running_cat = [
     \ '                         ?$=           :DMO:       II       ',
     \ '                                        :I+                 ',
     \]
-\] 
+\] " }}}
 
-" plugins --------------------------------------------
+" plugins --------------------------------------------{{{
 let s:repos = [
     \ 'neoclide/coc.nvim',
     \ 'sheerun/vim-polyglot',
@@ -797,10 +795,9 @@ fu! PlugInstall(...)
 endf
 fu! PlugUnInstall(...)
   execute("bo terminal ++shell echo 'start' && rm -rf ~/.vim/pack && echo 'end'")
-endf
-" 
+endf " }}}
 
-" favorite  -----------------------------------
+" favorite  -----------------------------------{{{
 command! -nargs=* Necronomicon cal Necronomicon(<f-args>)
 fu! Necronomicon(...) abort
   if a:0 == 0
@@ -811,9 +808,9 @@ fu! Necronomicon(...) abort
     let backup_cmd = "cd ~/backup; LIMIT=12; PREFIX=ふしぎなおくりもの; FOLDER_NAME=${PREFIX}".strftime("%Y-%m-%d")."; if [ ! -e ./${FOLDER_NAME} ]; then mkdir ${FOLDER_NAME}; fi; cp -rf ~/work ${FOLDER_NAME}; cp -rf ~/forge ${FOLDER_NAME}; CNT=`ls -l | grep ^d | wc -l`; if [ ${CNT} -gt ${LIMIT} ]; then ls -d */ | sort | head -n $((CNT-LIMIT)) | xargs rm -rf; fi"
     execute("bo terminal ++shell echo 'start' && ".backup_cmd." && echo 'end'")
   endif
-endf 
+endf " }}}
 
-" init ----------------------------------
+" init ----------------------------------{{{
 fu! Initiation()
 bo terminal ++shell mkdir -p ~/forge ~/work ~/backup && touch ~/work/necronomicon.md && if [ -e ~/forge/cheat_sheet.md ]; then rm ~/forge/cheat_sheet.md; fi && touch ~/forge/cheat_sheet.md
 let cheat_sheet = [
@@ -878,5 +875,4 @@ let cheat_sheet = [
 for v in cheat_sheet
   cal system('echo "'.v.'" >> ~/forge/cheat_sheet.md')
 endfor
-endf
-" 
+endf " }}}
