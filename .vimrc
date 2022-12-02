@@ -98,6 +98,7 @@ nnoremap <silent><C-u> :cal Scroll(0, 25)<CR>
 nnoremap <silent><C-d> :cal Scroll(1, 25)<CR>
 nnoremap <silent><C-b> :cal Scroll(0, 10)<CR>
 nnoremap <silent><C-f> :cal Scroll(1, 10)<CR>
+nnoremap <silent><Leader>t :call popup_create(term_start([&shell], #{ hidden: 1, term_finish: 'close'}), #{ border: [], minwidth: &columns/2, minheight: &lines/2 })<CR>
 " language ----------------------------------------
 nnoremap <Leader>lgd <Plug>(coc-definition)
 nnoremap <Leader>lgr <plug>(coc-references)
@@ -153,12 +154,8 @@ nnoremap <silent>mj :cal MarkHank("down", g:mark_words_manual)<CR>
 nnoremap <silent>mk :cal MarkHank("up", g:mark_words_manual)<CR>
 nnoremap <silent>mw :cal HiSet()<CR>
 " favorite ---------------------------------------
-nnoremap <silent><Leader>t :call popup_create(term_start([&shell], #{ hidden: 1, term_finish: 'close'}), #{ border: [], minwidth: &columns/2, minheight: &lines/2 })<CR>
-nnoremap <Leader><Leader>n :Necronomicon 
+nnoremap <Leader>n :Necronomicon 
 nnoremap <Leader><Leader><Leader> :15sp ~/forge/cheat_sheet.md<CR>
-nnoremap <Leader><Leader>w :cal RunCat()<CR>
-nnoremap <Leader><Leader>s :cal RunCatStop()<CR>
-nnoremap <Leader><Leader>c :cal ChangeColor()<CR>:colorscheme<CR>
 " }}}
 
 " ========================================
@@ -820,12 +817,36 @@ fu! Necronomicon(...) abort
   elseif a:0 == 1 && a:1 == 'YogSothoth'
     let backup_cmd = "cd ~/backup; LIMIT=12; PREFIX=ふしぎなおくりもの; FOLDER_NAME=${PREFIX}".strftime("%Y-%m-%d")."; if [ ! -e ./${FOLDER_NAME} ]; then mkdir ${FOLDER_NAME}; fi; cp -rf ~/work ${FOLDER_NAME}; cp -rf ~/forge ${FOLDER_NAME}; CNT=`ls -l | grep ^d | wc -l`; if [ ${CNT} -gt ${LIMIT} ]; then ls -d */ | sort | head -n $((CNT-LIMIT)) | xargs rm -rf; fi"
     execute("bo terminal ++shell echo 'start' && ".backup_cmd." && echo 'end'")
+  elseif a:1 == 'n'
+    " TODO wip
+    echo "c: change colorscheme"
+    echo "hlep: cheat sheet"
+    echo "ss: static snippet"
+    echo "r: run cat"
+    echo "rs: stop cat"
+    let mode = inputdialog("choose mode>>")
+    echo "<<"
+    if mode == "c"
+      cal ChangeColor()
+      echo execute("colorscheme")[1:]
+    elseif mode == "help"
+      cal execute("15sp ~/forge/cheat_sheet.md")
+    elseif mode == "ss"
+      cal execute("15sp ~/forge/static_snippets.sh")
+    elseif mode == "r"
+      cal RunCat()
+    elseif mode == "rs"
+      cal RunCatStop()
+    endif
   endif
-endf " }}}
+endf
+" }}}
 
 " init ----------------------------------{{{
 fu! Initiation()
-bo terminal ++shell mkdir -p ~/forge ~/work ~/backup && touch ~/work/necronomicon.md && if [ -e ~/forge/cheat_sheet.md ]; then rm ~/forge/cheat_sheet.md; fi && touch ~/forge/cheat_sheet.md
+cal system("mkdir -p ~/forge ~/work ~/backup && touch ~/work/necronomicon.md")
+cal system("if [ -e ~/forge/cheat_sheet.md ]; then rm ~/forge/cheat_sheet.md; fi && touch ~/forge/cheat_sheet.md")
+cal system("if [ ! -e ~/forge/static_snippets.sh ]; then touch ~/forge/cheat_sheet.sh; fi")
 let cheat_sheet = [
 \ "# CheatSheet",
 \ "",
@@ -885,13 +906,16 @@ let cheat_sheet = [
 \ "- Space w : clear anker, f-scope highlight, mark highlight",
 \ "",
 \ "# Favorit",
-\ "- Space Space n : Necronomicon (see vimrc)",
-\ "- Space Space w : run cat",
-\ "- Space Space s : stop cat",
-\ "- Space Space c : change colorscheme",
-\ "- Space * 3 : this cheat_sheet",
+\ "- Space n : Necronomicon",
+\ "-   :Necronomicon > open necronomicon",
+\ "-   :Necronomicon Azathoth > open necronomicon",
+\ "-   :Necronomicon YogSothoth > backup",
+\ "-   :Necronomicon n > other funcs",
+\ "- Space Space Space : this",
 \ ]
 for v in cheat_sheet
   cal system('echo "'.v.'" >> ~/forge/cheat_sheet.md')
 endfor
+echo 'initiation end'
+echo 'help to Space*3'
 endf " }}}

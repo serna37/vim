@@ -2,7 +2,7 @@
 curl https://raw.githubusercontent.com/serna37/vim/master/.vimrc > ~/.vimrc
 
 ```initiation.vim
-<Space><Space>n Azathoth<CR>
+<Space>n Azathoth<CR>
 ```
 
 # snippet
