@@ -107,8 +107,9 @@ nnoremap <Leader>lrr <plug>(coc-rename)
 nnoremap <Leader>lff <Plug>(coc-format)
 nnoremap <Leader>, <plug>(coc-diagnostic-next)
 nnoremap <Leader>. <plug>(coc-diagnostic-prev)
-" TODO 実行まだ
-nnoremap <Leader>run :echo 'TODO'<CR>
+if glob('~/.vim/pack/plugins/start/vim-quickrun') != '' " for quickrun
+  nnoremap <Leader>r :QuickRun -hook/time/enable 1<CR>
+endif
 nnoremap <Leader>sh :cal execute('top terminal ++rows=10 ++shell eval ' . getline('.'))<CR>
 " edit ---------------------------------------
 nnoremap <C-s> :w<CR>
@@ -788,6 +789,7 @@ let s:repos = [
     \ 'neoclide/coc.nvim',
     \ 'sheerun/vim-polyglot',
     \ 'hrsh7th/vim-vsnip',
+    \ 'thinca/vim-quickrun',
 \ ]
 " TODO want debug, runner?
 command! PlugInstall cal PlugInstall()
@@ -861,7 +863,7 @@ let cheat_sheet = [
 \ "- Space lff : format",
 \ "- Space , : prev diagnostic",
 \ "- Space . : next diagnostic",
-\ "- Space run : run",
+\ "- Space r : run",
 \ "- Space sh : run current line as shell",
 \ "",
 \ "# Snippet",
