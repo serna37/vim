@@ -154,8 +154,9 @@ nnoremap <Leader><Leader>c :cal ChangeColor()<CR>:colorscheme<CR>
 " Function
 " ========================================
 " fzf------------------------------------------{{{
-cd ~/git
-let g:fzf_find_cmd = 'find . -type f -name "*" -not -path "*.git/*" -not -path "*.class"'
+cd
+let g:not_path_arr = ['"*.vim/*"', '"*.git/*"', '"*.npm/*"', '"*.yarn/*"', '"*.m2/*"', '"*.class"', '"*.vscode/*"', '"*.config/*"', '"*Applications/*"', '"*Library/*"', '"*Music/*"', '"*Pictures/*"', '"*Movies/*"']
+let g:fzf_find_cmd = 'find . -type f -name "*" -not -path ' . join(g:not_path_arr, ' -not -path ')
 let g:fzf_searched_dir = execute('pwd')[1:] " first char is ^@, so trim
 let g:fzf_find_result_tmp = []
 
