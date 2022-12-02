@@ -804,8 +804,8 @@ command! PlugUnInstall cal PlugUnInstall()
 fu! PlugInstall(...)
   let cmd = "repos=('".join(s:repos,"' '")."') && mkdir -p ~/.vim/pack/plugins/start && cd ~/.vim/pack/plugins/start && for v in ${repos[@]};do git clone --depth 1 https://github.com/${v} ;done"
   execute("bo terminal ++shell " . cmd)
-  let g:vsnip_snippet_dir = "~/forge"
 endf
+let g:vsnip_snippet_dir = "~/forge"
 fu! PlugUnInstall(...)
   execute("bo terminal ++shell echo 'start' && rm -rf ~/.vim ~/.config && echo 'end'")
 endf " }}}
