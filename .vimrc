@@ -50,7 +50,8 @@ fu! SetStatusLine()
   hi User4 cterm=bold ctermfg=7 ctermbg=56 gui=bold guibg=#a0b0c0 guifg=black
   hi User5 cterm=bold ctermfg=7 ctermbg=5 gui=bold guibg=#0070e0 guifg=#ffffff
   let dict = {'i': '1* INSERT', 'n': '2* NORMAL', 'R': '3* REPLACE', 'c': '4* COMMAND', 't': '4* TERMIAL', 'v': '5* VISUAL', 'V': '5* VISUAL', "\<C-v>": '5* VISUAL'}
-  retu '%' . dict[mode()] . ' %* %<%F%m%r%h%w%=%2* %p%% %l/%L %02v [%{&fenc!=""?&fenc:&enc}][%{ff_table[&ff]}] %*'
+  let mode = match(keys(dict), mode()) != -1 ? dict[mode()] : '5* SP'
+  retu '%' . mode . ' %* %<%F%m%r%h%w%=%2* %p%% %l/%L %02v [%{&fenc!=""?&fenc:&enc}][%{ff_table[&ff]}] %*'
 endf
 set statusline=%!SetStatusLine()
 " explorer
@@ -110,6 +111,10 @@ nnoremap <Leader>run :echo 'TODO'<CR>
 nnoremap <Leader>sh :cal execute('top terminal ++rows=10 ++shell eval ' . getline('.'))<CR>
 " edit ---------------------------------------
 nnoremap <C-s> :w<CR>
+nnoremap x "_x
+nnoremap d "_d
+vnoremap x "_x
+vnoremap d "_d
 inoremap " ""<C-o>h
 inoremap ' ''<C-o>h
 inoremap ( ()<C-o>h
@@ -123,9 +128,10 @@ inoremap <expr> <CR> pumvisible() ? '<C-y>' : '<CR>'
 inoremap <expr> <Tab> '<C-n>'
 inoremap <expr> <S-Tab> pumvisible() ? '<C-p>' : '<S-Tab>'
 if glob('~/.vim/pack/plugins/start/coc.nvim') != '' " for coc
-  inoremap <expr> <CR> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
-  inoremap <expr> <Tab> coc#pum#visible() ? coc#pum#next(1) : "\<Tab>"
-  inoremap <expr> <S-Tab> coc#pum#visible() ? coc#pum#prev(1) : "\<S-Tab>"
+  inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
+  inoremap <silent><expr> <S-Tab> coc#pum#visible() ? coc#pum#prev(1) : "\<S-Tab>"
+  inoremap <silent><expr> <Tab> coc#pum#visible() ? coc#pum#next(1) : "\<Tab>"
+  let g:coc_snippet_next = '<tab>'
 endif
 " func - fzf ---------------------------------------
 nnoremap <silent><leader>f :cal FzfStart()<CR>
