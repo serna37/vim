@@ -129,9 +129,13 @@ inoremap <expr> <Tab> '<C-n>'
 inoremap <expr> <S-Tab> pumvisible() ? '<C-p>' : '<S-Tab>'
 if glob('~/.vim/pack/plugins/start/coc.nvim') != '' " for coc
   inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
-  inoremap <silent><expr> <S-Tab> coc#pum#visible() ? coc#pum#prev(1) : "\<S-Tab>"
   inoremap <silent><expr> <Tab> coc#pum#visible() ? coc#pum#next(1) : "\<Tab>"
+  inoremap <silent><expr> <S-Tab> coc#pum#visible() ? coc#pum#prev(1) : "\<S-Tab>"
   let g:coc_snippet_next = '<tab>'
+endif
+if glob('~/.vim/pack/plugins/start/vim-vsnip') != '' " for vsnip
+  inoremap <silent><expr> <C-s> vsnip#available(1) ? "<Plug>(vsnip-expand-or-jump)" : "\<C-s>"
+  inoremap <silent><expr> <C-w> vsnip#jumpable(-1) ? "<Plug>(vsnip-jump-prev)" : "\<C-w>"
 endif
 " func - fzf ---------------------------------------
 nnoremap <silent><leader>f :cal FzfStart()<CR>
@@ -791,13 +795,15 @@ let s:running_cat = [
 let s:repos = [
     \ 'neoclide/coc.nvim',
     \ 'sheerun/vim-polyglot',
+    \ 'hrsh7th/vim-vsnip',
 \ ]
-" TODO want snippet, debug, runner?
+" TODO want debug, runner?
 command! PlugInstall cal PlugInstall()
 command! PlugUnInstall cal PlugUnInstall()
 fu! PlugInstall(...)
   let cmd = "repos=('".join(s:repos,"' '")."') && mkdir -p ~/.vim/pack/plugins/start && cd ~/.vim/pack/plugins/start && for v in ${repos[@]};do git clone --depth 1 https://github.com/${v} ;done"
   execute("bo terminal ++shell " . cmd)
+  let g:vsnip_snippet_dir = "~/forge"
 endf
 fu! PlugUnInstall(...)
   execute("bo terminal ++shell echo 'start' && rm -rf ~/.vim/pack && echo 'end'")
@@ -842,6 +848,11 @@ let cheat_sheet = [
 \ "- Space . : next diagnostic",
 \ "- Space run : run",
 \ "- Space sh : run current line as shell",
+\ "",
+\ "# Snippet",
+\ "- Tab : completion, coc-snippet",
+\ "- (insert mode) Ctrl s : vsnip expand next",
+\ "- (insert mode) Ctrl w : vsnip prev",
 \ "",
 \ "# Motion",
 \ "- ↑↓←→ : resize window",
