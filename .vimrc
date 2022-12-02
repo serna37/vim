@@ -131,7 +131,8 @@ if glob('~/.vim/pack/plugins/start/coc.nvim') != '' " for coc
   inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
   inoremap <silent><expr> <Tab> coc#pum#visible() ? coc#pum#next(1) : "\<Tab>"
   inoremap <silent><expr> <S-Tab> coc#pum#visible() ? coc#pum#prev(1) : "\<S-Tab>"
-  let g:coc_snippet_next = '<tab>'
+  let g:coc_snippet_next = '<Tab>'
+  let g:coc_snippet_prev = '<S-Tab>'
 endif
 if glob('~/.vim/pack/plugins/start/vim-vsnip') != '' " for vsnip
   inoremap <silent><expr> <C-s> vsnip#available(1) ? "<Plug>(vsnip-expand-or-jump)" : "\<C-s>"
@@ -850,8 +851,9 @@ let cheat_sheet = [
 \ "- Space sh : run current line as shell",
 \ "",
 \ "# Snippet",
-\ "- Tab : completion, coc-snippet",
-\ "- (insert mode) Ctrl s : vsnip expand next",
+\ "- Tab : completion, coc-snippet next",
+\ "- Shift Tab : coc-snippet prev",
+\ "- (insert mode) Ctrl s : vsnip expand / next",
 \ "- (insert mode) Ctrl w : vsnip prev",
 \ "",
 \ "# Motion",
