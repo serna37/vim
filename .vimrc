@@ -107,8 +107,9 @@ nnoremap <Leader>, <plug>(coc-diagnostic-next)
 nnoremap <Leader>. <plug>(coc-diagnostic-prev)
 " TODO 実行まだ
 nnoremap <Leader>run :echo 'TODO'<CR>
-nnoremap <Leader>sh :cal execute('top terminal ++shell eval ' . getline('.'))<CR>
+nnoremap <Leader>sh :cal execute('top terminal ++rows=10 ++shell eval ' . getline('.'))<CR>
 " edit ---------------------------------------
+nnoremap <C-s> :w<CR>
 inoremap " ""<C-o>h
 inoremap ' ''<C-o>h
 inoremap ( ()<C-o>h
@@ -168,7 +169,7 @@ fu! FzfStart() " open window
   let g:fzf_enter_keyword = []
   let g:fzf_his_result = map(split(execute('ls'), '\n'), { i,v -> split(filter(split(v, ' '), { i,v -> v != '' })[2], '"')[0] }) + map(split(execute('oldfiles'), '\n'), { i,v -> split(v, ': ')[1] })
   let g:fzf_find_result = g:fzf_his_result[0:29]
-  let g:fzf_enter_win = popup_create(g:fzf_pwd_prefix, #{ title: 'Type or <BS> / past:<Space> / MRU<>FZF:<Tab> / choose:<Enter> / end:<Esc> / chache refresh:<C-f>',  border: [], zindex: 99, minwidth: &columns/2, maxwidth: &columns/2, maxheight: 1, line: &columns/4-&columns/24, filter: function('s:fzf_refresh_result') })
+  let g:fzf_enter_win = popup_create(g:fzf_pwd_prefix, #{ title: 'Type or <BS> / past:<Space> / MRU<>FZF:<Tab> / choose:<Enter> / end:<Esc> / chache refresh:<C-f>',  border: [], zindex: 99, minwidth: &columns/2, maxwidth: &columns/2, maxheight: 1, line: &columns/4-&columns/36, filter: function('s:fzf_refresh_result') })
   cal win_execute(g:fzf_enter_win, "mapclear <buffer>")
   cal s:fzf_create_choose_win()
 endf
@@ -782,8 +783,9 @@ let s:running_cat = [
 " plugins --------------------------------------------{{{
 let s:repos = [
     \ 'neoclide/coc.nvim',
+    \ 'sheerun/vim-polyglot',
 \ ]
-" TODO have to install nodejs, yarn
+" TODO want snippet, debug, runner?
 command! PlugInstall cal PlugInstall()
 command! PlugUnInstall cal PlugUnInstall()
 fu! PlugInstall(...)
@@ -815,11 +817,14 @@ let cheat_sheet = [
 \ "# CheatSheet",
 \ "",
 \ "# Install",
-\ "- command PlugInstall : install plugin",
+\ "- call ColorInstall() : install colorscheme",
+\ "- command PlugInstall : install plugin (need nodejs, yarn)",
 \ "- >> call coc#util#install()",
 \ "- >> CocInstall coc-tsserver",
+\ "- >> CocConfig",
+\ "- >>> install ccls (need ccls)",
+\ "- >>> also see https://github.com/neoclide/coc.nvim/wiki/Language-servers#ccobjective-c",
 \ "- command PlugUnInstall : uninstall plugin, uninstall language-server",
-\ "- call ColorInstall() : install colorscheme",
 \ "",
 \ "# Language",
 \ "- Space lgd : go to definition",
