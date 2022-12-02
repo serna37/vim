@@ -112,14 +112,8 @@ nnoremap <Leader>run :echo 'TODO'<CR>
 nnoremap <Leader>sh :cal execute('top terminal ++rows=10 ++shell eval ' . getline('.'))<CR>
 " edit ---------------------------------------
 nnoremap <C-s> :w<CR>
-nnoremap x "_x
 nnoremap d "_d
-vnoremap x "_x
 vnoremap d "_d
-inoremap " ""<C-o>h
-inoremap ' ''<C-o>h
-inoremap ( ()<C-o>h
-inoremap { {}<C-o>h
 inoremap <C-h> <C-o>h
 inoremap <C-l> <C-o>l
 vnoremap <C-j> "zx"zp`[V`]
@@ -842,7 +836,7 @@ endf
 fu! Initiation()
 cal system("mkdir -p ~/forge ~/work ~/backup && touch ~/work/necronomicon.md")
 cal system("if [ -e ~/forge/cheat_sheet.md ]; then rm ~/forge/cheat_sheet.md; fi && touch ~/forge/cheat_sheet.md")
-cal system("if [ ! -e ~/forge/static_snippets.sh ]; then touch ~/forge/cheat_sheet.sh; fi")
+cal system("if [ ! -e ~/forge/static_snippets.sh ]; then touch ~/forge/static_snippets.sh; fi")
 let cheat_sheet = [
 \ "# CheatSheet",
 \ "",
