@@ -807,7 +807,7 @@ fu! PlugInstall(...)
   let g:vsnip_snippet_dir = "~/forge"
 endf
 fu! PlugUnInstall(...)
-  execute("bo terminal ++shell echo 'start' && rm -rf ~/.vim/pack && echo 'end'")
+  execute("bo terminal ++shell echo 'start' && rm -rf ~/.vim ~/.config && echo 'end'")
 endf " }}}
 
 " favorite  -----------------------------------{{{
