@@ -452,10 +452,18 @@ fu! HiFLine()
     endif
   endwhile
 
-  cal matchaddpos("QuickScopePrimary", target_arr, 16)
-  cal matchaddpos("QuickScopeSecondary", target_arr_second, 16)
-  cal matchaddpos("QuickScopeBack", target_arr_back, 16)
-  cal matchaddpos("QuickScopeBackSecond", target_arr_back_second, 16)
+  if len(target_arr) != 0
+    cal matchaddpos("QuickScopePrimary", target_arr, 16)
+  endif
+  if len(target_arr_second) != 0
+    cal matchaddpos("QuickScopeSecondary", target_arr_second, 16)
+  endif
+  if len(target_arr_back) != 0
+    cal matchaddpos("QuickScopeBack", target_arr_back, 16)
+  endif
+  if len(target_arr_back_second) != 0
+    cal matchaddpos("QuickScopeBackSecond", target_arr_back_second, 16)
+  endif
 endf
 " }}}
 
