@@ -909,7 +909,7 @@ let cheat_sheet = [
 \ "- call ColorInstall() : install colorscheme",
 \ "- command PlugInstall : install plugin (need nodejs, yarn)",
 \ "-   >> call coc#util#install()",
-\ "-   >> CocInstall coc-snippets coc-tsserver",
+\ "-   >> CocInstall coc-snippets coc-tsserver coc-json coc-go coc-clangd",
 \ "-   >> CocConfig",
 \ "-   >> also see https://github.com/neoclide/coc.nvim/wiki/Language-servers",
 \ "- command PlugUnInstall : uninstall plugin",
