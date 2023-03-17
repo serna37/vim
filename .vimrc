@@ -103,16 +103,29 @@ nnoremap <silent><C-b> :cal Scroll(0, 10)<CR>
 nnoremap <silent><C-f> :cal Scroll(1, 10)<CR>
 nnoremap <silent><Leader>t :call popup_create(term_start([&shell], #{ hidden: 1, term_finish: 'close'}), #{ border: [], minwidth: &columns/2, minheight: &lines/2 })<CR>
 " language ----------------------------------------
-nnoremap <Leader>lgd <Plug>(coc-definition)
-nnoremap <Leader>lgr <plug>(coc-references)
-nnoremap <silent><Leader>ldd :call CocAction('doHover')<CR>
-nnoremap <Leader>lrr <plug>(coc-rename)
-nnoremap <Leader>lff <Plug>(coc-format)
+nnoremap <Leader>d <Plug>(coc-definition)
+nnoremap <Leader>r <plug>(coc-references)
+nnoremap <Leader>v :cal IDEActions()<CR>
+fu! IDEActions()
+  echo 'rename: ReNaming'
+  echo 'format: Format'
+  echo 'run: Run'
+  let cmd = inputdialog(">>")
+  if cmd == ''
+    retu
+  endif
+  echo '<<'
+  if cmd == 'rename'
+    cal CocActionAsync('rename')
+  elseif cmd == 'format'
+    cal CocActionAsync('format')
+  elseif cmd == 'run'
+    exe "QuickRun -hook/time/enable 1"
+  endif
+endf
+nnoremap <Leader>? :cal CocAction('doHover')<CR>
 nnoremap <Leader>, <plug>(coc-diagnostic-next)
 nnoremap <Leader>. <plug>(coc-diagnostic-prev)
-if glob('~/.vim/pack/plugins/start/vim-quickrun') != '' " for quickrun
-  nnoremap <Leader>r :QuickRun -hook/time/enable 1<CR>
-endif
 nnoremap <Leader>sh :cal execute('top terminal ++rows=10 ++shell eval ' . getline('.'))<CR>
 " edit ---------------------------------------
 nnoremap d "_d
@@ -906,11 +919,10 @@ let cheat_sheet = [
 \ "",
 \ "# IDE",
 \ "(plugin coc)",
-\ "- Space lgd : go to definition",
-\ "- Space lgr : find references",
-\ "- Space ldd : hover document",
-\ "- Space lrr : rename",
-\ "- Space lff : format",
+\ "- Space d : go to definition",
+\ "- Space r : find references",
+\ "- Space v : other IDE functions",
+\ "- Space ? : hover document",
 \ "- Space , : prev diagnostic",
 \ "- Space . : next diagnostic",
 \ "- Tab : completion, coc-snippet next",
@@ -919,9 +931,6 @@ let cheat_sheet = [
 \ "(plugin vim-vsnip)",
 \ "- (insert mode) Ctrl s : vsnip expand / next",
 \ "- (insert mode) Ctrl w : vsnip prev",
-\ "",
-\ "(plugin vim-quickrun)",
-\ "- Space r : run",
 \ "",
 \ "# Motion Window",
 \ "- ↑↓←→ : resize window",
