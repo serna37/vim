@@ -39,7 +39,10 @@ set showmatch
 set list
 set listchars=tab:»-,trail:-,eol:↲,extends:»,precedes:«,nbsp:%
 set ambiwidth=double
-" status line
+augroup vimrcEx
+  au BufRead * if line("'\"") > 0 && line("'\"") <= line("$") |
+  \ exe "normal g`\"" | endif
+augroup END" status line
 set ruler
 set laststatus=2
 let ff_table = {'dos' : 'CRLF', 'unix' : 'LF', 'mac' : 'CR'}
@@ -116,6 +119,8 @@ nnoremap d "_d
 vnoremap d "_d
 inoremap <C-h> <C-o>h
 inoremap <C-l> <C-o>l
+inoremap <C-k> <C-o>k
+inoremap <C-j> <C-o>j
 vnoremap <C-j> "zx"zp`[V`]
 vnoremap <C-k> "zx<Up>"zP`[V`]
 " completion ---------------------------------------
@@ -133,8 +138,37 @@ if glob('~/.vim/pack/plugins/start/vim-vsnip') != '' " for vsnip
   inoremap <silent><expr> <C-s> vsnip#available(1) ? "<Plug>(vsnip-expand-or-jump)" : "\<C-s>"
   inoremap <silent><expr> <C-w> vsnip#jumpable(-1) ? "<Plug>(vsnip-jump-prev)" : "\<C-w>"
 endif
-" func - fzf ---------------------------------------
+" filer ---------------------------------------
+if glob('~/.vim/pack/plugins/start/nerdtree') != ''
+  let g:NERDTreeShowBookmarks = 1
+  let g:NERDTreeShowHidden = 1
+  nnoremap <silent><Leader>e :NERDTreeToggle<CR>
+  nnoremap <silent><Leader><Leader>e :NERDTreeFind<CR>zz
+endif
+" func - fzf ---------------------------------------batコマンドでsyntax hilight
 nnoremap <silent><leader>f :cal FzfStart()<CR>
+if glob('~/.vim/pack/plugins/start/fzf.vim') != ''
+  set rtp+=~/.vim/pack/plugins/start/fzf
+  nnoremap <silent><leader>f :Files<CR>
+  nnoremap <silent><leader>h :History<CR>
+  nnoremap <silent><leader>b :Buffers<CR>
+endif
+" airline ---------------------------------------
+if glob('~/.vim/pack/plugins/start/vim-airline') != ''
+  let g:airline_theme = 'deus'
+  let g:airline#extensions#tabline#enabled = 1
+  let g:airline_powerline_fonts = 1
+  let g:airline_highlighting_cache = 1
+  function! CloseBuf()
+    let l:now_b = bufnr('%')
+    bn
+    execute('bd ' . now_b)
+  endfunction
+  nnoremap <silent><C-p> :bn<CR>
+  nnoremap <silent><C-q> :bp<CR>
+  nnoremap <silent><Leader>x :call CloseBuf()<CR>
+endif
+
 " func - grep ---------------------------------------
 nnoremap <silent><Leader>g :cal GrepChoseMode()<CR>
 " func - god speed ---------------------------------------
@@ -797,12 +831,20 @@ let s:repos = [
     \ 'sheerun/vim-polyglot',
     \ 'hrsh7th/vim-vsnip',
     \ 'thinca/vim-quickrun',
+    \ 'preservim/nerdtree',
+    \ 'junegunn/fzf.vim',
+    \ 'junegunn/fzf',
+    \ 'vim-airline/vim-airline',
+    \ 'vim-airline/vim-airline-themes',
+    \ 'powerline/fonts',
+    \ 'ryanoasis/vim-devicons',
+    \ 'ryanoasis/nerd-fonts',
 \ ]
 " TODO want debug, runner?
 command! PlugInstall cal PlugInstall()
 command! PlugUnInstall cal PlugUnInstall()
 fu! PlugInstall(...)
-  let cmd = "repos=('".join(s:repos,"' '")."') && mkdir -p ~/.vim/pack/plugins/start && cd ~/.vim/pack/plugins/start && for v in ${repos[@]};do git clone --depth 1 https://github.com/${v} ;done"
+  let cmd = "repos=('".join(s:repos,"' '")."') && mkdir -p ~/.vim/pack/plugins/start && cd ~/.vim/pack/plugins/start && for v in ${repos[@]};do git clone --depth 1 https://github.com/${v} ;done" . " && fzf/install --no-key-bindings --completion --no-bash --no-zsh --no-fish" . " && sh fonts/install.sh" . " && sh nerd-fonts/install.sh && rm -rf nerd-fonts"
   execute("bo terminal ++shell " . cmd)
 endf
 let g:vsnip_snippet_dir = "~/forge"
@@ -886,7 +928,7 @@ let cheat_sheet = [
 \ "- Ctrl + hjkl : move window forcus",
 \ "- Ctrl + udfb : comfortable scroll",
 \ "- (visual choose) Ctrl jk : move line text",
-\ "- (insert mode) Ctrl hl : move cursor",
+\ "- (insert mode) Ctrl hljk : move cursor",
 \ "- Space t : terminal popup",
 \ "",
 \ "# Search",
