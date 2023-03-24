@@ -102,7 +102,7 @@ nnoremap <silent><C-u> :cal Scroll(0, 25)<CR>
 nnoremap <silent><C-d> :cal Scroll(1, 25)<CR>
 nnoremap <silent><C-b> :cal Scroll(0, 10)<CR>
 nnoremap <silent><C-f> :cal Scroll(1, 10)<CR>
-nnoremap <silent><Leader>t :bo terminal ++rows=15<CR>
+nnoremap <silent><Leader>t :bo terminal ++rows=10<CR>
 nnoremap <silent><Leader>tp :call popup_create(term_start([&shell], #{ hidden: 1, term_finish: 'close'}), #{ border: [], minwidth: &columns/2, minheight: &lines/2 })<CR>
 " language ----------------------------------------
 nnoremap <Leader>d <Plug>(coc-definition)
