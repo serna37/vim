@@ -168,6 +168,18 @@ if glob('~/.vim/pack/plugins/start/fzf.vim') != ''
   nnoremap <silent><leader>f :Files<CR>
   nnoremap <silent><leader>h :History<CR>
   nnoremap <silent><leader>b :Buffers<CR>
+  " if git repo, ref .gitignore
+  " TODO
+  "let pwd = system('pwd')
+  "exe 'lcd %:h'
+  let gitroot = system('git rev-parse --show-superproject-working-tree --show-toplevel')
+  "exe 'lcd ' . pwd
+  "retu !v:shell_error ? gitroot[0:strlen(gitroot)-2] . '/*' : './*'
+  if v:shell_error
+    nnoremap <silent><leader>f :Files<CR>
+  else
+    nnoremap <silent><leader>f :GFiles<CR>
+  endif
 endif
 " airline ---------------------------------------
 if glob('~/.vim/pack/plugins/start/vim-airline') != ''
