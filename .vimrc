@@ -102,7 +102,8 @@ nnoremap <silent><C-u> :cal Scroll(0, 25)<CR>
 nnoremap <silent><C-d> :cal Scroll(1, 25)<CR>
 nnoremap <silent><C-b> :cal Scroll(0, 10)<CR>
 nnoremap <silent><C-f> :cal Scroll(1, 10)<CR>
-nnoremap <silent><Leader>t :call popup_create(term_start([&shell], #{ hidden: 1, term_finish: 'close'}), #{ border: [], minwidth: &columns/2, minheight: &lines/2 })<CR>
+nnoremap <silent><Leader>t :bo terminal ++rows=15<CR>
+nnoremap <silent><Leader>tp :call popup_create(term_start([&shell], #{ hidden: 1, term_finish: 'close'}), #{ border: [], minwidth: &columns/2, minheight: &lines/2 })<CR>
 " language ----------------------------------------
 nnoremap <Leader>d <Plug>(coc-definition)
 nnoremap <Leader>r <plug>(coc-references)
@@ -169,12 +170,7 @@ if glob('~/.vim/pack/plugins/start/fzf.vim') != ''
   nnoremap <silent><leader>h :History<CR>
   nnoremap <silent><leader>b :Buffers<CR>
   " if git repo, ref .gitignore
-  " TODO
-  "let pwd = system('pwd')
-  "exe 'lcd %:h'
   let gitroot = system('git rev-parse --show-superproject-working-tree --show-toplevel')
-  "exe 'lcd ' . pwd
-  "retu !v:shell_error ? gitroot[0:strlen(gitroot)-2] . '/*' : './*'
   if v:shell_error
     nnoremap <silent><leader>f :Files<CR>
   else
@@ -951,7 +947,8 @@ let cheat_sheet = [
 \ "- Ctrl + udfb : comfortable scroll",
 \ "- (visual choose) Ctrl jk : move line text",
 \ "- (insert mode) Ctrl hljk : move cursor",
-\ "- Space t : terminal popup",
+\ "- Space t : terminal",
+\ "- Space tp : terminal popup",
 \ "",
 \ "# Search",
 \ "- Space q : clear search highlight",
