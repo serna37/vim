@@ -28,6 +28,7 @@ set foldlevelstart=0
 set foldcolumn=1
 " view
 syntax on
+set re=0
 set background=dark
 set scrolloff=5
 set title
@@ -117,8 +118,10 @@ fu! IDEActions()
   echo '<<'
   if cmd == 'rename'
     cal CocActionAsync('rename')
+    echo 'ok'
   elseif cmd == 'format'
     cal CocActionAsync('format')
+    echo 'ok'
   elseif cmd == 'run'
     exe "QuickRun -hook/time/enable 1"
   endif
@@ -894,6 +897,7 @@ fu! Necronomicon(...) abort
     elseif mode == "rs"
       cal feedkeys("\<CR>")
       cal feedkeys(":cal RunCatStop()\<CR>")
+      cal popup_clear()
     endif
   endif
 endf
