@@ -1,6 +1,10 @@
 # setup
 curl https://raw.githubusercontent.com/serna37/vim/master/.vimrc > ~/.vimrc
 
+or (exclude plugin mode)
+curl https://raw.githubusercontent.com/serna37/vim/master/.vimrc_monolothic > ~/.vimrc
+
+
 ```initiation.vim
 <Space>n Azathoth<CR>
 ```

@@ -46,6 +46,18 @@ augroup vimrcEx
 augroup END" status line
 set ruler
 set laststatus=2
+let ff_table = {'dos' : 'CRLF', 'unix' : 'LF', 'mac' : 'CR'}
+fu! SetStatusLine()
+  hi User1 cterm=bold ctermfg=7 ctermbg=4 gui=bold guibg=#70a040 guifg=#ffffff
+  hi User2 cterm=bold ctermfg=2 ctermbg=0 gui=bold guibg=#4070a0 guifg=#ffffff
+  hi User3 cterm=bold ctermbg=5 ctermfg=0
+  hi User4 cterm=bold ctermfg=7 ctermbg=56 gui=bold guibg=#a0b0c0 guifg=black
+  hi User5 cterm=bold ctermfg=7 ctermbg=5 gui=bold guibg=#0070e0 guifg=#ffffff
+  let dict = {'i': '1* INSERT', 'n': '2* NORMAL', 'R': '3* REPLACE', 'c': '4* COMMAND', 't': '4* TERMIAL', 'v': '5* VISUAL', 'V': '5* VISUAL', "\<C-v>": '5* VISUAL'}
+  let mode = match(keys(dict), mode()) != -1 ? dict[mode()] : '5* SP'
+  retu '%' . mode . ' %* %<%F%m%r%h%w%=%2* %p%% %l/%L %02v [%{&fenc!=""?&fenc:&enc}][%{ff_table[&ff]}] %*'
+endf
+set statusline=%!SetStatusLine()
 " explorer
 set splitright
 filetype plugin on
@@ -72,9 +84,9 @@ set completeopt=menuone,noinsert,preview,popup
 " {{{
 let g:mapleader = "\<Space>"
 " search ---------------------------------------
-nnoremap <silent>* *N<Plug>(quickhl-manual-this)
-nnoremap <silent># *N<Plug>(quickhl-manual-this)
-nnoremap <silent><Leader>q <Plug>(quickhl-manual-reset):noh<CR>
+nnoremap <silent>* *N
+nnoremap <silent># *N
+nnoremap <silent><Leader>q :noh<CR>
 " move ---------------------------------------
 nnoremap j gj
 nnoremap k gk
@@ -184,9 +196,9 @@ endif
 " func - grep ---------------------------------------
 nnoremap <silent><Leader>g :cal GrepChoseMode()<CR>
 " func - god speed ---------------------------------------
-nnoremap <silent><Tab> :cal MarkHank("down", g:mark_words_auto)<CR>
-nnoremap <silent><S-Tab> :cal MarkHank("up", g:mark_words_auto)<CR>
-nnoremap <silent><Leader>w :cal MarkFieldOut()<CR>
+nnoremap <silent><Tab> :cal MarkHank("down", g:mark_words_auto)<CR>:cal FModeActivate()<CR>
+nnoremap <silent><S-Tab> :cal MarkHank("up", g:mark_words_auto)<CR>:cal FModeActivate()<CR>
+nnoremap <silent><Leader>w :cal MarkFieldOut()<CR>:cal FModeDeactivate()<CR>
 " func - mark ---------------------------------------
 nnoremap <silent><Leader>m :cal MarkMenu()<CR>
 nnoremap <silent>mm :cal Marking()<CR>
@@ -194,8 +206,6 @@ nnoremap <silent>mj :cal MarkHank("down", g:mark_words_manual)<CR>
 nnoremap <silent>mk :cal MarkHank("up", g:mark_words_manual)<CR>
 nnoremap <silent>mw :cal HiSet()<CR>
 " favorite ---------------------------------------
-nmap <Leader>z :Goyo<CR>:set number<CR>
-nmap <Leader>l :Limelight!!<CR>
 nnoremap <Leader>n :Necronomicon 
 nnoremap <Leader><Leader><Leader> :15sp ~/forge/cheat_sheet.md<CR>
 " }}}
@@ -203,6 +213,116 @@ nnoremap <Leader><Leader><Leader> :15sp ~/forge/cheat_sheet.md<CR>
 " ========================================
 " Function
 " ========================================
+" fzf------------------------------------------{{{
+let g:not_path_arr = ['"*.vim/*"', '"*.git/*"', '"*.npm/*"', '"*.yarn/*"', '"*.m2/*"', '"*.class"', '"*.vscode/*"', '"*.config/*"', '"*Applications/*"', '"*Library/*"', '"*Music/*"', '"*Pictures/*"', '"*Movies/*"', '"*AppData/*"', '"*OneDrive/*"', '"*Videos/*"']
+let g:fzf_find_cmd = 'find . -type f -name "*" -not -path ' . join(g:not_path_arr, ' -not -path ')
+let g:fzf_searched_dir = execute('pwd')[1:] " first char is ^@, so trim
+let g:fzf_find_result_tmp = []
+
+fu! FzfStart() " open window
+  if stridx(execute('pwd')[1:], g:fzf_searched_dir) == -1 || len(g:fzf_find_result_tmp) == 0
+    cal s:fzf_re_find()
+  endif
+  let g:fzf_mode = 'his'
+  let g:fzf_searching_zone = '(*^-^) BUF & MRU'
+  let g:fzf_pwd_prefix = 'pwd:[' . execute('pwd')[1:] . ']>>'
+  let g:fzf_enter_keyword = []
+  let g:fzf_his_result = map(split(execute('ls'), '\n'), { i,v -> split(filter(split(v, ' '), { i,v -> v != '' })[2], '"')[0] }) + map(split(execute('oldfiles'), '\n'), { i,v -> split(v, ': ')[1] })
+  let g:fzf_find_result = g:fzf_his_result[0:29]
+  let g:fzf_enter_win = popup_create(g:fzf_pwd_prefix, #{ title: 'Type or <BS> / past:<Space> / MRU<>FZF:<Tab> / choose:<Enter> / end:<Esc> / chache refresh:<C-f>',  border: [], zindex: 99, minwidth: &columns/2, maxwidth: &columns/2, maxheight: 1, line: &columns/4-&columns/36, filter: function('s:fzf_refresh_result') })
+  cal win_execute(g:fzf_enter_win, "mapclear <buffer>")
+  cal s:fzf_create_choose_win()
+endf
+fu! s:fzf_create_choose_win()
+  let g:fzf_c_idx = 0
+  let g:fzf_choose_win = popup_menu(g:fzf_find_result, #{ title: g:fzf_searching_zone, border: [], zindex: 98, minwidth: &columns/2, maxwidth: &columns/2, minheight: 2, maxheight: &lines/2, filter: function('s:fzf_choose') })
+  cal win_execute(g:fzf_enter_win, "mapclear <buffer>")
+endf
+
+fu! s:fzf_re_find() " async find command
+  cal RunCat()
+  let g:fzf_find_result_tmp = []
+  let g:fzf_searched_dir = execute('pwd')[1:]
+  echo 'find files in ['.g:fzf_searched_dir.'] and chache ...'
+  cal job_start(g:fzf_find_cmd, {'out_cb': function('s:fzf_find_start'), 'close_cb': function('s:fzf_find_end')})
+endf
+fu! s:fzf_find_start(ch, msg) abort
+  let g:fzf_find_result_tmp = add(g:fzf_find_result_tmp, a:msg)
+endf
+fu! s:fzf_find_end(ch) abort
+  echo 'find files in ['.g:fzf_searched_dir.'] and chache is complete!!'
+  cal RunCatStop()
+endf
+
+fu! s:fzf_refresh_result(winid, key) abort " event to draw search result
+  if a:key is# "\<Esc>"
+    cal popup_close(g:fzf_enter_win)
+    cal popup_close(g:fzf_choose_win)
+    retu 1
+  elseif a:key is# "\<CR>"
+    call popup_close(g:fzf_enter_win)
+    retu 1
+  elseif a:key is# "\<C-f>"
+    cal s:fzf_re_find()
+  elseif a:key is# "\<Space>"
+    for i in range(0,strlen(@")-1)
+      let g:fzf_enter_keyword = add(g:fzf_enter_keyword, strpart(@",i,1))
+    endfor
+  elseif a:key is# "\<Tab>"
+    let g:fzf_mode = g:fzf_mode == 'his' ? 'fzf' : 'his'
+    let g:fzf_searching_zone = g:fzf_mode == 'his' ? '(*^-^) BUF & MRU' : '(*^-^) FZF [' . g:fzf_searched_dir . ']'
+    cal popup_close(g:fzf_choose_win)
+    if g:fzf_mode == 'his'
+      let g:fzf_find_result = len(g:fzf_enter_keyword) != 0 ? matchfuzzy(g:fzf_his_result, join(g:fzf_enter_keyword, '')) : g:fzf_his_result
+    else
+      let g:fzf_find_result = len(g:fzf_enter_keyword) != 0 ? matchfuzzy(g:fzf_find_result_tmp, join(g:fzf_enter_keyword, '')) : g:fzf_find_result_tmp
+    endif
+    let g:fzf_find_result = g:fzf_find_result[0:29]
+    cal s:fzf_create_choose_win()
+    retu 1
+  elseif a:key is# "\<BS>" && len(g:fzf_enter_keyword) > 0
+    unlet g:fzf_enter_keyword[len(g:fzf_enter_keyword)-1]
+  elseif a:key is# "\<BS>" && len(g:fzf_enter_keyword) == 0
+    " noop
+  elseif strtrans(a:key) == "<80><fd>`"
+    " noop (for polyglot bug adhoc)
+    retu
+  else
+    let g:fzf_enter_keyword = add(g:fzf_enter_keyword, a:key)
+  endif
+
+  if g:fzf_mode == 'his'
+    let g:fzf_find_result = len(g:fzf_enter_keyword) != 0 ? matchfuzzy(g:fzf_his_result, join(g:fzf_enter_keyword, '')) : g:fzf_his_result
+  else
+    let g:fzf_find_result = len(g:fzf_enter_keyword) != 0 ? matchfuzzy(g:fzf_find_result_tmp, join(g:fzf_enter_keyword, '')) : g:fzf_find_result_tmp
+  endif
+
+  cal setbufline(winbufnr(g:fzf_enter_win), 1, g:fzf_pwd_prefix . join(g:fzf_enter_keyword, ''))
+  cal setbufline(winbufnr(g:fzf_choose_win), 1, map(range(1,30), { i,v -> '' }))
+  cal setbufline(winbufnr(g:fzf_choose_win), 1, g:fzf_find_result[0:29]) " re view only first 30 files
+  retu a:key is# "x" || a:key is# "\<Space>" ? 1 : popup_filter_menu(a:winid, a:key)
+endf
+
+fu! s:fzf_choose(winid, key) abort
+  if a:key is# 'j'
+    let g:fzf_c_idx = g:fzf_c_idx == len(g:fzf_find_result)-1 ? len(g:fzf_find_result)-1 : g:fzf_c_idx + 1
+  elseif a:key is# 'k'
+    let g:fzf_c_idx = g:fzf_c_idx == 0 ? 0 : g:fzf_c_idx - 1
+  elseif a:key is# "\<CR>"
+    retu s:fzf_open(a:winid, 'e', g:fzf_find_result[g:fzf_c_idx])
+  elseif a:key is# "\<C-v>"
+    retu s:fzf_open(a:winid, 'vnew', g:fzf_find_result[g:fzf_c_idx])
+  elseif a:key is# "\<C-t>"
+    retu s:fzf_open(a:winid, 'tabnew', g:fzf_find_result[g:fzf_c_idx])
+  endif
+  retu popup_filter_menu(a:winid, a:key)
+endf
+fu! s:fzf_open(winid, op, f) abort
+  cal popup_close(a:winid)
+  exe a:op a:f
+  retu 1
+  endf " }}}
+
   " grep ----------------------------------------{{{
 fu! GrepChoseMode() abort
   echo 'mode 0: This File'
@@ -257,6 +377,153 @@ fu! CurrentGitRoot() " current git root(no git -> current directory)
   exe 'lcd ' . pwd
   retu !v:shell_error ? gitroot[0:strlen(gitroot)-2] . '/*' : './*'
 endf " }}}
+
+" highlight -----------------------------------{{{
+" TODO cword highlight disable
+" on word, bright
+"aug auto_hl_cword
+"  au!
+"  au BufEnter,CmdwinEnter * cal HiCwordStart()
+"aug END
+"fu! HiCwordStart()
+"  aug QuickhlCword
+"    au!
+"    au! CursorMoved <buffer> cal HiCwordR()
+"    au! ColorScheme * execute("hi link QuickhlCword ColorColumn")
+"  aug END
+"  execute("hi link QuickhlCword ColorColumn")
+"endf
+"
+"fu! HiCwordR()
+"  silent! 2match none
+"  exe "2mat QuickhlCword /\\\<". escape(expand('<cword>'), '\/~ .*^[''$') . "\\\>/"
+"endf
+
+" on search, multi highlight
+aug QuickhlManual
+  au!
+  au! ColorScheme * cal HlIni()
+aug END
+let g:search_hl= [
+    \ "cterm=bold ctermfg=16 ctermbg=153 gui=bold guifg=#ffffff guibg=#0a7383",
+    \ "cterm=bold ctermfg=7  ctermbg=1   gui=bold guibg=#a07040 guifg=#ffffff",
+    \ "cterm=bold ctermfg=7  ctermbg=2   gui=bold guibg=#4070a0 guifg=#ffffff",
+    \ "cterm=bold ctermfg=7  ctermbg=3   gui=bold guibg=#40a070 guifg=#ffffff",
+    \ "cterm=bold ctermfg=7  ctermbg=4   gui=bold guibg=#70a040 guifg=#ffffff",
+    \ "cterm=bold ctermfg=7  ctermbg=5   gui=bold guibg=#0070e0 guifg=#ffffff",
+    \ "cterm=bold ctermfg=7  ctermbg=6   gui=bold guibg=#007020 guifg=#ffffff",
+    \ "cterm=bold ctermfg=7  ctermbg=21  gui=bold guibg=#d4a00d guifg=#ffffff",
+    \ "cterm=bold ctermfg=7  ctermbg=22  gui=bold guibg=#06287e guifg=#ffffff",
+    \ "cterm=bold ctermfg=7  ctermbg=45  gui=bold guibg=#5b3674 guifg=#ffffff",
+    \ "cterm=bold ctermfg=7  ctermbg=16  gui=bold guibg=#4c8f2f guifg=#ffffff",
+    \ "cterm=bold ctermfg=7  ctermbg=50  gui=bold guibg=#1060a0 guifg=#ffffff",
+    \ "cterm=bold ctermfg=7  ctermbg=56  gui=bold guibg=#a0b0c0 guifg=black",
+    \ ]
+let g:now_hi = 0
+fu! HlIni()
+  for v in g:search_hl
+    exe "hi UserSearchHi" . index(g:search_hl, v) . " " . v
+  endfor
+endf
+cal HlIni()
+
+fu! HiReset(group_name)
+  let already = filter(getmatches(), {i, v -> v['group'] == a:group_name})
+  if len(already) > 0
+    cal matchdelete(already[0]['id'])
+  endif
+endf
+
+fu! HiSet() abort " set highlight on all window in tab
+  " TODO reset cword highlight
+  "cal HiReset('QuickhlCword')
+  let current_win = win_getid()
+  let cw = expand('<cword>')
+  windo cal matchadd("UserSearchHi" . g:now_hi, cw, 15)
+  cal win_gotoid(current_win) " return current window
+  let g:now_hi = g:now_hi >= len(g:search_hl)-1 ? 0 : g:now_hi + 1
+endf " }}}
+
+" quick-scope ---------------------------------{{{
+aug qs_colors
+  au!
+  au ColorScheme * highlight QuickScopePrimary cterm=bold ctermfg=196 ctermbg=16 guifg=#66D9EF guibg=#000000
+  au ColorScheme * highlight QuickScopeSecondary ctermfg=161 ctermbg=16 guifg=#66D9EF guibg=#000000
+  au ColorScheme * highlight QuickScopeBack ctermfg=51 ctermbg=16 guifg=#66D9EF guibg=#000000
+  au ColorScheme * highlight QuickScopeBackSecond ctermfg=25 ctermbg=16 guifg=#66D9EF guibg=#000000
+aug END
+
+fu! FModeActivate()
+  aug f_scope
+    au!
+    au CursorMoved * cal HiFLine()
+  aug End
+  cal HiFLine()
+endf
+
+fu! FModeDeactivate()
+  aug f_scope
+    au!
+  aug End
+  let current_win = win_getid()
+  windo cal clearmatches() " reset highlight on all window in tab
+  cal win_gotoid(current_win) " return current window
+endf
+
+let g:fmode_flg = 1
+fu! FModeToggle(flg)
+  let g:fmode_flg = a:flg
+endf
+
+fu! HiFLine()
+  if g:fmode_flg == 0
+    retu
+  endif
+  cal HiReset('QuickScopePrimary')
+  cal HiReset('QuickScopeSecondary')
+  cal HiReset('QuickScopeBack')
+  cal HiReset('QuickScopeBackSecond')
+
+  let line = line('.')
+  let col = col('.')
+  let now_line = getline('.')
+
+  let target_arr = []
+  let target_arr_second = []
+  let target_arr_back = []
+  let target_arr_back_second = []
+
+  let offset = 0
+  while offset != -1
+    let start = matchstrpos(now_line, '\<.', offset)
+    let offset = matchstrpos(now_line, '.\>', offset)[2]
+    let ashiato = start[1] >= col ? now_line[col:start[1]-1] : now_line[start[2]+1:col]
+    if stridx(ashiato, start[0]) == -1
+      cal add(start[1] >= col ? target_arr : target_arr_back, [line, start[2]]) " uniq char
+    elseif start[2] > 0
+      let next_char = now_line[start[2]:start[2]]
+      if start[1] >= col
+        cal add(stridx(ashiato, next_char) == -1 ? target_arr : target_arr_second, [line, start[2]+1]) " uniq char
+      else
+        cal add(stridx(ashiato, next_char) == -1 ? target_arr_back  : target_arr_back_second , [line, start[2]+1])
+      endif
+    endif
+  endwhile
+
+  if len(target_arr) != 0
+    cal matchaddpos("QuickScopePrimary", target_arr, 16)
+  endif
+  if len(target_arr_second) != 0
+    cal matchaddpos("QuickScopeSecondary", target_arr_second, 16)
+  endif
+  if len(target_arr_back) != 0
+    cal matchaddpos("QuickScopeBack", target_arr_back, 16)
+  endif
+  if len(target_arr_back_second) != 0
+    cal matchaddpos("QuickScopeBackSecond", target_arr_back_second, 16)
+  endif
+endf
+" }}}
 
 " mark ----------------------------------------{{{
 let g:mark_words = 'abcdefghijklmnopqrstuvwxyz'
@@ -449,6 +716,7 @@ endf
 fu! ScrollToggle(flg)
   set cursorcolumn!
   set cursorline!
+  cal FModeToggle(a:flg)
 endf " }}}
 
 " zihou timer ---------------------------------------{{{
@@ -473,6 +741,7 @@ fu! ChangeColor()
     execute('colorscheme ' . s:colorscheme_arr[localtime() % len(s:colorscheme_arr)])
   else
     execute('colorscheme ' . s:colorscheme_arr_default[localtime() % len(s:colorscheme_arr_default)])
+    cal SetStatusLine()
   endif
 endf
 cal ChangeColor()
@@ -596,11 +865,14 @@ let s:repos = [
     \ 'thinca/vim-quickrun',
     \ 'puremourning/vimspector',
     \ 'unblevable/quick-scope',
+    \ 'yuttie/comfortable-motion.vim',
+    \ 'simeji/winresizer',
     \ 'obcat/vim-hitspop',
     \ 't9md/vim-quickhl',
     \ 'junegunn/goyo.vim',
     \ 'junegunn/limelight.vim',
 \ ]
+" TODO want debug, runner?
 command! PlugInstall cal PlugInstall()
 command! PlugUnInstall cal PlugUnInstall()
 fu! PlugInstall(...)
@@ -729,4 +1001,3 @@ endfor
 echo 'initiation end'
 echo 'help to Space*3'
 endf " }}}
-
