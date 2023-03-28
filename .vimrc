@@ -851,18 +851,26 @@ let s:running_cat = [
 
 " plugins --------------------------------------------{{{
 let s:repos = [
-    \ 'neoclide/coc.nvim',
-    \ 'sheerun/vim-polyglot',
-    \ 'hrsh7th/vim-vsnip',
-    \ 'thinca/vim-quickrun',
-    \ 'preservim/nerdtree',
-    \ 'junegunn/fzf.vim',
-    \ 'junegunn/fzf',
+    \ 'powerline/fonts',
+    \ 'ryanoasis/nerd-fonts',
+    \ 'ryanoasis/vim-devicons',
     \ 'vim-airline/vim-airline',
     \ 'vim-airline/vim-airline-themes',
-    \ 'powerline/fonts',
-    \ 'ryanoasis/vim-devicons',
-    \ 'ryanoasis/nerd-fonts',
+    \ 'sheerun/vim-polyglot',
+    \ 'preservim/nerdtree',
+    \ 'Xuyuanp/nerdtree-git-plugin',
+    \ 'junegunn/fzf',
+    \ 'junegunn/fzf.vim',
+    \ 'neoclide/coc.nvim',
+    \ 'thinca/vim-quickrun',
+    \ 'puremourning/vimspector',
+    \ 'unblevable/quick-scope',
+    \ 'yuttie/comfortable-motion.vim',
+    \ 'simeji/winresizer',
+    \ 'obcat/vim-hitspop',
+    \ 't9md/vim-quickhl',
+    \ 'junegunn/goyo.vim',
+    \ 'junegunn/limelight.vim',
 \ ]
 " TODO want debug, runner?
 command! PlugInstall cal PlugInstall()
