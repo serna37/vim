@@ -932,6 +932,8 @@ let cheat_sheet = [
 \ "-   >> CocInstall coc-snippets coc-tsserver coc-json coc-go coc-clangd",
 \ "-   >> CocConfig",
 \ "-   >> also see https://github.com/neoclide/coc.nvim/wiki/Language-servers",
+\ "-   >> also snippet setting ref https://qiita.com/kfuku1634_dev/items/25f5efd503c773a58056",
+\ "-   >> :CocCommand snippets.editSnippets",
 \ "- command PlugUnInstall : uninstall plugin",
 \ "",
 \ "# IDE",
