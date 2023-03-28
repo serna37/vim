@@ -186,7 +186,7 @@ nnoremap <silent><Leader>g :cal GrepChoseMode()<CR>
 " func - god speed ---------------------------------------
 nnoremap <silent><Tab> :cal MarkHank("down", g:mark_words_auto)<CR>
 nnoremap <silent><S-Tab> :cal MarkHank("up", g:mark_words_auto)<CR>
-nnoremap <silent><Leader>w :cal MarkFieldOut()<CR>
+nnoremap <silent><Leader>w <plug>(QuickScopeToggle):cal MarkFieldOut()<CR>
 " func - mark ---------------------------------------
 nnoremap <silent><Leader>m :cal MarkMenu()<CR>
 nnoremap <silent>mm :cal Marking()<CR>
@@ -672,10 +672,6 @@ let cheat_sheet = [
 \ "- Space . : next diagnostic",
 \ "- Tab : completion, coc-snippet next",
 \ "- Shift Tab : coc-snippet prev",
-\ "",
-\ "(plugin vim-vsnip)",
-\ "- (insert mode) Ctrl s : vsnip expand / next",
-\ "- (insert mode) Ctrl w : vsnip prev",
 \ "",
 \ "# Motion Window",
 \ "- ↑↓←→ : resize window",
