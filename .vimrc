@@ -381,6 +381,7 @@ let s:coc_extentions = [
     \ 'coc-tsserver',
     \ 'coc-clangd',
     \ 'coc-go',
+    \ 'coc-python',
 \ ]
 
 fu! PlugInstall(...)
