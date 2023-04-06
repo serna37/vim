@@ -49,6 +49,7 @@ for vsnip, this is "create snippet" snippet
 - ↑↓←→ : resize window
 - Space t : terminal (bottom)
 - Space tp : terminal (popup window)
+- Space z : zen mode
 
 # MOTION
 - tab / Shift-tab : 5row jump

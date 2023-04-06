@@ -116,6 +116,12 @@ nnoremap <Down> 4<C-w>+
 nnoremap <silent><Leader>t :bo terminal ++rows=10<CR>
 nnoremap <silent><Leader>tp :call popup_create(term_start([&shell], #{ hidden: 1, term_finish: 'close'}), #{ border: [], minwidth: &columns/2, minheight: &lines/2 })<CR>
 
+" zen
+nnoremap <silent><Leader>z :Goyo<CR>
+let g:limelight_conceal_ctermfg = 'gray'
+autocmd! User GoyoEnter Limelight
+autocmd! User GoyoLeave Limelight!
+
 " MOVE ============================================-
 " row-move
 nnoremap j gj
@@ -356,6 +362,8 @@ let s:repos = [
     \ 'unblevable/quick-scope',
     \ 'obcat/vim-hitspop',
     \ 't9md/vim-quickhl',
+    \ 'junegunn/goyo.vim',
+    \ 'junegunn/limelight.vim',
 \ ]
 
 " extentions
