@@ -190,10 +190,11 @@ nnoremap <Leader>d <Plug>(coc-definition)
 nnoremap <Leader>r <plug>(coc-references)
 nnoremap <Leader>v :cal IDEActions()<CR>
 fu! IDEActions()
-  echo 'o: Outline'
   echo 'r: ReName'
   echo 'f: Format'
+  echo 'o: Outline'
   echo 'run: Run'
+  echo 's: Snippets'
   let cmd = inputdialog(">>")
   if cmd == ''
     retu
@@ -210,6 +211,8 @@ fu! IDEActions()
   elseif cmd == 'run'
     exe "QuickRun -hook/time/enable 1"
     echo 'ok'
+  elseif cmd == 's'
+    execute("CocCommand snippets.editSnippets")
   endif
 endf
 nnoremap <Leader>? :cal CocAction('doHover')<CR>
@@ -408,5 +411,4 @@ endf
 command! PlugInstall cal PlugInstall()
 command! PlugInstallCoc cal PlugInstallCoc()
 command! PlugUnInstall cal PlugUnInstall()
-
 
