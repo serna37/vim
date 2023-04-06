@@ -1,13 +1,17 @@
 # setup
+```setup_command.sh
 curl https://raw.githubusercontent.com/serna37/vim/master/.vimrc > ~/.vimrc
-action detail -> show 
+```
 
+and execute command
 ```initiation.vim
 :PlugInstall
-reboot
+↓after reboot
 :PlugInstallCoc
 ```
 
+<details>
+<summary>(old) monolithic version</summary>
 # monolithic version
 or (exclude plugin mode)
 curl https://raw.githubusercontent.com/serna37/vim/master/monolithic.vim > ~/.vimrc
@@ -34,6 +38,8 @@ for vsnip, this is "create snippet" snippet
 }
 ```
 
+</details>
+
 # action cheat sheet
 
 # WINDOW
@@ -57,8 +63,8 @@ for vsnip, this is "create snippet" snippet
 - Space b : fuzzy finder buffer
 
 ## word serch
-- * : search word (original vim but dont move cursor)
-- # : search word (original vim but dont move cursor)
+- \* : search word (original vim but dont move cursor)
+- \# : search word (original vim but dont move cursor)
 - Space q : quit search highlight
 - Space s : grep interactive from current buffer (coc-lists)
 - Space g : grep interactive Recursive (ripgrep by fzf.vim)
@@ -79,5 +85,3 @@ for vsnip, this is "create snippet" snippet
 - Space , : prev diagnostic
 - Space . : next diagnostic
 - Space sh : run current line as shell
-
-
