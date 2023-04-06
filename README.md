@@ -1,11 +1,17 @@
 # setup
 curl https://raw.githubusercontent.com/serna37/vim/master/.vimrc > ~/.vimrc
 
-or (exclude plugin mode)
-curl https://raw.githubusercontent.com/serna37/vim/master/.vimrc_monolothic > ~/.vimrc
-
-
 ```initiation.vim
+:PlugInstall
+reboot
+:PlugInstallCoc
+```
+
+# monolithic version
+or (exclude plugin mode)
+curl https://raw.githubusercontent.com/serna37/vim/master/monolithic.vim > ~/.vimrc
+
+```monolithic initiation.vim
 <Space>n Azathoth<CR>
 ```
 
