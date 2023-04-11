@@ -106,6 +106,11 @@ nnoremap <C-l> <C-w>l
 nnoremap <C-k> <C-w>k
 nnoremap <C-j> <C-w>j
 
+tnoremap <C-h> <C-w>h
+tnoremap <C-l> <C-w>l
+tnoremap <C-k> <C-w>k
+tnoremap <C-j> <C-w>j
+
 " window resize
 nnoremap <Left> 4<C-w><
 nnoremap <Right> 4<C-w>>
