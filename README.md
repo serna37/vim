@@ -85,4 +85,4 @@ for vsnip, this is "create snippet" snippet
 - Space ? : hover document
 - Space , : prev diagnostic
 - Space . : next diagnostic
-- Space sh : run current line as shell
+- (disabled) Space sh : run current line as shell
