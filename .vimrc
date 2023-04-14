@@ -259,7 +259,6 @@ endf
 fu! AllPush() abort
   let w = inputdialog("commit message>>")
   echo '<<'
-  "cal system('git add . && git commit -m "'.w.'" && git push')
   cal execute('top terminal ++rows=10 ++shell git add . && git commit -m "'.w.'" && git push')
 endf
 " }}}
