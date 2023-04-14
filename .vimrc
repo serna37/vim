@@ -202,12 +202,14 @@ nnoremap <Leader>d <Plug>(coc-definition)
 nnoremap <Leader>r <plug>(coc-references)
 nnoremap <Leader>v :cal IDEActions()<CR>
 fu! IDEActions()
+  echo '==================================================================='
   echo 'r  : [ReName] rename current word recursively'
   echo 'f  : [Format] applay format for this file'
   echo 'o  : [Outline] view outline on popup'
   echo 'run: [Run] run current program'
   echo 's  : [Snippet] edit snippets'
   echo 'a  : [ALL PUSH] commit & push all changes'
+  echo '==================================================================='
   let cmd = inputdialog(">>")
   if cmd == ''
     retu
@@ -257,7 +259,8 @@ endf
 fu! AllPush() abort
   let w = inputdialog("commit message>>")
   echo '<<'
-  cal system('git add . && git commit -m "'.w.'" && git push')
+  "cal system('git add . && git commit -m "'.w.'" && git push')
+  cal execute('top terminal ++rows=10 ++shell git add . && git commit -m "'.w.'" && git push')
 endf
 " }}}
 
