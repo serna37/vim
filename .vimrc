@@ -167,7 +167,8 @@ nnoremap <silent><Leader>q <Plug>(quickhl-manual-reset):noh<CR>
 
 " grep
 nnoremap <silent><Leader>s :CocList words<CR>
-nnoremap <silent><Leader>g :Rg<CR>
+"nnoremap <silent><Leader>g :Rg<CR>
+nnoremap <silent><Leader>g :cal Grep()<CR>
 
 " marking
 nnoremap <silent><Leader>m :CocCommand fzf-preview.Marks<CR>
@@ -238,6 +239,20 @@ nnoremap <Leader>. <plug>(coc-diagnostic-prev)
 " ========================================
 " FUNCTION
 " ========================================
+" grep -----------{{{
+fu! Grep() abort
+  let w = inputdialog("word>>")
+  if w == ''
+    retu
+  endif
+  echo '<<'
+  "cgetexpr system('rg -n '.w.' '.expand('%')) | cw
+  "cgetexpr system('rg -n fu ~/.vimrc') | cw
+  cal ripgrep#search('-w --ignore-case '.w)
+  "cgetexpr execute('!rg -n fu ~/.vimrc') | cw
+endf
+" }}}
+
 " mark ----------------------------------------{{{
 let g:mark_words = 'abcdefghijklmnopqrstuvwxyz'
 fu! s:get_mark(tar) abort
@@ -362,6 +377,7 @@ let s:repos = [
     \ 'sheerun/vim-polyglot',
     \ 'junegunn/fzf',
     \ 'junegunn/fzf.vim',
+    \ 'kyoh86/vim-ripgrep',
     \ 'neoclide/coc.nvim',
     \ 'thinca/vim-quickrun',
     \ 'unblevable/quick-scope',
