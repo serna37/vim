@@ -154,9 +154,15 @@ nnoremap <silent><leader>b :Buffers<CR>
 nnoremap <silent><leader>f :cal FzfG()<CR>
 fu! FzfG() " if git repo, ref .gitignore
   let pwd = system('pwd')
-  exe 'lcd %:h'
+  try
+    exe 'lcd %:h'
+  catch
+  endtry
   let gitroot = system('git rev-parse --show-superproject-working-tree --show-toplevel')
-  exe 'lcd ' . pwd
+  try
+    exe 'lcd ' . pwd
+  catch
+  endtry
   execute(!v:shell_error ? 'GFiles' : 'Files')
 endf
 
