@@ -68,7 +68,7 @@ for vsnip, this is "create snippet" snippet
 - \# : search word (original vim but dont move cursor)
 - Space q : quit search highlight
 - Space s : grep interactive from current buffer (coc-lists)
-- Space g : grep interactive Recursive (ripgrep by fzf.vim)
+- Space g : grep interactive Recursive (ripgrep)
 
 ## marking
 - mm : marking toggle
@@ -85,4 +85,4 @@ for vsnip, this is "create snippet" snippet
 - Space ? : hover document
 - Space , : prev diagnostic
 - Space . : next diagnostic
-- Space sh : run current line as shell
+- (disabled) Space sh : run current line as shell
