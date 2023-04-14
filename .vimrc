@@ -202,11 +202,12 @@ nnoremap <Leader>d <Plug>(coc-definition)
 nnoremap <Leader>r <plug>(coc-references)
 nnoremap <Leader>v :cal IDEActions()<CR>
 fu! IDEActions()
-  echo 'r: ReName'
-  echo 'f: Format'
-  echo 'o: Outline'
-  echo 'run: Run'
-  echo 's: Snippets'
+  echo 'r  : [ReName] rename current word recursively'
+  echo 'f  : [Format] applay format for this file'
+  echo 'o  : [Outline] view outline on popup'
+  echo 'run: [Run] run current program'
+  echo 's  : [Snippet] edit snippets'
+  echo 'a  : [ALL PUSH] commit & push all changes'
   let cmd = inputdialog(">>")
   if cmd == ''
     retu
@@ -225,6 +226,8 @@ fu! IDEActions()
     echo 'ok'
   elseif cmd == 's'
     execute("CocCommand snippets.editSnippets")
+  elseif cmd == 'a'
+    cal AllPush()
   endif
 endf
 nnoremap <Leader>? :cal CocAction('doHover')<CR>
@@ -241,17 +244,23 @@ nnoremap <Leader>. <plug>(coc-diagnostic-prev)
 " ========================================
 " grep -----------{{{
 fu! Grep() abort
-  let w = inputdialog("word>>")
+  let w = inputdialog("word [target]>>")
   if w == ''
     retu
   endif
   echo '<<'
-  "cgetexpr system('rg -n '.w.' '.expand('%')) | cw
-  "cgetexpr system('rg -n fu ~/.vimrc') | cw
   cal ripgrep#search('-w --ignore-case '.w)
-  "cgetexpr execute('!rg -n fu ~/.vimrc') | cw
 endf
 " }}}
+
+" git -----------{{{
+fu! AllPush() abort
+  let w = inputdialog("commit message>>")
+  echo '<<'
+  cal system('git add . && git commit -m "'.w.'" && git push')
+endf
+" }}}
+
 
 " mark ----------------------------------------{{{
 let g:mark_words = 'abcdefghijklmnopqrstuvwxyz'
