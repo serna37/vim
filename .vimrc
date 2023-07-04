@@ -202,12 +202,6 @@ inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
 inoremap <silent><expr> <Tab> coc#pum#visible() ? coc#pum#next(1) : "\<Tab>"
 inoremap <silent><expr> <S-Tab> coc#pum#visible() ? coc#pum#prev(1) : "\<S-Tab>"
 
-" completion Parentheses
-inoremap { {}<Left>
-inoremap {<Enter> {}<Left><CR><ESC><S-o>
-inoremap ( ()<ESC>i
-inoremap (<Enter> ()<Left><CR><ESC><S-o>
-
 " IDE ============================================-
 " coc
 nnoremap <Leader>d <Plug>(coc-definition)
