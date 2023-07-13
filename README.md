@@ -6,7 +6,7 @@ curl https://raw.githubusercontent.com/serna37/vim/master/.vimrc > ~/.vimrc
 and execute command
 ```initiation.vim
 :PlugInstall
-↓after reboot
+↓after vim reboot
 :PlugInstallCoc
 ```
 
@@ -40,7 +40,10 @@ for vsnip, this is "create snippet" snippet
 
 </details>
 
-# action cheat sheet
+# My action cheat sheet
+# Basic
+- normal vim
+- fzf popup window
 
 # WINDOW
 - Ctrl + q/p : prev / next buffer
@@ -48,7 +51,6 @@ for vsnip, this is "create snippet" snippet
 - Ctrl + hjkl : move window forcus
 - ↑↓←→ : resize window
 - Space t : terminal (bottom)
-- Space tp : terminal (popup window)
 - Space z : zen mode
 
 # MOTION
@@ -67,12 +69,19 @@ for vsnip, this is "create snippet" snippet
 - \* : search word (original vim but dont move cursor)
 - \# : search word (original vim but dont move cursor)
 - Space q : quit search highlight
-- Space s : grep interactive from current buffer (coc-lists)
+- s : jump word with easy-motion
+- Space s : incremental search word with easy-motion
+- Space Space s : grep interactive from current buffer (coc-lists)
 - Space g : grep interactive Recursive (ripgrep)
 
 ## marking
 - mm : marking toggle
 - Space m : show mark list (coc fzf-preview)
+
+## jump
+- Space l : line
+- Space j : jump history
+- Space c : changed line
 
 # EDIT
 - (visual mode) Ctrl jk : move line
@@ -80,9 +89,16 @@ for vsnip, this is "create snippet" snippet
 
 # IDE
 - Space d : go to definition
-- Space r : find references
+- Space r : (popup) find references
+- Space o : (popup) outline
 - Space v : other IDE functions menu
 - Space ? : hover document
 - Space , : prev diagnostic
 - Space . : next diagnostic
-- (disabled) Space sh : run current line as shell
+
+# on popup
+- Ctrl + n/p : chose down/up
+- Ctrl + d/u : preview down/up
+- Tab : select
+- Ctrl + q : selections -> quickfix
+(with quickfix -> fzf-preview.QuickFix)

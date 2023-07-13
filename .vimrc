@@ -148,6 +148,13 @@ augroup qs_colors
 augroup END
 nnoremap <silent><Leader>w <plug>(QuickScopeToggle)
 
+" easy motion
+let g:EasyMotion_do_mapping = 0
+let g:EasyMotion_smartcase = 1
+let g:EasyMotion_keys='swadjkhlnmf'
+" only around jump
+nnoremap s <Plug>(easymotion-bd-w)
+
 " SEARCH ============================================-
 " explorer
 nnoremap <silent><Leader>e :CocCommand explorer --width 30<CR>
@@ -171,22 +178,35 @@ fu! FzfG() " if git repo, ref .gitignore
   catch
   endtry
 "  execute(!v:shell_error ? 'GFiles' : 'Files')
-  execute(!v:shell_error ? 'CocCommand fzf-preview.GitFiles' : 'Files')
+  execute(!v:shell_error ? 'CocCommand fzf-preview.ProjectFiles' : 'Files')
 endf
 
-" word search
+" word search (highlight)
 nnoremap <silent>* *N<Plug>(quickhl-manual-this)
+autocmd CursorHold * silent call CocActionAsync('highlight')
 nnoremap <silent># *N<Plug>(quickhl-manual-this)
 nnoremap <silent><Leader>q <Plug>(quickhl-manual-reset):noh<CR>
 
-" grep
-nnoremap <silent><Leader>s :CocList words<CR>
+" search with incremental greplist
+nnoremap <Leader><Leader>s :CocList words<CR>
+" search with easy motion
+nnoremap <silent><Leader>s <Plug>(easymotion-sn)
+
 "nnoremap <silent><Leader>g :Rg<CR>
 nnoremap <silent><Leader>g :cal Grep()<CR>
 
 " marking
 nnoremap <silent><Leader>m :CocCommand fzf-preview.Marks<CR>
 nnoremap <silent>mm :cal Marking()<CR>
+
+" go line
+nnoremap <silent><Leader>l :CocCommand fzf-preview.Lines<CR>
+
+" jump history
+nnoremap <silent><Leader>j :CocCommand fzf-preview.Jumps<CR>
+
+" changed row
+nnoremap <silent><Leader>c :CocCommand fzf-preview.Changes<CR>
 
 " EDIT ============================================-
 " d = delete(no clipboard)
@@ -407,6 +427,7 @@ let s:repos = [
     \ 'vim-airline/vim-airline',
     \ 'vim-airline/vim-airline-themes',
     \ 'sheerun/vim-polyglot',
+    \ 'uiiaoo/java-syntax.vim',
     \ 'junegunn/fzf',
     \ 'junegunn/fzf.vim',
     \ 'kyoh86/vim-ripgrep',
@@ -415,6 +436,7 @@ let s:repos = [
     \ 'unblevable/quick-scope',
     \ 'obcat/vim-hitspop',
     \ 't9md/vim-quickhl',
+    \ 'easymotion/vim-easymotion',
     \ 'junegunn/goyo.vim',
     \ 'junegunn/limelight.vim',
 \ ]
