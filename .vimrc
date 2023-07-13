@@ -119,7 +119,7 @@ nnoremap <Down> 4<C-w>+
 
 " terminal
 nnoremap <silent><Leader>t :bo terminal ++rows=10<CR>
-nnoremap <silent><Leader>tp :call popup_create(term_start([&shell], #{ hidden: 1, term_finish: 'close'}), #{ border: [], minwidth: &columns/2, minheight: &lines/2 })<CR>
+"nnoremap <silent><Leader>tp :call popup_create(term_start([&shell], #{ hidden: 1, term_finish: 'close'}), #{ border: [], minwidth: &columns/2, minheight: &lines/2 })<CR>
 
 " zen
 nnoremap <silent><Leader>z :Goyo<CR>
@@ -141,6 +141,11 @@ nnoremap <silent><C-b> :cal Scroll(0, 10)<CR>
 nnoremap <silent><C-f> :cal Scroll(1, 10)<CR>
 
 " f-scope
+augroup qs_colors
+  autocmd!
+  autocmd ColorScheme * highlight QuickScopePrimary guifg='#afff5f' gui=underline ctermfg=196 cterm=underline
+  autocmd ColorScheme * highlight QuickScopeSecondary guifg='#5fffff' gui=underline ctermfg=81 cterm=underline
+augroup END
 nnoremap <silent><Leader>w <plug>(QuickScopeToggle)
 
 " SEARCH ============================================-
@@ -149,8 +154,10 @@ nnoremap <silent><Leader>e :CocCommand explorer --width 30<CR>
 
 " fuzzy finder
 set rtp+=~/.vim/pack/plugins/start/fzf
-nnoremap <silent><leader>h :History<CR>
-nnoremap <silent><leader>b :Buffers<CR>
+"nnoremap <silent><leader>h :History<CR>
+"nnoremap <silent><leader>b :Buffers<CR>
+nnoremap <silent><leader>h :CocCommand fzf-preview.MruFiles<CR>
+nnoremap <silent><leader>b :CocCommand fzf-preview.AllBuffers<CR>
 nnoremap <silent><leader>f :cal FzfG()<CR>
 fu! FzfG() " if git repo, ref .gitignore
   let pwd = system('pwd')
@@ -163,7 +170,8 @@ fu! FzfG() " if git repo, ref .gitignore
     exe 'lcd ' . pwd
   catch
   endtry
-  execute(!v:shell_error ? 'GFiles' : 'Files')
+"  execute(!v:shell_error ? 'GFiles' : 'Files')
+  execute(!v:shell_error ? 'CocCommand fzf-preview.GitFiles' : 'Files')
 endf
 
 " word search
@@ -205,13 +213,18 @@ inoremap <silent><expr> <S-Tab> coc#pum#visible() ? coc#pum#prev(1) : "\<S-Tab>"
 " IDE ============================================-
 " coc
 nnoremap <Leader>d <Plug>(coc-definition)
-nnoremap <Leader>r <plug>(coc-references)
+"nnoremap <Leader>r <plug>(coc-references)
+nnoremap <Leader>r :CocCommand fzf-preview.CocReferences<CR>
+nnoremap <Leader>o :CocCommand fzf-preview.CocOutline<CR>
 nnoremap <Leader>v :cal IDEActions()<CR>
 fu! IDEActions()
   echo '==================================================================='
   echo 'r  : [ReName] rename current word recursively'
   echo 'f  : [Format] applay format for this file'
-  echo 'o  : [Outline] view outline on popup'
+  echo 'def  : [Define] Go to Definition (Space+d)'
+  echo 'ref  : [Reference] Reference (Space+r)'
+  echo 'o  : [Outline] view outline on popup (Space+o)'
+  echo 'q  : [QuickFix-Grep] Open Preview Popup from quickfix - from fzfpreview Ctrl+Q'
   echo 'run: [Run] run current program'
   echo 's  : [Snippet] edit snippets'
   echo 'a  : [ALL PUSH] commit & push all changes'
@@ -229,6 +242,8 @@ fu! IDEActions()
     echo 'ok'
   elseif cmd == 'o'
     execute("CocCommand fzf-preview.CocOutline")
+  elseif cmd == 'q'
+    execute("CocCommand fzf-preview.QuickFix")
   elseif cmd == 'run'
     exe "QuickRun -hook/time/enable 1"
     echo 'ok'
@@ -257,7 +272,7 @@ fu! Grep() abort
     retu
   endif
   echo '<<'
-  cal ripgrep#search('-w --ignore-case '.w)
+  execute('CocCommand fzf-preview.ProjectGrep -w --ignore-case '.w)
 endf
 " }}}
 
@@ -420,6 +435,7 @@ let s:coc_extentions = [
     \ 'coc-clangd',
     \ 'coc-go',
     \ 'coc-python',
+    \ 'coc-java',
 \ ]
 
 fu! PlugInstall(...)
