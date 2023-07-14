@@ -66,20 +66,20 @@ for vsnip, this is "create snippet" snippet
 - Space b : fuzzy finder buffer
 
 ## word serch
-- \* : search word (original vim but dont move cursor)
-- \# : search word (original vim but dont move cursor)
-- Space q : quit search highlight
 - s : jump word with easy-motion
 - Space s : incremental search word with easy-motion
 - Space Space s : grep interactive from current buffer (coc-lists)
+- \* : search word (original vim but dont move cursor)
+- \# : search word (original vim but dont move cursor)
+- Space q : quit search highlight
 - Space g : grep interactive Recursive (ripgrep)
 
-## marking
+## mark
 - mm : marking toggle
 - Space m : show mark list (coc fzf-preview)
 
 ## jump
-- Space l : line
+- Space l : line (= NUM+G, but preview window)
 - Space j : jump history
 - Space c : changed line
 

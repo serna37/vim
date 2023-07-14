@@ -247,6 +247,7 @@ fu! IDEActions()
   echo 'q  : [QuickFix-Grep] Open Preview Popup from quickfix - from fzfpreview Ctrl+Q'
   echo 'run: [Run] run current program'
   echo 's  : [Snippet] edit snippets'
+  echo 'git  : [GIT] git actions'
   echo 'a  : [ALL PUSH] commit & push all changes'
   echo '==================================================================='
   let cmd = inputdialog(">>")
@@ -269,6 +270,8 @@ fu! IDEActions()
     echo 'ok'
   elseif cmd == 's'
     execute("CocCommand snippets.editSnippets")
+  elseif cmd == 'git'
+    execute("CocCommand fzf-preview.GitActions")
   elseif cmd == 'a'
     cal AllPush()
   endif
@@ -424,19 +427,22 @@ let s:colors = [
 
 " repo
 let s:repos = [
+    \ 'neoclide/coc.nvim',
+    \ 'junegunn/fzf',
+    \ 'junegunn/fzf.vim',
+    \ 'kyoh86/vim-ripgrep',
+    \ 'unblevable/quick-scope',
+    \ 'easymotion/vim-easymotion',
     \ 'vim-airline/vim-airline',
     \ 'vim-airline/vim-airline-themes',
     \ 'sheerun/vim-polyglot',
     \ 'uiiaoo/java-syntax.vim',
-    \ 'junegunn/fzf',
-    \ 'junegunn/fzf.vim',
-    \ 'kyoh86/vim-ripgrep',
-    \ 'neoclide/coc.nvim',
-    \ 'thinca/vim-quickrun',
-    \ 'unblevable/quick-scope',
     \ 'obcat/vim-hitspop',
     \ 't9md/vim-quickhl',
-    \ 'easymotion/vim-easymotion',
+    \ 'tpope/vim-fugitive',
+    \ 'airblade/vim-gitgutter',
+    \ 'jiangmiao/auto-pairs',
+    \ 'thinca/vim-quickrun',
     \ 'junegunn/goyo.vim',
     \ 'junegunn/limelight.vim',
 \ ]
