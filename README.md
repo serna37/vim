@@ -94,7 +94,7 @@ for vsnip, this is "create snippet" snippet
 - Space , : prev diagnostic
 - Space . : next diagnostic
 
-# on popup
+# on popup (default keymap)
 - Ctrl + n/p : chose down/up
 - Ctrl + d/u : preview down/up
 - Tab : select
