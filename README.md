@@ -74,13 +74,11 @@ for vsnip, this is "create snippet" snippet
 - Space q : quit search highlight
 - Space g : grep interactive Recursive (ripgrep)
 
-## mark
+## jump/mark
 - mm : marking toggle
 - Space m : show mark list (coc fzf-preview)
-
-## jump
 - Space l : line (= NUM+G, but preview window)
-- Space j : jump history
+- Space j : jumped history
 - Space c : changed line
 
 # EDIT
@@ -88,10 +86,10 @@ for vsnip, this is "create snippet" snippet
 - (insert mode) Ctrl hljk : move cursor
 
 # IDE
+- Space v : IDE functions menu
 - Space d : go to definition
 - Space r : (popup) find references
 - Space o : (popup) outline
-- Space v : other IDE functions menu
 - Space ? : hover document
 - Space , : prev diagnostic
 - Space . : next diagnostic

@@ -183,8 +183,8 @@ endf
 
 " word search (highlight)
 nnoremap <silent>* *N<Plug>(quickhl-manual-this)
-autocmd CursorHold * silent call CocActionAsync('highlight')
 nnoremap <silent># *N<Plug>(quickhl-manual-this)
+autocmd CursorHold * silent call CocActionAsync('highlight')
 nnoremap <silent><Leader>q <Plug>(quickhl-manual-reset):noh<CR>
 
 " search with incremental greplist
@@ -236,49 +236,54 @@ nnoremap <Leader>d <Plug>(coc-definition)
 "nnoremap <Leader>r <plug>(coc-references)
 nnoremap <Leader>r :CocCommand fzf-preview.CocReferences<CR>
 nnoremap <Leader>o :CocCommand fzf-preview.CocOutline<CR>
-nnoremap <Leader>v :cal IDEActions()<CR>
-fu! IDEActions()
-  echo '==================================================================='
-  echo 'r  : [ReName] rename current word recursively'
-  echo 'f  : [Format] applay format for this file'
-  echo 'def  : [Define] Go to Definition (Space+d)'
-  echo 'ref  : [Reference] Reference (Space+r)'
-  echo 'o  : [Outline] view outline on popup (Space+o)'
-  echo 'q  : [QuickFix-Grep] Open Preview Popup from quickfix - from fzfpreview Ctrl+Q'
-  echo 'run: [Run] run current program'
-  echo 's  : [Snippet] edit snippets'
-  echo 'git  : [GIT] git actions'
-  echo 'a  : [ALL PUSH] commit & push all changes'
-  echo '==================================================================='
-  let cmd = inputdialog(">>")
-  if cmd == ''
-    retu
-  endif
-  echo '<<'
-  if cmd == 'r'
-    cal CocActionAsync('rename')
-    echo 'ok'
-  elseif cmd == 'f'
-    cal CocActionAsync('format')
-    echo 'ok'
-  elseif cmd == 'o'
-    execute("CocCommand fzf-preview.CocOutline")
-  elseif cmd == 'q'
-    execute("CocCommand fzf-preview.QuickFix")
-  elseif cmd == 'run'
-    exe "QuickRun -hook/time/enable 1"
-    echo 'ok'
-  elseif cmd == 's'
-    execute("CocCommand snippets.editSnippets")
-  elseif cmd == 'git'
-    execute("CocCommand fzf-preview.GitActions")
-  elseif cmd == 'a'
-    cal AllPush()
-  endif
-endf
 nnoremap <Leader>? :cal CocAction('doHover')<CR>
 nnoremap <Leader>, <plug>(coc-diagnostic-next)
 nnoremap <Leader>. <plug>(coc-diagnostic-prev)
+nnoremap <Leader>v :cal IDEMenu()<CR>
+
+let g:my_ide_menu_items = [
+      \'[ReName] rename current word recursively',
+      \'[Format] applay format for this file',
+      \'[Run] run current program',
+      \'[Git] git actions',
+      \'[ALL PUSH] commit & push all changes',
+      \'[QuickFix-Grep] Open Preview Popup from quickfix - from fzfpreview Ctrl+Q',
+      \'[Snippet] edit snippets',
+      \'=(Space d)[Definition] Go to Definition',
+      \'=(Space r)[Reference] Reference',
+      \'=(Space o)[Outline] view outline on popup',
+      \'=(Space ?)[Document] show document on popup',
+      \'=(Space ,)[Next Diagnosis] jump next diagnosis',
+      \'=(Space .)[Prev Diagnosis] jump prev diagnosis',
+ \]
+fu! IDEMenu() abort " show menu list and execute {{{
+  cal popup_menu(g:my_ide_menu_items , #{ title: 'IDE menu (j / k choose)', border: [], zindex: 100, minwidth: &columns/2, maxwidth: &columns/2, minheight: 2, maxheight: &lines/2, filter: function('IDEChoose', [{'idx': 0, 'files': g:my_ide_menu_items }]) })
+endf
+
+fu! IDEChoose(ctx, winid, key) abort
+  if a:key is# 'j' && a:ctx.idx < len(a:ctx.files)-1
+    let a:ctx.idx = a:ctx.idx+1
+  elseif a:key is# 'k' && a:ctx.idx > 0
+    let a:ctx.idx = a:ctx.idx-1
+  elseif a:key is# "\<CR>"
+    if a:ctx.idx == 0
+      cal CocActionAsync('rename')
+    elseif a:ctx.idx == 1
+      cal CocActionAsync('format')
+    elseif a:ctx.idx == 2
+      exe "QuickRun -hook/time/enable 1"
+    elseif a:ctx.idx == 3
+      execute("CocCommand fzf-preview.GitActions")
+    elseif a:ctx.idx == 4
+      cal AllPush()
+    elseif a:ctx.idx == 5
+      execute("CocCommand fzf-preview.QuickFix")
+    elseif a:ctx.idx == 6
+      execute("CocCommand snippets.editSnippets")
+    endif
+  endif
+  retu popup_filter_menu(a:winid, a:key)
+endf " }}}
 
 " execute line as shell
 "nnoremap <Leader>sh :cal execute('top terminal ++rows=10 ++shell eval ' . getline('.'))<CR>
