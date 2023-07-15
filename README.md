@@ -18,7 +18,9 @@ curl https://raw.githubusercontent.com/serna37/vim/master/.vimrc > ~/.vimrc
 ```json
 {
   "snippets.ultisnips.pythonPrompt": false,
-  "explorer.icon.enableNerdfont": true
+  "explorer.icon.enableNerdfont": true,
+  "explorer.file.showHiddenFiles": true,
+  "explorer.file.reveal.auto": true
 }
 ```
 
