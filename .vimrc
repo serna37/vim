@@ -374,6 +374,7 @@ let s:repos = [
     \ 'tpope/vim-fugitive',
     \ 'airblade/vim-gitgutter',
     \ 'jiangmiao/auto-pairs',
+    \ 'markonm/traces.vim',
     \ 'thinca/vim-quickrun',
     \ 'junegunn/goyo.vim',
     \ 'junegunn/limelight.vim',
