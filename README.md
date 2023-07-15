@@ -61,7 +61,7 @@ for vsnip, this is "create snippet" snippet
 - fzf popup window
 
 # WINDOW
-- Ctrl + q/p : prev / next buffer
+- Ctrl + q/n : prev / next buffer
 - Space x : close buffer
 - Ctrl + hjkl : move window forcus
 - ↑↓←→ : resize window

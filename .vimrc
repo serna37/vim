@@ -122,7 +122,7 @@ let g:mapleader = "\<Space>"
 " {{{
 " tabline motion
 nmap <silent><C-p> <Plug>AirlineSelectPrevTab
-nmap <silent><C-q> <Plug>AirlineSelectNextTab
+nmap <silent><C-n> <Plug>AirlineSelectNextTab
 nnoremap <silent><Leader>x :call CloseBuf()<CR>
 " window forcus move
 nnoremap <C-h> <C-w>h
