@@ -1,18 +1,31 @@
-# setup
-```setup_command.sh
+# installation
+1. get this vimrc
+```sh
 curl https://raw.githubusercontent.com/serna37/vim/master/.vimrc > ~/.vimrc
 ```
-
-and execute command
-```initiation.vim
+2. execute command on vim
+```
 :PlugInstall
-↓after vim reboot
+```
+3. after reboot vim, execute command
+```
 :PlugInstallCoc
+```
+4. open 'coc-setting.json' by this command, and edit
+```
+:CocConfig
+```
+```json
+{
+  "snippets.ultisnips.pythonPrompt": false,
+  "explorer.icon.enableNerdfont": true
+}
 ```
 
 <details>
 <summary>(old) monolithic version</summary>
 # monolithic version
+[feature] no plugin, all function is on this vimrc.
 or (exclude plugin mode)
 curl https://raw.githubusercontent.com/serna37/vim/master/monolithic.vim > ~/.vimrc
 
