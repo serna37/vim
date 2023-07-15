@@ -91,6 +91,8 @@ for vsnip, this is "create snippet" snippet
 
 ## jump/mark
 - mm : marking toggle
+- m p/n : prev/next mark
+- mc : clear mark
 - Space m : show mark list (coc fzf-preview)
 - Space l : line (= NUM+G, but preview window)
 - Space j : jumped history
