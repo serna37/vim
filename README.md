@@ -1,3 +1,13 @@
+# dependency
+- git
+- node
+- yarn
+- ripgrep
+- bat (option: fzf-preview color)
+- [powerline/fonts](https://github.com/powerline/fonts) (option: font)
+- [ryanoasis/nerd-fonts](https://github.com/ryanoasis/nerd-fonts) (option: font)
+- [ryanoasis/vim-devicons](https://github.com/ryanoasis/vim-devicons) (option: icon)
+
 # installation
 1. get this vimrc
 ```sh
