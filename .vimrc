@@ -1,4 +1,5 @@
 " vim:set foldmethod=marker:
+
 " ========================================
 " SETTING
 " ========================================
@@ -78,94 +79,158 @@ set completeopt=menuone,noinsert,preview,popup
 "}}}
 
 " ========================================
-" KEY MAP
+" Plugin Options
 " ========================================
 " {{{
-let g:mapleader = "\<Space>"
-
-" WINDOW ============================================-
-" airline
-let g:airline_theme = 'deus'
-let g:airline#extensions#tabline#enabled = 1
-let g:airline_powerline_fonts = 1
-let g:airline_highlighting_cache = 1
-
-" tabline motion
-fu! CloseBuf()
-  let l:now_b = bufnr('%')
-  bn
-  execute('bd ' . now_b)
-endf
-nnoremap <silent><C-p> :bn<CR>
-nnoremap <silent><C-q> :bp<CR>
-nnoremap <silent><Leader>x :call CloseBuf()<CR>
-
-" window forcus move
-nnoremap <C-h> <C-w>h
-nnoremap <C-l> <C-w>l
-nnoremap <C-k> <C-w>k
-nnoremap <C-j> <C-w>j
-
-tnoremap <C-h> <C-w>h
-tnoremap <C-l> <C-w>l
-tnoremap <C-k> <C-w>k
-tnoremap <C-j> <C-w>j
-
-" window resize
-nnoremap <Left> 4<C-w><
-nnoremap <Right> 4<C-w>>
-nnoremap <Up> 4<C-w>-
-nnoremap <Down> 4<C-w>+
-
-" terminal
-nnoremap <silent><Leader>t :bo terminal ++rows=10<CR>
-"nnoremap <silent><Leader>tp :call popup_create(term_start([&shell], #{ hidden: 1, term_finish: 'close'}), #{ border: [], minwidth: &columns/2, minheight: &lines/2 })<CR>
-
-" zen
-nnoremap <silent><Leader>z :Goyo<CR>
-let g:limelight_conceal_ctermfg = 'gray'
-autocmd! User GoyoEnter Limelight
-autocmd! User GoyoLeave Limelight!
-
-" MOVE ============================================-
-" row-move
-nnoremap j gj
-nnoremap k gk
-nnoremap <silent><Tab> 5gj
-nnoremap <silent><S-Tab> 5gk
-
-" scroll
-nnoremap <silent><C-u> :cal Scroll(0, 25)<CR>
-nnoremap <silent><C-d> :cal Scroll(1, 25)<CR>
-nnoremap <silent><C-b> :cal Scroll(0, 10)<CR>
-nnoremap <silent><C-f> :cal Scroll(1, 10)<CR>
-
+" coc
+let g:coc_snippet_next = '<Tab>'
+let g:coc_snippet_prev = '<S-Tab>'
+" fzf
+set rtp+=~/.vim/pack/plugins/start/fzf
 " f-scope
 augroup qs_colors
   autocmd!
   autocmd ColorScheme * highlight QuickScopePrimary guifg='#afff5f' gui=underline ctermfg=196 cterm=underline
   autocmd ColorScheme * highlight QuickScopeSecondary guifg='#5fffff' gui=underline ctermfg=81 cterm=underline
 augroup END
-nnoremap <silent><Leader>w <plug>(QuickScopeToggle)
-
 " easy motion
 let g:EasyMotion_do_mapping = 0
 let g:EasyMotion_smartcase = 1
 let g:EasyMotion_keys='swadjkhlnmf'
-" only around jump
-nnoremap s <Plug>(easymotion-bd-w)
+" airline
+let g:airline_theme = 'deus'
+let g:airline#extensions#tabline#enabled = 1
+let g:airline_powerline_fonts = 1
+let g:airline_highlighting_cache = 1
+" gitgutter
+let g:gitgutter_map_keys = 0
+" zen
+let g:limelight_conceal_ctermfg = 'gray'
+autocmd! User GoyoEnter Limelight
+autocmd! User GoyoLeave Limelight!
+"}}}
+
+" ========================================
+" KEY MAP
+" ========================================
+" {{{
+let g:mapleader = "\<Space>"
+
+" WINDOW ============================================-
+" {{{
+" tabline motion
+nnoremap <silent><C-p> :bn<CR>
+nnoremap <silent><C-q> :bp<CR>
+nnoremap <silent><Leader>x :call CloseBuf()<CR>
+" window forcus move
+nnoremap <C-h> <C-w>h
+nnoremap <C-l> <C-w>l
+nnoremap <C-k> <C-w>k
+nnoremap <C-j> <C-w>j
+tnoremap <C-h> <C-w>h
+tnoremap <C-l> <C-w>l
+tnoremap <C-k> <C-w>k
+tnoremap <C-j> <C-w>j
+" window resize
+nnoremap <Left> 4<C-w><
+nnoremap <Right> 4<C-w>>
+nnoremap <Up> 4<C-w>-
+nnoremap <Down> 4<C-w>+
+" terminal
+nnoremap <silent><Leader>t :bo terminal ++rows=10<CR>
+"nnoremap <silent><Leader>tp :call popup_create(term_start([&shell], #{ hidden: 1, term_finish: 'close'}), #{ border: [], minwidth: &columns/2, minheight: &lines/2 })<CR>
+" zen
+nnoremap <silent><Leader>z :Goyo<CR>
+" }}}
+
+" MOTION ============================================-
+" {{{
+" row-move
+nnoremap j gj
+nnoremap k gk
+nnoremap <Tab> 5gj
+nnoremap <S-Tab> 5gk
+" scroll
+nnoremap <silent><C-u> :cal Scroll(0, 25)<CR>
+nnoremap <silent><C-d> :cal Scroll(1, 25)<CR>
+nnoremap <silent><C-b> :cal Scroll(0, 10)<CR>
+nnoremap <silent><C-f> :cal Scroll(1, 10)<CR>
+" f-scope
+nnoremap <Leader>w <plug>(QuickScopeToggle)
+" }}}
 
 " SEARCH ============================================-
-" explorer
+" {{{
+" file search
 nnoremap <silent><Leader>e :CocCommand explorer --width 30<CR>
-
-" fuzzy finder
-set rtp+=~/.vim/pack/plugins/start/fzf
-"nnoremap <silent><leader>h :History<CR>
-"nnoremap <silent><leader>b :Buffers<CR>
+nnoremap <silent><leader>f :cal FzfG()<CR>
 nnoremap <silent><leader>h :CocCommand fzf-preview.MruFiles<CR>
 nnoremap <silent><leader>b :CocCommand fzf-preview.AllBuffers<CR>
-nnoremap <silent><leader>f :cal FzfG()<CR>
+" word search (highlight)
+nnoremap s <Plug>(easymotion-bd-w)
+nnoremap <Leader>s <Plug>(easymotion-sn)
+nnoremap <Leader><Leader>s :CocList words<CR>
+nnoremap <silent>* *N<Plug>(quickhl-manual-this)
+nnoremap <silent># *N<Plug>(quickhl-manual-this)
+autocmd CursorHold * silent call CocActionAsync('highlight')
+nnoremap <silent><Leader>q <Plug>(quickhl-manual-reset):noh<CR>
+nnoremap <silent><Leader>g :cal Grep()<CR>
+" jump/mark
+nnoremap <silent>mm :cal Marking()<CR>
+nnoremap <silent><Leader>m :CocCommand fzf-preview.Marks<CR>
+nnoremap <silent><Leader>l :CocCommand fzf-preview.Lines<CR>
+nnoremap <silent><Leader>j :CocCommand fzf-preview.Jumps<CR>
+nnoremap <silent><Leader>c :CocCommand fzf-preview.Changes<CR>
+" }}}
+
+" EDIT ============================================-
+" {{{
+" d = delete(no clipboard)
+nnoremap d "_d
+vnoremap d "_d
+" block move @ visual mode
+vnoremap <C-j> "zx"zp`[V`]
+vnoremap <C-k> "zx<Up>"zP`[V`]
+" move cursor @ insert mode
+inoremap <C-h> <C-o>h
+inoremap <C-l> <C-o>l
+inoremap <C-k> <C-o>k
+inoremap <C-j> <C-o>j
+" completion @ coc
+inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
+inoremap <silent><expr> <Tab> coc#pum#visible() ? coc#pum#next(1) : "\<Tab>"
+inoremap <silent><expr> <S-Tab> coc#pum#visible() ? coc#pum#prev(1) : "\<S-Tab>"
+" }}}
+
+" IDE ============================================-
+" {{{
+nnoremap <Leader>v :cal IDEMenu()<CR>
+nnoremap <Leader>d <Plug>(coc-definition)
+nnoremap <Leader>r :CocCommand fzf-preview.CocReferences<CR>
+nnoremap <Leader>o :CocCommand fzf-preview.CocOutline<CR>
+nnoremap <Leader>? :cal CocAction('doHover')<CR>
+nnoremap <Leader>, <plug>(coc-diagnostic-next)
+nnoremap <Leader>. <plug>(coc-diagnostic-prev)
+"nnoremap <Leader>sh :cal execute('top terminal ++rows=10 ++shell eval ' . getline('.'))<CR>
+" }}}
+
+"}}}
+
+" ========================================
+" FUNCTION
+" ========================================
+" {{{
+
+" close buffer
+" {{{
+fu! CloseBuf()
+  let l:now_b = bufnr('%')
+  bn
+  execute('bd ' . now_b)
+endf
+" }}}
+" fzf
+" {{{
 fu! FzfG() " if git repo, ref .gitignore
   let pwd = system('pwd')
   try
@@ -180,67 +245,28 @@ fu! FzfG() " if git repo, ref .gitignore
 "  execute(!v:shell_error ? 'GFiles' : 'Files')
   execute(!v:shell_error ? 'CocCommand fzf-preview.ProjectFiles' : 'Files')
 endf
-
-" word search (highlight)
-nnoremap <silent>* *N<Plug>(quickhl-manual-this)
-nnoremap <silent># *N<Plug>(quickhl-manual-this)
-autocmd CursorHold * silent call CocActionAsync('highlight')
-nnoremap <silent><Leader>q <Plug>(quickhl-manual-reset):noh<CR>
-
-" search with incremental greplist
-nnoremap <Leader><Leader>s :CocList words<CR>
-" search with easy motion
-nnoremap <silent><Leader>s <Plug>(easymotion-sn)
-
-"nnoremap <silent><Leader>g :Rg<CR>
-nnoremap <silent><Leader>g :cal Grep()<CR>
-
-" marking
-nnoremap <silent><Leader>m :CocCommand fzf-preview.Marks<CR>
-nnoremap <silent>mm :cal Marking()<CR>
-
-" go line
-nnoremap <silent><Leader>l :CocCommand fzf-preview.Lines<CR>
-
-" jump history
-nnoremap <silent><Leader>j :CocCommand fzf-preview.Jumps<CR>
-
-" changed row
-nnoremap <silent><Leader>c :CocCommand fzf-preview.Changes<CR>
-
-" EDIT ============================================-
-" d = delete(no clipboard)
-nnoremap d "_d
-vnoremap d "_d
-
-" move cursor @ insert mode
-inoremap <C-h> <C-o>h
-inoremap <C-l> <C-o>l
-inoremap <C-k> <C-o>k
-inoremap <C-j> <C-o>j
-
-" block move @ visual mode
-vnoremap <C-j> "zx"zp`[V`]
-vnoremap <C-k> "zx<Up>"zP`[V`]
-
-" completion @ coc
-let g:coc_snippet_next = '<Tab>'
-let g:coc_snippet_prev = '<S-Tab>'
-inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
-inoremap <silent><expr> <Tab> coc#pum#visible() ? coc#pum#next(1) : "\<Tab>"
-inoremap <silent><expr> <S-Tab> coc#pum#visible() ? coc#pum#prev(1) : "\<S-Tab>"
-
-" IDE ============================================-
-" coc
-nnoremap <Leader>d <Plug>(coc-definition)
-"nnoremap <Leader>r <plug>(coc-references)
-nnoremap <Leader>r :CocCommand fzf-preview.CocReferences<CR>
-nnoremap <Leader>o :CocCommand fzf-preview.CocOutline<CR>
-nnoremap <Leader>? :cal CocAction('doHover')<CR>
-nnoremap <Leader>, <plug>(coc-diagnostic-next)
-nnoremap <Leader>. <plug>(coc-diagnostic-prev)
-nnoremap <Leader>v :cal IDEMenu()<CR>
-
+" }}}
+" grep
+" {{{
+fu! Grep() abort
+  let w = inputdialog("word [target]>>")
+  if w == ''
+    retu
+  endif
+  echo '<<'
+  execute('CocCommand fzf-preview.ProjectGrep -w --ignore-case '.w)
+endf
+" }}}
+" git all push
+" {{{
+fu! AllPush() abort
+  let w = inputdialog("commit message>>")
+  echo '<<'
+  cal execute('top terminal ++rows=10 ++shell git add . && git commit -m "'.w.'" && git push')
+endf
+" }}}
+" IDE menu
+" {{{
 let g:my_ide_menu_items = [
       \'[ReName] rename current word recursively',
       \'[Format] applay format for this file',
@@ -256,7 +282,8 @@ let g:my_ide_menu_items = [
       \'=(Space ,)[Next Diagnosis] jump next diagnosis',
       \'=(Space .)[Prev Diagnosis] jump prev diagnosis',
  \]
-fu! IDEMenu() abort " show menu list and execute {{{
+
+fu! IDEMenu() abort
   cal popup_menu(g:my_ide_menu_items , #{ title: 'IDE menu (j / k choose)', border: [], zindex: 100, minwidth: &columns/2, maxwidth: &columns/2, minheight: 2, maxheight: &lines/2, filter: function('IDEChoose', [{'idx': 0, 'files': g:my_ide_menu_items }]) })
 endf
 
@@ -283,37 +310,10 @@ fu! IDEChoose(ctx, winid, key) abort
     endif
   endif
   retu popup_filter_menu(a:winid, a:key)
-endf " }}}
-
-" execute line as shell
-"nnoremap <Leader>sh :cal execute('top terminal ++rows=10 ++shell eval ' . getline('.'))<CR>
-
-"}}}
-
-" ========================================
-" FUNCTION
-" ========================================
-" grep -----------{{{
-fu! Grep() abort
-  let w = inputdialog("word [target]>>")
-  if w == ''
-    retu
-  endif
-  echo '<<'
-  execute('CocCommand fzf-preview.ProjectGrep -w --ignore-case '.w)
 endf
 " }}}
-
-" git -----------{{{
-fu! AllPush() abort
-  let w = inputdialog("commit message>>")
-  echo '<<'
-  cal execute('top terminal ++rows=10 ++shell git add . && git commit -m "'.w.'" && git push')
-endf
-" }}}
-
-
-" mark ----------------------------------------{{{
+" mark
+" {{{
 let g:mark_words = 'abcdefghijklmnopqrstuvwxyz'
 fu! s:get_mark(tar) abort
   try
@@ -394,8 +394,8 @@ aug sig_aus
 aug END " }}}
 
 " }}}
-
-" scroll ----------------------------------------{{{
+" scroll
+" {{{
 fu! Scroll(vector, delta)
   cal ScrollToggle(0)
   let vec = a:vector == 0 ? "\<C-y>" : "\<C-e>"
@@ -406,11 +406,13 @@ endf
 fu! ScrollToggle(flg)
   set cursorcolumn!
   set cursorline!
-endf "}}}
-
-" color --------------------------------{{{
+endf
+"}}}
+" color
+" {{{
 let s:colorscheme_arr_default = ['torte']
-let s:colorscheme_arr = ['onedark', 'hybrid_material', 'molokai']
+let s:colorscheme_arr = ['onedark', 'hybrid_material']
+" molokai
 fu! ChangeColor()
   if glob('~/.vim/colors') != ''
     execute('colorscheme ' . s:colorscheme_arr[localtime() % len(s:colorscheme_arr)])
@@ -421,8 +423,8 @@ endf
 cal ChangeColor()
 
 " }}}
-
-" plugins --------------------------------------------{{{
+" plugins
+" {{{
 " color
 let s:colors = [
     \ 'hybrid_material.vim',
@@ -499,6 +501,8 @@ endf
 fu! PlugUnInstall(...)
   execute("bo terminal ++shell echo 'start' && rm -rf ~/.vim ~/.config && echo 'end'")
 endf
+" }}}
+
 " }}}
 
 " ========================================
