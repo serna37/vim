@@ -112,6 +112,31 @@ let g:gitgutter_map_keys = 0
 let g:limelight_conceal_ctermfg = 'gray'
 autocmd! User GoyoEnter Limelight
 autocmd! User GoyoLeave Limelight!
+" startify
+let g:startify_custom_header = [
+    \'                                                                                                                           dN',
+    \'                                                                                           ..                             JMF',
+    \'                                                                                      ..gMMMM%                           JMF',
+    \'                                                                                    .MM9^ .MF                           (MF',
+    \'                                                                           .(,      ("   .M#                  .g,      .MF',
+    \'                     .,  dN                                             gg,,M@          .M#                  .M#!      (M>',
+    \'                     JM} M#             .MNgg.                     .g,  ?M[ 7B         .MMg+gg,.           .MM"        ."',
+    \'             ...gNMN,.Mb MN           .gMM9!                      .(MN,  .=           .MMM9=  ?MN,         (WN,      .MM ',
+    \'jN-      ..gMMN#!     (Mp(M}       .+MMYMF                    ..kMMWM%               ,M#^       dN.          .WNJ,   JM',
+    \'MM     .MM9^  dN,                 dNB^ (M%                   ?M"!  ,M\        .,               .M#   .&MMMN,    ?"   M#',
+    \'MN            .MN#^                    dM:  ..(J-,                 ,B         .TM             .M#   ,M@  .MF',
+    \'MN.       ..MMBMN_                     dN_.MM@"!?MN.   TMm     .a,                           (M@         MM^',
+    \'MN.     .MM"  JMb....       ..        dMMM=     .Mb            ?HNgJ..,                   .MM^',
+    \'dM{          -MMM#7"T""   .dN#TMo       ?      .MM^                 ?!                 +gM#=',
+    \'(M]         .MN(N#       .M@  .MF              .MM^                                      ~',
+    \'.MN          ?"""             MM!            .MMD                        ',
+    \' ?N[                                         7"                                ',
+    \'  TMe                                                                          ',
+    \'   ?MN,                                                                      ',
+    \'     TMNg,                                                                     '
+    \]
+
+
 "}}}
 
 " ========================================
@@ -366,6 +391,7 @@ let s:repos = [
     \ 'kyoh86/vim-ripgrep',
     \ 'unblevable/quick-scope',
     \ 'easymotion/vim-easymotion',
+    \ 'mhinz/vim-startify',
     \ 'vim-airline/vim-airline',
     \ 'vim-airline/vim-airline-themes',
     \ 'sheerun/vim-polyglot',
