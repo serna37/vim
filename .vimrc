@@ -102,8 +102,8 @@ let g:EasyMotion_keys='swadjkhlnmf'
 " airline
 let g:airline_theme = 'deus'
 let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#buffer_idx_mode = 1
 let g:airline_powerline_fonts = 1
-let g:airline_highlighting_cache = 1
 " gitgutter
 let g:gitgutter_map_keys = 0
 " zen
@@ -121,8 +121,8 @@ let g:mapleader = "\<Space>"
 " WINDOW ============================================-
 " {{{
 " tabline motion
-nnoremap <silent><C-p> :bn<CR>
-nnoremap <silent><C-q> :bp<CR>
+nmap <silent><C-p> <Plug>AirlineSelectPrevTab
+nmap <silent><C-q> <Plug>AirlineSelectNextTab
 nnoremap <silent><Leader>x :call CloseBuf()<CR>
 " window forcus move
 nnoremap <C-h> <C-w>h
@@ -178,8 +178,7 @@ autocmd CursorHold * silent call CocActionAsync('highlight')
 nnoremap <silent><Leader>q <Plug>(quickhl-manual-reset):noh<CR>
 nnoremap <silent><Leader>g :cal Grep()<CR>
 " jump/mark
-nnoremap <silent>mm :cal Marking()<CR>
-nnoremap <silent><Leader>m :CocCommand fzf-preview.Marks<CR>
+nnoremap <silent><Leader>m :CocCommand fzf-preview.Bookmarks<CR>
 nnoremap <silent><Leader>l :CocCommand fzf-preview.Lines<CR>
 nnoremap <silent><Leader>j :CocCommand fzf-preview.Jumps<CR>
 nnoremap <silent><Leader>c :CocCommand fzf-preview.Changes<CR>
@@ -244,7 +243,6 @@ fu! FzfG() " if git repo, ref .gitignore
     exe 'lcd ' . pwd
   catch
   endtry
-"  execute(!v:shell_error ? 'GFiles' : 'Files')
   execute(!v:shell_error ? 'CocCommand fzf-preview.ProjectFiles' : 'Files')
 endf
 " }}}
@@ -263,6 +261,10 @@ endf
 " {{{
 fu! AllPush() abort
   let w = inputdialog("commit message>>")
+  if w == ''
+    echo 'cancel'
+    retu
+  endif
   echo '<<'
   cal execute('top terminal ++rows=10 ++shell git add . && git commit -m "'.w.'" && git push')
 endf
@@ -270,19 +272,19 @@ endf
 " IDE menu
 " {{{
 let g:my_ide_menu_items = [
-      \'[ReName] rename current word recursively',
-      \'[Format] applay format for this file',
-      \'[Run] run current program',
-      \'[Git] git actions',
-      \'[ALL PUSH] commit & push all changes',
-      \'[QuickFix-Grep] Open Preview Popup from quickfix - from fzfpreview Ctrl+Q',
-      \'[Snippet] edit snippets',
-      \'=(Space d)[Definition] Go to Definition',
-      \'=(Space r)[Reference] Reference',
-      \'=(Space o)[Outline] view outline on popup',
-      \'=(Space ?)[Document] show document on popup',
-      \'=(Space ,)[Next Diagnosis] jump next diagnosis',
-      \'=(Space .)[Prev Diagnosis] jump prev diagnosis',
+    \'[ReName] rename current word recursively',
+    \'[Format] applay format for this file',
+    \'[Run] run current program',
+    \'[Git] git actions',
+    \'[ALL PUSH] commit & push all changes',
+    \'[QuickFix-Grep] Open Preview Popup from quickfix - from fzfpreview Ctrl+Q',
+    \'[Snippet] edit snippets',
+    \'=(Space d)[Definition] Go to Definition',
+    \'=(Space r)[Reference] Reference',
+    \'=(Space o)[Outline] view outline on popup',
+    \'=(Space ?)[Document] show document on popup',
+    \'=(Space ,)[Next Diagnosis] jump next diagnosis',
+    \'=(Space .)[Prev Diagnosis] jump prev diagnosis',
  \]
 
 fu! IDEMenu() abort
@@ -314,88 +316,6 @@ fu! IDEChoose(ctx, winid, key) abort
   retu popup_filter_menu(a:winid, a:key)
 endf
 " }}}
-" mark
-" {{{
-let g:mark_words = 'abcdefghijklmnopqrstuvwxyz'
-fu! s:get_mark(tar) abort
-  try
-    retu execute('marks ' . a:tar)
-  catch
-    retu ''
-  endtry
-endf
-
-fu! Marking() abort " mark auto word, toggle {{{
-  let get_marks = s:get_mark(g:mark_words)
-  if get_marks == ''
-    execute('mark a')
-    cal MarkShow()
-    echo 'marked'
-    retu
-  endif
-  let l:now_marks = []
-  let l:warr = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
-  for row in split(get_marks , '\n')[1:]
-    let l:r = filter(split(row, ' '), {i, v -> v != ''})
-    if stridx(g:mark_words, r[0]) != -1 && r[1] == line('.')
-      cal MarkSignDel()
-      execute('delmarks ' . r[0])
-      cal MarkShow()
-      echo 'delete mark '.r[0]
-      retu
-    endif
-    let l:now_marks = add(now_marks, r[0])
-  endfor
-  let l:can_use = filter(warr, {i, v -> stridx(join(now_marks, ''), v) == -1})
-  if len(can_use) != 0
-    cal MarkSignDel()
-    execute('mark ' . can_use[0])
-    cal MarkShow()
-    echo 'marked '.can_use[0]
-  else
-    echo 'over limit markable char'
-  endif
-endf " }}}
-
-fu! MarkSignDel() " delete sign on mark {{{
-  let get_marks = s:get_mark(g:mark_words)
-  if get_marks == ''
-    retu
-  endif
-  let mark_dict = {}
-  for row in split(get_marks, '\n')[1:]
-    let l:r = filter(split(row, ' '), {i, v -> v != ''})
-    let mark_dict[r[0]] = r[1]
-  endfor
-  for mchar in keys(mark_dict)
-    let id = stridx(g:mark_words, mchar) + 1
-    exe "sign unplace " . id . " file=" . expand("%:p")
-    exe "sign undefine " . mchar
-  endfor
-endf " }}}
-
-fu! MarkShow() abort " show marks on row {{{
-  let get_marks = s:get_mark(g:mark_words)
-  if get_marks == ''
-    retu
-  endif
-  let mark_dict = {}
-  for row in split(get_marks, '\n')[1:]
-    let l:r = filter(split(row, ' '), {i, v -> v != ''})
-    let mark_dict[r[0]] = r[1]
-  endfor
-  for mchar in keys(mark_dict)
-    let id = stridx(g:mark_words, mchar) + 1
-    exe "sign define " . mchar . " text=" . mchar . " texthl=" . "ErrorMsg"
-    exe "sign place " . id . " line=" . mark_dict[mchar] . " name=" . mchar . " file=" . expand("%:p")
-  endfor
-endf
-aug sig_aus
-  au!
-  au BufEnter,CmdwinEnter * cal MarkShow()
-aug END " }}}
-
-" }}}
 " scroll
 " {{{
 fu! Scroll(vector, delta)
@@ -413,7 +333,8 @@ endf
 " color
 " {{{
 let s:colorscheme_arr_default = ['torte']
-let s:colorscheme_arr = ['onedark', 'hybrid_material']
+let s:colorscheme_arr = ['onedark']
+" hybrid_material
 " molokai
 fu! ChangeColor()
   if glob('~/.vim/colors') != ''
@@ -449,6 +370,7 @@ let s:repos = [
     \ 'uiiaoo/java-syntax.vim',
     \ 'obcat/vim-hitspop',
     \ 't9md/vim-quickhl',
+    \ 'MattesGroeger/vim-bookmarks',
     \ 'tpope/vim-fugitive',
     \ 'airblade/vim-gitgutter',
     \ 'jiangmiao/auto-pairs',
