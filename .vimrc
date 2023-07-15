@@ -424,6 +424,13 @@ endf
 
 " uninstall
 fu! PlugUnInstall(...)
+  echo 'delete ~/.vim ~/.config'
+  echo 'are you sure to delete these folder ?'
+  let w = inputdialog("YES (Y) / NO (N)")
+  if w != 'Y' || w != 'y'
+    echo 'cancel'
+    retu
+  endif
   execute("bo terminal ++shell echo 'start' && rm -rf ~/.vim ~/.config && echo 'end'")
 endf
 " }}}
