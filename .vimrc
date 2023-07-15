@@ -85,6 +85,8 @@ set completeopt=menuone,noinsert,preview,popup
 " coc
 let g:coc_snippet_next = '<Tab>'
 let g:coc_snippet_prev = '<S-Tab>'
+" vimspector
+let g:vimspector_enable_mappings = 'HUMAN'
 " fzf
 set rtp+=~/.vim/pack/plugins/start/fzf
 " f-scope
@@ -435,6 +437,7 @@ let s:colors = [
 " repo
 let s:repos = [
     \ 'neoclide/coc.nvim',
+    \ 'puremourning/vimspector',
     \ 'junegunn/fzf',
     \ 'junegunn/fzf.vim',
     \ 'kyoh86/vim-ripgrep',
