@@ -150,6 +150,7 @@ for vsnip, this is "create snippet" snippet
 - junegunn/goyo.vim
 - junegunn/limelight.vim
 
+# plugins from CocInstall
 - coc-explorer
 - coc-lists
 - coc-fzf-preview
@@ -167,5 +168,5 @@ for vsnip, this is "create snippet" snippet
 - coc-java
 
 # TODO
-- [] update about vim-quickrun
-- [] update about vimspector
+- [ ] update about vim-quickrun
+- [ ] update about vimspector
