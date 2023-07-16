@@ -65,11 +65,11 @@ for vsnip, this is "create snippet" snippet
 </details>
 
 # My action cheat sheet
-# Basic
+## Basic
 - normal vim
 - fzf popup window
 
-# WINDOW
+## WINDOW
 - Ctrl + q/n : prev / next buffer
 - Space x : close buffer
 - Ctrl + hjkl : move window forcus
@@ -77,19 +77,19 @@ for vsnip, this is "create snippet" snippet
 - Space t : terminal (bottom)
 - Space z : zen mode
 
-# MOTION
+## MOTION
 - tab / Shift-tab : 5row jump
 - Ctrl + udfb : comfortable scroll
 - Space w : f-scope toggle
 
-# SEARCH
-## file search
+## SEARCH
+### file search
 - Space e : explorer
 - Space f : fuzzy finder files / git files
 - Space h : fuzzy finder history
 - Space b : fuzzy finder buffer
 
-## word serch
+### word serch
 - s : jump word with easy-motion
 - Space s : incremental search word with easy-motion
 - Space Space s : grep interactive from current buffer (coc-lists)
@@ -98,7 +98,7 @@ for vsnip, this is "create snippet" snippet
 - Space q : quit search highlight
 - Space g : grep interactive Recursive (ripgrep)
 
-## jump/mark
+### jump/mark
 - mm : marking toggle
 - m p/n : prev/next mark
 - mc : clear mark
@@ -107,11 +107,11 @@ for vsnip, this is "create snippet" snippet
 - Space j : jumped history
 - Space c : changed line
 
-# EDIT
+## EDIT
 - (visual mode) Ctrl jk : move line
 - (insert mode) Ctrl hljk : move cursor
 
-# IDE
+## IDE
 - Space v : IDE functions menu
 - Space d : go to definition
 - Space r : (popup) find references
@@ -120,9 +120,52 @@ for vsnip, this is "create snippet" snippet
 - Space , : prev diagnostic
 - Space . : next diagnostic
 
-# on popup (default keymap)
+## on popup (default keymap)
 - Ctrl + n/p : chose down/up
 - Ctrl + d/u : preview down/up
 - Tab : select
 - Ctrl + q : selections -> quickfix
 (with quickfix -> fzf-preview.QuickFix)
+
+# plugins
+- junegunn/fzf
+- junegunn/fzf.vim
+- neoclide/coc.nvim
+- unblevable/quick-scope
+- easymotion/vim-easymotion
+- obcat/vim-hitspop
+- t9md/vim-quickhl
+- MattesGroeger/vim-bookmarks
+- jiangmiao/auto-pairs
+- markonm/traces.vim
+- tpope/vim-fugitive
+- airblade/vim-gitgutter
+- mhinz/vim-startify
+- vim-airline/vim-airline
+- vim-airline/vim-airline-themes
+- sheerun/vim-polyglot
+- uiiaoo/java-syntax.vim
+- thinca/vim-quickrun
+- puremourning/vimspector
+- junegunn/goyo.vim
+- junegunn/limelight.vim
+
+- coc-explorer
+- coc-lists
+- coc-fzf-preview
+- coc-snippets
+- coc-sh
+- coc-vimlsp
+- coc-json
+- coc-sql
+- coc-html
+- coc-css
+- coc-tsserver
+- coc-clangd
+- coc-go
+- coc-python
+- coc-java
+
+# TODO
+- [] update about vim-quickrun
+- [] update about vimspector
