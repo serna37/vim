@@ -232,7 +232,7 @@ inoremap <silent><expr> <S-Tab> coc#pum#visible() ? coc#pum#prev(1) : "\<S-Tab>"
 
 " IDE ============================================-
 " {{{
-nnoremap <Leader>v :cal IDEMenu()<CR>
+nnoremap <silent><Leader>v :cal IDEMenu()<CR>
 nnoremap <Leader>d <Plug>(coc-definition)
 nnoremap <Leader>r :CocCommand fzf-preview.CocReferences<CR>
 nnoremap <Leader>o :CocCommand fzf-preview.CocOutline<CR>

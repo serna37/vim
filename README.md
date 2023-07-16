@@ -168,5 +168,4 @@ for vsnip, this is "create snippet" snippet
 - coc-java
 
 # TODO
-- [ ] update about vim-quickrun
 - [ ] update about vimspector
