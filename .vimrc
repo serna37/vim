@@ -87,7 +87,6 @@ let g:coc_snippet_next = '<Tab>'
 let g:coc_snippet_prev = '<S-Tab>'
 " vimspector
 let g:vimspector_enable_mappings = 'VISUAL_STUDIO'
-let g:vimspector_install_gadgets = [ 'debugpy', 'CodeLLDB', 'delve', 'vscode-js-debug' ]
 " fzf
 set rtp+=~/.vim/pack/plugins/start/fzf
 " f-scope
@@ -426,7 +425,7 @@ let s:coc_extentions = [
     \ 'coc-tsserver',
     \ 'coc-clangd',
     \ 'coc-go',
-    \ 'coc-jedi',
+    \ 'coc-pyright',
     \ 'coc-java',
 \ ]
 
