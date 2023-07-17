@@ -171,17 +171,17 @@ for vsnip, this is "create snippet" snippet
 - [ ] update about vimspector
 
 # debug
-install gadget by vim command
+1. install gadget by vim command
 ```
 :VimspectorInstall
 ```
-custom on vimrc
+2. custom DAP adaptors on vimrc
 ```.vimrc
-let g:vimspector_install_gadgets = [ 'debugpy', 'CodeLLDB', 'delve', 'debugger-for-chrome' ]
+let g:vimspector_install_gadgets = [ 'debugpy', 'CodeLLDB', 'delve', 'vscode-js-debug' ]
 ```
 all list is [here](https://github.com/puremourning/vimspector#supported-languages)
 
-sample of .vimspector.json on python project root
+3. sample of .vimspector.json on python project root
 ```.json
 {
   "adapters": {},
@@ -209,3 +209,4 @@ sample of .vimspector.json on python project root
   }
 }
 ```
+4. keymap is [here](https://github.com/puremourning/vimspector#visual-studio--vscode)
