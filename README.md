@@ -31,7 +31,8 @@ curl https://raw.githubusercontent.com/serna37/vim/master/.vimrc > ~/.vimrc
   "snippets.ultisnips.pythonPrompt": false,
   "explorer.icon.enableNerdfont": true,
   "explorer.file.showHiddenFiles": true,
-  "python.formatting.provider": "yapf"
+  "python.formatting.provider": "yapf",
+  "pyright.inlayHints.variableTypes": false
 }
 ```
 ※ I chose yapf for python formatter, so need `python -m pip install yapf`
