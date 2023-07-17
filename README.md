@@ -36,6 +36,11 @@ curl https://raw.githubusercontent.com/serna37/vim/master/.vimrc > ~/.vimrc
 ```
 ※ I chose yapf for python formatter, so need `python -m pip install yapf`
 
+5. setup [copilot](https://github.com/github/copilot.vim)
+```
+:Copilot setup
+```
+
 <details>
 <summary>(old) monolithic version</summary>
 # monolithic version
