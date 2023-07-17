@@ -160,7 +160,7 @@ for vsnip, this is "create snippet" snippet
 - coc-tsserver
 - coc-clangd
 - coc-go
-- coc-jedi
+- coc-pyright
 - coc-java
 
 # debug
