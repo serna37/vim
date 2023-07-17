@@ -30,9 +30,11 @@ curl https://raw.githubusercontent.com/serna37/vim/master/.vimrc > ~/.vimrc
 {
   "snippets.ultisnips.pythonPrompt": false,
   "explorer.icon.enableNerdfont": true,
-  "explorer.file.showHiddenFiles": true
+  "explorer.file.showHiddenFiles": true,
+  "python.formatting.provider": "yapf"
 }
 ```
+※ I chose yapf for python formatter, so need `python -m pip install yapf`
 
 <details>
 <summary>(old) monolithic version</summary>
@@ -177,3 +179,5 @@ let g:vimspector_install_gadgets = [ 'debugpy', 'CodeLLDB', 'delve', 'vscode-js-
 curl https://raw.githubusercontent.com/serna37/vim/master/.vimspector.json > .vimspector.json
 ```
 4. keymap is [here](https://github.com/puremourning/vimspector#visual-studio--vscode)
+
+※ kind of Server hosting program cannot debug... only java can with `request: attach` [ref](https://zenn.dev/urawa72/articles/d942c96241200fd9adda#%E3%83%87%E3%83%90%E3%83%83%E3%82%B0)
