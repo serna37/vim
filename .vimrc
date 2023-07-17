@@ -86,7 +86,8 @@ set completeopt=menuone,noinsert,preview,popup
 let g:coc_snippet_next = '<Tab>'
 let g:coc_snippet_prev = '<S-Tab>'
 " vimspector
-let g:vimspector_enable_mappings = 'HUMAN'
+let g:vimspector_enable_mappings = 'VISUAL_STUDIO'
+let g:vimspector_install_gadgets = [ 'debugpy', 'CodeLLDB', 'delve', 'vscode-js-debug' ]
 " fzf
 set rtp+=~/.vim/pack/plugins/start/fzf
 " f-scope
@@ -302,6 +303,7 @@ let g:my_ide_menu_items = [
     \'[ReName] rename current word recursively',
     \'[Format] applay format for this file',
     \'[Run] run current program',
+    \'[Debug] debug current program',
     \'[Git] git actions',
     \'[ALL PUSH] commit & push all changes',
     \'[QuickFix-Grep] Open Preview Popup from quickfix - from fzfpreview Ctrl+Q',
@@ -331,12 +333,14 @@ fu! IDEChoose(ctx, winid, key) abort
     elseif a:ctx.idx == 2
       exe "QuickRun -hook/time/enable 1"
     elseif a:ctx.idx == 3
-      execute("CocCommand fzf-preview.GitActions")
+      cal vimspector#Launch()
     elseif a:ctx.idx == 4
-      cal AllPush()
+      execute("CocCommand fzf-preview.GitActions")
     elseif a:ctx.idx == 5
-      execute("CocCommand fzf-preview.QuickFix")
+      cal AllPush()
     elseif a:ctx.idx == 6
+      execute("CocCommand fzf-preview.QuickFix")
+    elseif a:ctx.idx == 7
       execute("CocCommand snippets.editSnippets")
     endif
   endif
