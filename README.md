@@ -169,3 +169,12 @@ for vsnip, this is "create snippet" snippet
 
 # TODO
 - [ ] update about vimspector
+
+# debug
+install gadget by vim command
+```
+:VimspectorInstall
+```
+
+for python:`:VimspectorInstall debugpy`
+all list is [here](https://github.com/puremourning/vimspector#supported-languages)
