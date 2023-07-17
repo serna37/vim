@@ -1,4 +1,5 @@
 # dependency
+- vim 9.0~ +python Huge (should get from [repo](https://github.com/vim/vim) and complie)
 - git
 - node
 - yarn
@@ -113,12 +114,7 @@ for vsnip, this is "create snippet" snippet
 
 ## IDE
 - Space v : IDE functions menu
-- Space d : go to definition
-- Space r : (popup) find references
-- Space o : (popup) outline
-- Space ? : hover document
-- Space , : prev diagnostic
-- Space . : next diagnostic
+(explain shortcut on popup window)
 
 ## on popup (default keymap)
 - Ctrl + n/p : chose down/up
@@ -167,22 +163,17 @@ for vsnip, this is "create snippet" snippet
 - coc-jedi
 - coc-java
 
-# TODO
-- [ ] update about vimspector
-
 # debug
-1. install gadget by vim command
-```
-:VimspectorInstall
-```
-2. custom DAP adaptors on vimrc
+1. custom DAP adaptors on vimrc. all list is [here](https://github.com/puremourning/vimspector#supported-languages)
 ```.vimrc
 let g:vimspector_install_gadgets = [ 'debugpy', 'CodeLLDB', 'delve', 'vscode-js-debug' ]
 ```
-all list is [here](https://github.com/puremourning/vimspector#supported-languages)
-
-3. sample of .vimspector.json on python project root
-```.json
-
+2. install gadget by vim command
+```
+:VimspectorInstall
+```
+3. create .vimspector.json on project root
+```sh
+curl https://raw.githubusercontent.com/serna37/vim/master/.vimspector.json > TARGET_DIRECTORY
 ```
 4. keymap is [here](https://github.com/puremourning/vimspector#visual-studio--vscode)
