@@ -406,6 +406,7 @@ let s:repos = [
     \ 'uiiaoo/java-syntax.vim',
     \ 'thinca/vim-quickrun',
     \ 'puremourning/vimspector',
+    \ 'github/copilot.vim',
     \ 'junegunn/goyo.vim',
     \ 'junegunn/limelight.vim',
 \ ]
