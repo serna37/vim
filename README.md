@@ -10,6 +10,14 @@
 - [ryanoasis/vim-devicons](https://github.com/ryanoasis/vim-devicons) (option: icon)
 
 # installation
+0. get vim
+```sh
+git clone --depth 1 https://github.com/vim/vim.git \
+&& cd vim \
+./configure --with-features=huge --enable-python3interp=dynamic \
+&& sudo make && sudo make install \
+&& vim --version
+```
 1. get this vimrc
 ```sh
 curl https://raw.githubusercontent.com/serna37/vim/master/.vimrc > ~/.vimrc
