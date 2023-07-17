@@ -174,6 +174,6 @@ let g:vimspector_install_gadgets = [ 'debugpy', 'CodeLLDB', 'delve', 'vscode-js-
 ```
 3. create .vimspector.json on project root
 ```sh
-curl https://raw.githubusercontent.com/serna37/vim/master/.vimspector.json > TARGET_DIRECTORY
+curl https://raw.githubusercontent.com/serna37/vim/master/.vimspector.json > .vimspector.json
 ```
 4. keymap is [here](https://github.com/puremourning/vimspector#visual-studio--vscode)
