@@ -175,6 +175,8 @@ install gadget by vim command
 ```
 :VimspectorInstall
 ```
-
-for python:`:VimspectorInstall debugpy`
+custom on vimrc
+```
+let g:vimspector_install_gadgets = [ 'debugpy', 'CodeLLDB', 'delve', 'debugger-for-chrome' ]
+```
 all list is [here](https://github.com/puremourning/vimspector#supported-languages)
