@@ -1,0 +1,45 @@
+{
+  "adapters": {},
+  "configurations": {
+    "python_file": {
+      "adapter": "debugpy",
+      "configuration": {
+        "name": "Python: Current File",
+        "type": "python",
+        "request": "launch",
+        "cwd": "${cwd}",
+        "program": "${file}",
+        "args": [],
+        "stopOnEntry": true,
+        "externalConsole": false,
+        "debugOptions": []
+      },
+      "breakpoints": {
+        "exception": {
+          "raised": "N",
+          "uncaught": "Y"
+        }
+      }
+    },
+    "go": {
+      "adapter": "delve",
+      "configuration": {
+        "name": "Go: Current File",
+        "type": "go",
+        "request": "launch",
+        "cwd": "${cwd}",
+        "program": "${file}",
+        "args": [],
+        "stopOnEntry": true,
+        "externalConsole": false,
+        "debugOptions": []
+      },
+      "breakpoints": {
+        "exception": {
+          "raised": "N",
+          "uncaught": "Y"
+        }
+      }
+    }
+  }
+}
