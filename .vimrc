@@ -179,6 +179,8 @@ nnoremap j gj
 nnoremap k gk
 nnoremap <Tab> 5gj
 nnoremap <S-Tab> 5gk
+vnoremap <Tab> 5gj
+vnoremap <S-Tab> 5gk
 " scroll
 nnoremap <silent><C-u> :cal Scroll(0, 25)<CR>
 nnoremap <silent><C-d> :cal Scroll(1, 25)<CR>
