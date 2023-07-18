@@ -47,5 +47,4 @@ inoremap <C-h> <C-o>h
 inoremap <C-l> <C-o>l
 inoremap <C-k> <C-o>k
 inoremap <C-j> <C-o>j
-" completion @ coc
 
