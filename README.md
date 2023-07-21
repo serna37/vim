@@ -22,6 +22,11 @@ git clone --depth 1 https://github.com/vim/vim.git \
 ```sh
 curl https://raw.githubusercontent.com/serna37/vim/master/.vimrc > ~/.vimrc
 ```
+or
+```sh
+git clone --depth 1 https://github.com/serna37/vim
+ln -s vim/.vimrc ~/.vimrc
+```
 2. execute command on vim
 ```
 :PlugInstall
