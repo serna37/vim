@@ -1,24 +1,33 @@
 " vim:set foldmethod=marker:
 
-" TODO fix content doc
+" TODO grep -> optional
+" TODO grep -> cheat sheet
+" TODO cheat sheet upgrade
 
 " ==============================================================================
-"    CONTENTS
+"  CONTENTS
 "
-"     # basic vim setting
-"       ## FILE ........................ | file encoding, charset, vim specific setting.
-"       ## VISUALIZATION ......... | enhanced visual information.
-"       ## OPERATION ......... | cursor move, and so on.
-"       ## COMPLETION ......... | indent, word
-"       ## SEARCH ......... | search, explorer
-"       ## OTHERS ......... | fast terminal, reg engin, fold
+"   # CheatSheet
+"     ## CheatSheet Hover ...... | hover cheat sheet at Cursor Hold 5 sec.
 "
-"     # plugins setting
-"       ## GLOBAL VARIABLE ......... | overrite global variable
+"   # Basic vim setting
+"     ## FILE .................. | file encoding, charset, vim specific setting.
+"     ## VISUALIZATION ......... | enhanced visual information.
+"     ## WINDOW ................ | window forcus, resize, open terminal.
+"     ## MOVE .................. | row move, scroll, mark.
+"     ## EDIT .................. | insert mode parenthese, cursor, block move.
+"     ## COMPLETION ............ | indent, word completion.
+"     ## SEARCH ................ | incremental search, grep, explorer.
+"     ## OTHERS ................ | fast terminal, reg engin, fold.
 "
-"     # functions
-"       ## FUNCTIONS ......... | adhoc functions
-"       ## IMITATION ......... | imitation plugins as functions
+"   # plugins setting
+"     ## PLUGIN VARIABLES ...... | setting for plugins without conflict.
+"     ## PLUGIN KEYMAP ......... | setting for plugins without conflict.
+"
+"   # functions
+"     ## FUNCTIONS ............. | adhoc functions.
+"     ## IMITATION ............. | imitate plugins as functions.
+"     ## PLUGINS ............... | plugin manager functions.
 "
 " ==============================================================================
 
@@ -35,6 +44,7 @@ augroup cheat_sheet_hover
   au!
   autocmd CursorHold * silent call CheatSheet()
   autocmd CursorMoved * silent call CheatSheetClose()
+  autocmd CursorMovedI * silent call CheatSheetClose()
 augroup END
 
 let g:my_vim_cheet_sheet = [
@@ -44,8 +54,10 @@ let g:my_vim_cheet_sheet = [
       \' (s)          [EasyMotion] ',
       \' (Space s)    [EasyMotion incremental] ',
       \' (Space*2 s)  [Buffer Grep incrementa] ',
+      \' ------------------------------------------------ ',
       \' (Space fhbm) [FZF files/buffers/histories/marks] ',
       \' (Space jcl)  [FZF jumped/changed/line] ',
+      \' ------------------------------------------------ ',
       \' (Space w)    [F-Scope Toggle] ',
       \' (Space z)    [Zen Mode] ',
       \' (Space*3)    [ON/OFF Cheat Sheet] ',
@@ -94,7 +106,7 @@ let g:show_cheat_sheet_flg = 1
 let g:recheatwinid = 0
 fu! PopupFever()
   call RunCat()
-  let g:recheatwinid = popup_create(g:my_vim_cheet_sheet, #{ title: ' Action Cheet Sheet ', border: [], line: &columns/4-&columns/36 })
+  let g:recheatwinid = popup_create(g:my_vim_cheet_sheet, #{ title: ' Action Cheet Sheet ', border: [], line: &columns/4 })
   let g:logowinid = popup_create(g:startify_custom_header, #{ border: [] })
 endf
 fu! PopupFeverStop()
@@ -576,7 +588,7 @@ let s:colorscheme_arr = ['onedark', 'hybrid_material', 'molokai']
 
 let s:popid = 0
 fu! IDEMenu() abort
-  let s:popid = popup_create(g:my_ide_action_cheet_sheet, #{ title: ' Other KeyMaps ', border: [], line: &columns/4-&columns/36 })
+  let s:popid = popup_create(g:my_ide_action_cheet_sheet, #{ title: ' Other KeyMaps ', border: [], line: &columns/4 })
   cal popup_menu(g:my_ide_menu_items, #{ title: ' IDE MENU (j / k choose) ', border: [], filter: function('IDEChoose', [{'idx': 0, 'files': g:my_ide_menu_items }]) })
 endf
 
@@ -585,7 +597,7 @@ fu! IDEChoose(ctx, winid, key) abort
     let a:ctx.idx = a:ctx.idx+1
   elseif a:key is# 'k' && a:ctx.idx > 0
     let a:ctx.idx = a:ctx.idx-1
-  elseif a:key is# "\<Esc>"
+  elseif a:key is# "\<Esc>" || a:key is# "\<Space>"
     call popup_close(s:popid)
   elseif a:key is# "\<CR>"
     if a:ctx.idx == 0
@@ -626,7 +638,7 @@ fu! IDEChoose(ctx, winid, key) abort
         execute('colorscheme ' . s:colorscheme_arr_default[localtime() % len(s:colorscheme_arr_default)])
       endif
     endif
-  call popup_close(s:popid)
+    call popup_close(s:popid)
   endif
   retu popup_filter_menu(a:winid, a:key)
 endf
