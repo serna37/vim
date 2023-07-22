@@ -1,3 +1,7 @@
+# WIP
+this is in working for update ...
+no funtion: QuickScope, PlugInstall
+
 # demo
 [放置popup](./放置popup.mov)
 # dependency
