@@ -25,6 +25,98 @@
 let mapleader = "\<SPACE>"
 
 " #############################################################
+" ##################       CheatSheet       ###################
+" #############################################################
+
+" cursor hold
+" motion cheat sheet on popup
+
+augroup cheat_sheet_hover
+  au!
+  autocmd CursorHold * silent call CheatSheet()
+  autocmd CursorMoved * silent call CheatSheetClose()
+augroup END
+
+let g:my_vim_cheet_sheet = [
+      \' (Space v)    [IDE Action Menu] ',
+      \' (Tab S-Tab)  [5 row jump] ',
+      \' (mm/mn/mp)   [mark/next/prev] ',
+      \' (s)          [EasyMotion] ',
+      \' (Space s)    [EasyMotion incremental] ',
+      \' (Space*2 s)  [Buffer Grep incrementa] ',
+      \' (Space fhbm) [FZF files/buffers/histories/marks] ',
+      \' (Space jcl)  [FZF jumped/changed/line] ',
+      \' (Space w)    [F-Scope Toggle] ',
+      \' (Space z)    [Zen Mode] ',
+      \' (Space*3)    [ON/OFF Cheat Sheet] ',
+      \]
+
+" no plugin version
+if glob('~/.vim/pack/plugins/start') == ''
+  let g:my_vim_cheet_sheet = [
+        \' (Space v)    [IDE Action Menu] some are dosabled ',
+        \' (Tab S-Tab)  [5 row jump] ',
+        \' (mm/mn/mp)   [mark/next/prev] ',
+        \' (Space f)    [FZF files/buffers/histories] ',
+        \' (Space m)    [Marks] ',
+        \' (Space w)    [F-Scope Toggle] ',
+        \' (Space*3)    [ON/OFF Cheat Sheet] ',
+        \]
+endif
+
+let g:cheat_sheet_open_flg = 0
+let g:cheatwinid = 0
+let g:cheat_sheet_timer_id = 0
+fu! CheatSheetPopup(timer)
+  let g:cheatwinid = popup_create(g:my_vim_cheet_sheet, #{ title: ' Action Cheet Sheet ', border: [], zindex: 1, line: "cursor+1", col: "cursor" })
+endf
+
+fu! CheatSheet()
+  if g:show_cheat_sheet_flg == 0
+    return
+  endif
+  if g:cheat_sheet_open_flg == 0
+    let g:cheat_sheet_open_flg = 1
+    let g:cheat_sheet_timer_id = timer_start(5000, function("CheatSheetPopup"))
+  endif
+endf
+fu! CheatSheetClose()
+  if g:show_cheat_sheet_flg == 0
+    return
+  endif
+  let g:cheat_sheet_open_flg = 0
+  call popup_close(g:cheatwinid)
+  call timer_stop(g:cheat_sheet_timer_id)
+endf
+
+nnoremap <silent><Leader><Leader><Leader> :call PopupFever()<CR>:call ToggleCheatHover()<CR>
+let g:show_cheat_sheet_flg = 1
+let g:recheatwinid = 0
+fu! PopupFever()
+  call RunCat()
+  let g:recheatwinid = popup_create(g:my_vim_cheet_sheet, #{ title: ' Action Cheet Sheet ', border: [], line: &columns/4-&columns/36 })
+  let g:logowinid = popup_create(g:startify_custom_header, #{ border: [] })
+endf
+fu! PopupFeverStop()
+  call RunCatStop()
+  call popup_close(g:recheatwinid )
+  call popup_close(g:logowinid)
+endf
+fu! ToggleCheatHover()
+  let msg = 'Disable Cheat Sheet Hover'
+  if g:show_cheat_sheet_flg == 1
+    let g:show_cheat_sheet_flg = 0
+  else
+    let msg = 'Enable Cheat Sheet Hover'
+    let g:show_cheat_sheet_flg = 1
+  endif
+  let g:checkwinid = popup_notification(msg, #{ border: [], line: &columns/4-&columns/37, close: "button" })
+  call timer_start(3000, { -> PopupFeverStop()})
+endf
+
+
+
+" #############################################################
 " ##################          FILE          ###################
 " #############################################################
 
@@ -167,28 +259,6 @@ if glob('~/.vim/pack/plugins/start/vim-bookmarks') == ''
   nnoremap <silent><Leader>m :call MarkMenu()<CR>
 endif
 
-" cursor hold
-" motion cheat sheet on popup
-autocmd CursorHold * silent call Cheat()
-let g:my_vim_cheet_sheet = [
-      \'(Space d) [Definition]     Go to Definition',
-      \]
-
-let s:cheatwinid = 0
-let s:logowinid = 0
-fu! Cheat()
-  let s:cheatwinid = popup_create(g:my_vim_cheet_sheet, #{ title: 'Action Cheet Sheet', border: [], line: "cursor+1", col: "cursor", filter: function('CloseCheat') })
-  cal timer_start(5000, { -> RunCat() })
-  cal timer_start(10000, { -> Logo() })
-endf
-fu! Logo()
-  let s:logowinid = popup_create(g:startify_custom_header, #{ border: [], filter: function('CloseCheat') })
-endf
-fu! CloseCheat(winid, key) abort
-  call popup_close(s:cheatwinid)
-  call RunCatStop()
-  call popup_close(s:logowinid)
-endf
 
 " #############################################################
 " ##################         EDIT           ###################
@@ -296,6 +366,10 @@ set foldcolumn=1 " fold preview
 " #############################################################
 " ##################    PLUGIN VARIABLES    ###################
 " #############################################################
+
+if glob('~/.vim/colors/') != ''
+  colorscheme onedark
+endif
 
 " coc
 let g:coc_snippet_next = '<Tab>'
@@ -1065,6 +1139,91 @@ endf
 " #############################################################
 
 
-" TODO
+" my colorscheme
+let s:colors = [ 'onedark.vim', 'hybrid_material.vim', 'molokai.vim' ]
 
+" repo
+let s:repos = [
+    \ 'junegunn/fzf',
+    \ 'junegunn/fzf.vim',
+    \ 'neoclide/coc.nvim',
+    \ 'unblevable/quick-scope',
+    \ 'easymotion/vim-easymotion',
+    \ 'obcat/vim-hitspop',
+    \ 't9md/vim-quickhl',
+    \ 'MattesGroeger/vim-bookmarks',
+    \ 'jiangmiao/auto-pairs',
+    \ 'markonm/traces.vim',
+    \ 'tpope/vim-fugitive',
+    \ 'airblade/vim-gitgutter',
+    \ 'mhinz/vim-startify',
+    \ 'vim-airline/vim-airline',
+    \ 'vim-airline/vim-airline-themes',
+    \ 'sheerun/vim-polyglot',
+    \ 'uiiaoo/java-syntax.vim',
+    \ 'thinca/vim-quickrun',
+    \ 'puremourning/vimspector',
+    \ 'github/copilot.vim',
+    \ 'junegunn/goyo.vim',
+    \ 'junegunn/limelight.vim',
+    \ ]
+
+" extentions
+let s:coc_extentions = [
+    \ 'coc-explorer',
+    \ 'coc-lists',
+    \ 'coc-fzf-preview',
+    \ 'coc-snippets',
+    \ 'coc-sh',
+    \ 'coc-vimlsp',
+    \ 'coc-json',
+    \ 'coc-sql',
+    \ 'coc-html',
+    \ 'coc-css',
+    \ 'coc-tsserver',
+    \ 'coc-clangd',
+    \ 'coc-go',
+    \ 'coc-pyright',
+    \ 'coc-java',
+    \ ]
+
+fu! PlugInstall(...)
+  " color
+  let repo = 'https://raw.githubusercontent.com/serna37/vim-color/master/'
+  let cmd = "mkdir -p ~/.vim/colors && cd ~/.vim/colors "
+  for scheme in s:colors
+    let cmd = cmd . ' && curl ' . repo . scheme . ' > ' . scheme
+  endfor
+  " plugins
+  let cmd = cmd . " && repos=('".join(s:repos,"' '")."') && mkdir -p ~/.vim/pack/plugins/start && cd ~/.vim/pack/plugins/start"
+    \ . " && for v in ${repos[@]};do git clone --depth 1 https://github.com/${v} ;done"
+    \ . " && fzf/install --no-key-bindings --completion --no-bash --no-zsh --no-fish"
+  cal job_start(["/bin/zsh","-c",cmd], {'close_cb': function('s:coc_setup')})
+  echo 'plug install processing...'
+endf
+fu! s:coc_setup(ch) abort
+  echo 'coc install. please reboot vim, and call "PlugInstallCoc"'
+  cal coc#util#install()
+endf
+
+" coc extentions
+fu! PlugInstallCoc()
+  execute("CocInstall " . join(s:coc_extentions," "))
+endf
+
+" uninstall
+fu! PlugUnInstall(...)
+  echo 'delete ~/.vim'
+  echo 'are you sure to delete these folder ?'
+  let w = inputdialog("YES (Y) / NO (N)")
+  if w != 'Y' || w != 'y'
+    echo 'cancel'
+    retu
+  endif
+  execute("bo terminal ++shell echo 'start' && rm -rf ~/.vim && echo 'end'")
+endf
+
+command! PlugInstall cal PlugInstall()
+command! PlugInstallCoc cal PlugInstallCoc()
+command! PlugUnInstall cal PlugUnInstall()
 
