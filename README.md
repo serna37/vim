@@ -3,7 +3,7 @@ this is in working for update ...
 no funtion: QuickScope, PlugInstall
 
 # demo
-[放置popup](./放置popup.mov)
+![demo](./放置popup.mov)
 # dependency
 - vim 9.0~ +python Huge (should get from [repo](https://github.com/vim/vim) and complie)
 - git
