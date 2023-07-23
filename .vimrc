@@ -1,7 +1,5 @@
 " vim:set foldmethod=marker:
 
-" TODO WIP training wheels protocol
-
 " ==============================================================================
 "  CONTENTS
 "
@@ -1352,6 +1350,8 @@ let s:training_popup_tips_win_flg = 0
 let s:training_popup_tips_win_tid = 0
 
 function! TrainingWheelsPopupsActivate()
+  call TrainingWheelsPratticeFileCreate()
+  "call timer_start(200, function('TrainingWheelsPracticeFileOpen'))
   let s:show_cheat_sheet_flg = 0 " my cheat sheet disable
   call TrainingWheelsPopupsAllClose()
   let s:training_info_idx = 0
@@ -1360,6 +1360,9 @@ function! TrainingWheelsPopupsActivate()
   call popup_notification([
         \'             = Infomation =          ',
         \' Training Wheels Protocol Activated.',
+        \'  ↓Create and Open practice file. ',
+        \'   ~/practice.md. ',
+        \'  ',
         \' :TrainingWheelsProtocol 0  to DeActivate. '
         \],#{border:[],
         \zindex:999,
@@ -1368,27 +1371,34 @@ function! TrainingWheelsPopupsActivate()
   call timer_start(1000, function('TrainingInfo'))
   call timer_start(6000, function('TrainingInfo'))
   call timer_start(6500, function('TrainingPopupCursor1'))
+  call timer_start(6500, function('TrainingPopupCursor1SampleMv'))
   call timer_start(10000, function('TrainingInfo'))
   call timer_start(10500, function('TrainingPopupCursor2'))
+  call timer_start(10500, function('TrainingPopupCursor2SampleMv'))
   call timer_start(15000, function('TrainingInfo'))
   call timer_start(15500, function('TrainingPopupWindow1'))
+  call timer_start(15500, function('TrainingPopupWindow1SampleMv'))
   call timer_start(20000, function('TrainingInfo'))
   call timer_start(20500, function('TrainingPopupWindow2'))
+  call timer_start(20500, function('TrainingPopupWindow2SampleMv'))
   call timer_start(26000, function('TrainingInfo'))
-  call timer_start(31000, function('TrainingInfo'))
-  call timer_start(31500, function('TrainingPopupMode1'))
-  call timer_start(36000, function('TrainingInfo'))
-  call timer_start(39000, function('TrainingInfo'))
-  call timer_start(39500, function('TrainingPopupMode2'))
-  call timer_start(44000, function('TrainingInfo'))
-  call timer_start(44500, function('TrainingPopupSearch'))
-  call timer_start(47000, function('TrainingInfo'))
-  call timer_start(50000, function('TrainingInfo'))
-  call timer_start(50500, function('TrainingPopupOpeObj'))
-  call timer_start(53000, function('TrainingInfo'))
-  let s:training_popup_tips_win_tid = timer_start(53500, function('TrainingPopupTips'))
-  call timer_start(53500, function('TrainingPopupTipsCursor'))
-  call timer_start(56000, function('TrainingInfo'))
+  call timer_start(29000, function('TrainingInfo'))
+  call timer_start(29500, function('TrainingPopupMode1'))
+  call timer_start(32000, function('TrainingInfo'))
+  call timer_start(35000, function('TrainingInfo'))
+  call timer_start(35500, function('TrainingPopupMode2'))
+  call timer_start(35500, function('TrainingPopupMode2SampleMv'))
+  call timer_start(38000, function('TrainingInfo'))
+  call timer_start(38500, function('TrainingPopupSearch'))
+  call timer_start(38500, function('TrainingPopupSearchSampleMv'))
+  call timer_start(42000, function('TrainingInfo'))
+  call timer_start(45000, function('TrainingInfo'))
+  call timer_start(45500, function('TrainingPopupOpeObj'))
+  call timer_start(45500, function('TrainingPopupOpeObjSampleMv'))
+  call timer_start(49000, function('TrainingInfo'))
+  let s:training_popup_tips_win_tid = timer_start(49500, function('TrainingPopupTips'))
+  call timer_start(49500, function('TrainingPopupTipsCursor'))
+  call timer_start(52000, function('TrainingInfo'))
 endfunction
 
 function! TrainingWheelsPopupsActivateQuick()
@@ -1448,7 +1458,7 @@ endfunction
 let s:training_info_idx = 0
 let s:training_info_txt = [
       \[[' ======================================== ',
-      \'   WELCOME TO TRAINING WHEELS TUTORIAL.   ',
+      \'     WELCOME TO TUTORIAL ANIMATION.   ',
       \' ======================================== ',
       \' Please watch this on full screen.  ',
       \'',
@@ -1462,15 +1472,16 @@ let s:training_info_txt = [
       \[[' Then, window SCROLL motions are there. '], 5000],
       \[[' Also you can JUMP cursor ON WINDOW. '], 6000],
       \[[' When you edit file, maybe write words. ',
-      \' Then you can use INSERT MODE. '], 5000],
-      \[[' How to get INSERT MODE is here. '], 5000],
+      \' Then you can use INSERT MODE. '], 3000],
+      \[[' How to get INSERT MODE is here. '], 3000],
       \[[' Do you want to save file? '], 3000],
-      \[[' COMMAND MODE is convenience. '], 5000],
+      \[[' COMMAND MODE is convenience. '], 3000],
       \[[' And how to SEARCH word is here. '], 3000],
       \[[' You can improve motion moreover. '], 3000],
-      \[[' Use "Operator" & "TextObject". '], 3000],
+      \[[' Use "Operator" & "TextObject". '], 4000],
       \[[' Undo Redo Repeat is ... '], 3000],
       \[[" At the end, tutorial is over. ",
+      \' These popup remain until DeActivate TrainingWheelsProtocol ',
       \' Enjoy your vim life ! '], 5000],
       \]
 function! TrainingInfo(timer)
@@ -1497,6 +1508,31 @@ function! TrainingPopupCursor1(timer)
   cal matchaddpos("Identifier", [[1,10],[2,2],[2,14],[3,4]], 16, -1, #{window: s:training_popup_cursor1_winid})
 endfunction
 
+function! TrainingPopupCursor1SampleMv(timer)
+  execute("normal gg")
+  call cursor(26, 6)
+  call timer_start(600, function('TrainingPopupCursor1SampleMv1'))
+  call timer_start(1200, function('TrainingPopupCursor1SampleMv2'))
+  call timer_start(1800, function('TrainingPopupCursor1SampleMv3'))
+  call timer_start(2400, function('TrainingPopupCursor1SampleMv4'))
+endfunction
+function! TrainingPopupCursor1SampleMv1(timer)
+  execute("normal h")
+  echo("h   cursor move")
+endfunction
+function! TrainingPopupCursor1SampleMv2(timer)
+  execute("normal j")
+  echo("j   cursor move")
+endfunction
+function! TrainingPopupCursor1SampleMv3(timer)
+  execute("normal l")
+  echo("l   cursor move")
+endfunction
+function! TrainingPopupCursor1SampleMv4(timer)
+  execute("normal k")
+  echo("k   cursor move")
+endfunction
+
 " cursor jump
 function! TrainingPopupCursor2(timer)
   let s:training_popup_cursor2_winid = popup_create([
@@ -1521,6 +1557,38 @@ function! TrainingPopupCursor2(timer)
   cal matchaddpos("Comment", [[3,3,7],[3,13,14],[9,3,7],[9,13,14]], 16, -1, #{window: s:training_popup_cursor2_winid})
 endfunction
 
+function! TrainingPopupCursor2SampleMv(timer)
+  execute("normal gg")
+  call cursor(15, 12)
+  call timer_start(200, function('TrainingPopupCursor2SampleMv1'))
+  call timer_start(900, function('TrainingPopupCursor2SampleMv1'))
+  call timer_start(1600, function('TrainingPopupCursor2SampleMv2'))
+  call timer_start(2300, function('TrainingPopupCursor2SampleMv3'))
+  call timer_start(3000, function('TrainingPopupCursor2SampleMv4'))
+  call timer_start(3700, function('TrainingPopupCursor2SampleMv5'))
+endfunction
+function! TrainingPopupCursor2SampleMv1(timer)
+  execute("normal w")
+  echo("w   next word first char")
+endfunction
+function! TrainingPopupCursor2SampleMv2(timer)
+  execute("normal e")
+  echo("e   next wort last char")
+endfunction
+function! TrainingPopupCursor2SampleMv3(timer)
+  call cursor(15, 12)
+  echo("and ...")
+endfunction
+function! TrainingPopupCursor2SampleMv4(timer)
+  execute("normal fe")
+  echo("fe   next first e")
+endfunction
+function! TrainingPopupCursor2SampleMv5(timer)
+  execute("normal tx")
+  echo("tx   next first x, before 1")
+endfunction
+
+
 " move window
 function! TrainingPopupWindow1(timer)
   let s:training_popup_window1_winid = popup_create([
@@ -1530,7 +1598,7 @@ function! TrainingPopupWindow1(timer)
         \' |                 | |                 | ',
         \' |                 | | C-u  up         | ',
         \' |                 | | ↑               | ',
-        \' | 100G (line no)  | |                 | ',
+        \' | 15G (line no)   | |                 | ',
         \' |                 | | ↓               | ',
         \' |                 | | C-d  down       | ',
         \' |                 | |                 | ',
@@ -1543,9 +1611,33 @@ function! TrainingPopupWindow1(timer)
         \})
   cal matchaddpos("Identifier", [[3,4,2],[3,24,3]], 16, -1, #{window: s:training_popup_window1_winid})
   cal matchaddpos("Identifier", [[5,24,3]], 16, -1, #{window: s:training_popup_window1_winid})
-  cal matchaddpos("Identifier", [[7,4,4]], 16, -1, #{window: s:training_popup_window1_winid})
+  cal matchaddpos("Identifier", [[7,4,3]], 16, -1, #{window: s:training_popup_window1_winid})
   cal matchaddpos("Identifier", [[9,24,3]], 16, -1, #{window: s:training_popup_window1_winid})
   cal matchaddpos("Identifier", [[11,4,1],[11,24,3]], 16, -1, #{window: s:training_popup_window1_winid})
+endfunction
+
+function! TrainingPopupWindow1SampleMv(timer)
+  execute("normal gg")
+  call timer_start(200, function('TrainingPopupWindow1SampleMv1'))
+  call timer_start(1200, function('TrainingPopupWindow1SampleMv2'))
+  call timer_start(2200, function('TrainingPopupWindow1SampleMv3'))
+  call timer_start(3200, function('TrainingPopupWindow1SampleMv4'))
+endfunction
+function! TrainingPopupWindow1SampleMv1(timer)
+  execute "normal \<C-d>"
+  echo("C-d   pade down")
+endfunction
+function! TrainingPopupWindow1SampleMv2(timer)
+  execute("normal gg")
+  echo("gg   page top")
+endfunction
+function! TrainingPopupWindow1SampleMv3(timer)
+  execute("normal G")
+  echo("G   page last")
+endfunction
+function! TrainingPopupWindow1SampleMv4(timer)
+  execute("normal 15G")
+  echo("15G   line 15")
 endfunction
 
 " cursor jump in window
@@ -1580,6 +1672,46 @@ function! TrainingPopupWindow2(timer)
   cal matchaddpos("Identifier", [[13,25],[13,50,2]], 16, -1, #{window: s:training_popup_window2_winid})
   cal matchaddpos("Comment", [[5,25,7],[6,26,3],[6,32,4],[7,27,9]], 16, -1, #{window: s:training_popup_window2_winid})
   cal matchaddpos("Comment", [[10,25,7],[11,26,8],[12,27,9]], 16, -1, #{window: s:training_popup_window2_winid})
+endfunction
+
+function! TrainingPopupWindow2SampleMv(timer)
+  execute("normal gg")
+  call cursor(15, 1)
+  call timer_start(200, function('TrainingPopupWindow2SampleMv1'))
+  call timer_start(800, function('TrainingPopupWindow2SampleMv2'))
+  call timer_start(1400, function('TrainingPopupWindow2SampleMv3'))
+  call timer_start(2200, function('TrainingPopupWindow2SampleMv4'))
+  call timer_start(2600, function('TrainingPopupWindow2SampleMv4'))
+  call timer_start(3400, function('TrainingPopupWindow2SampleMv5'))
+  call timer_start(4200, function('TrainingPopupWindow2SampleMv6'))
+  call timer_start(4500, function('TrainingPopupWindow2SampleMv7'))
+endfunction
+function! TrainingPopupWindow2SampleMv1(timer)
+  execute("normal H")
+  echo("H   window High")
+endfunction
+function! TrainingPopupWindow2SampleMv2(timer)
+  execute("normal L")
+  echo("L   window Low")
+endfunction
+function! TrainingPopupWindow2SampleMv3(timer)
+  execute("normal M")
+  echo("M   window Middle")
+endfunction
+function! TrainingPopupWindow2SampleMv4(timer)
+  execute("normal }")
+  echo("}   next paragraph")
+endfunction
+function! TrainingPopupWindow2SampleMv5(timer)
+  execute "normal z\<CR>"
+  echo("z+Enter   stay cursor, top")
+endfunction
+function! TrainingPopupWindow2SampleMv6(timer)
+  execute("normal zz")
+  echo("zz   stay cursor, middle")
+endfunction
+function! TrainingPopupWindow2SampleMv7(timer)
+  echo("")
 endfunction
 
 " insert mode
@@ -1622,6 +1754,13 @@ function! TrainingPopupMode2(timer)
   cal matchaddpos("Identifier", [[1,2,2],[2,2,2],[3,2,3],[4,2,6],[5,2,19],[6,2,20]], 16, -1, #{window: s:training_popup_mode2_winid})
 endfunction
 
+function! TrainingPopupMode2SampleMv(timer)
+  call timer_start(400, function('TrainingPopupMode2SampleMv1'))
+endfunction
+function! TrainingPopupMode2SampleMv1(timer)
+  echo("Hello Vim!!")
+endfunction
+
 " search
 function! TrainingPopupSearch(timer)
   let s:training_popup_search_winid = popup_create([
@@ -1630,12 +1769,31 @@ function! TrainingPopupSearch(timer)
         \' n   | next hit',
         \' N   | prev hit',
         \' /word  | search free word',
+        \' :noh   | clear highlight',
         \],#{title: ' Search (NORMAL MODE) ',
         \border: [], zindex: 1,
         \line: 49,
         \col: 53
         \})
-  cal matchaddpos("Identifier", [[1,2],[2,2],[3,2],[4,2],[5,2,5]], 16, -1, #{window: s:training_popup_search_winid})
+  cal matchaddpos("Identifier", [[1,2],[2,2],[3,2],[4,2],[5,2,5],[6,2,4]], 16, -1, #{window: s:training_popup_search_winid})
+endfunction
+
+function! TrainingPopupSearchSampleMv(timer)
+  execute("normal gg")
+  call cursor(15, 9)
+  call timer_start(200, function('TrainingPopupSearchSampleMv1'))
+  call timer_start(800, function('TrainingPopupSearchSampleMv2'))
+  call timer_start(1200, function('TrainingPopupSearchSampleMv2'))
+  call timer_start(1600, function('TrainingPopupSearchSampleMv3'))
+endfunction
+function! TrainingPopupSearchSampleMv1(timer)
+  call feedkeys("\/test\<CR>")
+endfunction
+function! TrainingPopupSearchSampleMv2(timer)
+  call feedkeys("n")
+endfunction
+function! TrainingPopupSearchSampleMv3(timer)
+  call feedkeys("N")
 endfunction
 
 " operator + textobject
@@ -1669,6 +1827,34 @@ function! TrainingPopupOpeObj(timer)
   cal matchaddpos("Identifier", [[10,2,2],[11,2,2],[12,2,2],[13,2,2],[14,2,2]], 16, -1, #{window: s:training_popup_opeobj_winid})
   cal matchaddpos("Comment", [[16,3,8],[16,14,15]], 16, -1, #{window: s:training_popup_opeobj_winid})
   cal matchaddpos("Identifier", [[18,2,4],[19,2,3]], 16, -1, #{window: s:training_popup_opeobj_winid})
+endfunction
+
+function! TrainingPopupOpeObjSampleMv(timer)
+  call cursor(52, 13)
+  execute("normal zz")
+  call timer_start(200, function('TrainingPopupOpeObjSampleMv1'))
+  call timer_start(800, function('TrainingPopupOpeObjSampleMv2'))
+  call timer_start(1500, function('TrainingPopupOpeObjSampleMv3'))
+  call timer_start(1600, function('TrainingPopupOpeObjSampleMv4'))
+  call timer_start(2200, function('TrainingPopupOpeObjSampleMv5'))
+  call timer_start(2900, function('TrainingPopupOpeObjSampleMv3'))
+endfunction
+function! TrainingPopupOpeObjSampleMv1(timer)
+  echo("vi<   visual inner <>")
+endfunction
+function! TrainingPopupOpeObjSampleMv2(timer)
+  execute("normal vi<")
+endfunction
+function! TrainingPopupOpeObjSampleMv3(timer)
+  execute "normal \<Esc>"
+  call cursor(72, 6)
+  execute("normal zz")
+endfunction
+function! TrainingPopupOpeObjSampleMv4(timer)
+  echo("vis   visual inner statement")
+endfunction
+function! TrainingPopupOpeObjSampleMv5(timer)
+  execute("normal vis")
 endfunction
 
 " undo redo repeat
@@ -1707,6 +1893,23 @@ endfunction
 function! TrainingPopupTipsClose()
   call timer_stop(s:training_popup_tips_win_tid)
   call popup_close(s:training_popup_tips_winid)
+endfunction
+
+
+let g:training_wheels_practice_file = []
+
+" create practice file
+function! TrainingWheelsPratticeFileCreate()
+  " TODO change branch
+  let repo = 'https://raw.githubusercontent.com/serna37/vim/develop-training-wheels-protocol/practice.md'
+  let cmd = 'curl '.repo.' > ~/practice.md'
+  cal job_start(["/bin/zsh","-c",cmd], {'close_cb': function('TrainingWheelsPracticeFileOpen')})
+endfunction
+
+" open practice file (only tutorial)
+function! TrainingWheelsPracticeFileOpen(ch) abort
+  execute('e ~/practice.md')
+  call cursor(26, 6)
 endfunction
 
 
