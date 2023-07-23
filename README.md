@@ -1,3 +1,11 @@
+# TODO
+工事中
+
+
+# WIP
+this is in working for update ...
+no funtion: QuickScope 
+
 # dependency
 - vim 9.0~ +python Huge (should get from [repo](https://github.com/vim/vim) and complie)
 - git
