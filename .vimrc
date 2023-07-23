@@ -42,87 +42,111 @@ let mapleader = "\<SPACE>"
 
 augroup cheat_sheet_hover
   au!
-  autocmd CursorHold * silent call CheatSheet()
-  autocmd CursorMoved * silent call CheatSheetClose()
-  autocmd CursorMovedI * silent call CheatSheetClose()
+  autocmd CursorHold * silent call s:CheatSheet()
+  autocmd CursorMoved * silent call s:CheatSheetClose()
+  autocmd CursorMovedI * silent call s:CheatSheetClose()
 augroup END
 
-let g:my_vim_cheet_sheet = [
-      \' (Space v)    [IDE Action Menu] ',
-      \' (Tab S-Tab)  [5 row jump] ',
-      \' (mm/mn/mp)   [mark/next/prev] ',
-      \' (s)          [EasyMotion] ',
-      \' (Space s)    [EasyMotion incremental] ',
-      \' (Space*2 s)  [Buffer Grep incrementa] ',
-      \' ------------------------------------------------ ',
-      \' (Space fhbm) [FZF files/buffers/histories/marks] ',
-      \' (Space jcl)  [FZF jumped/changed/line] ',
-      \' ------------------------------------------------ ',
-      \' (Space w)    [F-Scope Toggle] ',
-      \' (Space z)    [Zen Mode] ',
-      \' (Space*3)    [ON/OFF Cheat Sheet] ',
+let s:my_vim_cheet_sheet = [
+      \' --[window]---------------------------------------------- ',
+      \' (C-n/p)(Space x)   [buffer tab][next/prev/close] ',
+      \' (←↑↓→)(C-hjkl)     [window][resize/forcus] ',
+      \' (Space t)(Space z) [terminal][Zen Mode] ',
+      \' --[motion]---------------------------------------------- ',
+      \' (Space v)      [IDE Action Menu] ',
+      \' (Tab S-Tab)    [jump][5rows] ',
+      \' (s)(Space s)   [easymotion incremental(Tab)] ',
+      \' (Space w)      [f-scope toggle] ',
+      \' (m minpcx)     [mark(toggle)/info/next/prev/clear/all] ',
+      \' INSERT(C-hjkl) [cursor move] ',
+      \' VISUAL(C-jk)   [blok up/down] ',
+      \' --[search]---------------------------------------------- ',
+      \' (Space fhb)    [fzf][files/histories/buffers] ',
+      \' (Space ejclm)  [explorer/jumped/changed/line/marks] ',
+      \' (Space g)(Space*2 s)  [grep][buffer grep incremental] ',
+      \' (Space q)      [clear search highlight] ',
+      \' --[command]--------------------------------------------- ',
+      \' (:PlugUnInstall)          [plugins uninstall] ',
+      \' (:TrainingWheelsProtocol) [training default vim]',
+      \' -------------------------------------------------------- ',
+      \' (Space*3)      [ON/OFF Cheat Sheet] ',
       \]
 
 " no plugin version
 if glob('~/.vim/pack/plugins/start') == ''
-  let g:my_vim_cheet_sheet = [
-        \' (Space v)    [IDE Action Menu] some are dosabled ',
-        \' (Tab S-Tab)  [5 row jump] ',
-        \' (mm/mn/mp)   [mark/next/prev] ',
-        \' (Space f)    [FZF files/buffers/histories] ',
-        \' (Space m)    [Marks] ',
-        \' (Space w)    [F-Scope Toggle] ',
-        \' (Space*3)    [ON/OFF Cheat Sheet] ',
+  let s:my_vim_cheet_sheet = [
+        \' --[window]---------------------------------------------- ',
+        \' (Space x)       [buffer][close] ',
+        \' (←↑↓→)(C-hjkl)  [window][resize/forcus] ',
+        \' (Space t)       [terminal] ',
+        \' --[motion]---------------------------------------------- ',
+        \' (Space v)      [IDE Action Menu] some are dosabled ',
+        \' (Tab S-Tab)    [jump][5rows] ',
+        \' (Space w)      [f-scope toggle] ',
+        \' (mm/mn/mp/mc)  [mark(toggle)/next/prev/clear] ',
+        \' INSERT(C-hjkl) [cursor move] ',
+        \' VISUAL(C-jk)   [blok up/down] ',
+        \' --[search]---------------------------------------------- ',
+        \' (Space f)   [fzf-mimic][files/histories/buffers] ',
+        \' (Space em)  [explorer(netrw)/marks] ',
+        \' (Space g)   [grep] ',
+        \' (Space q)   [clear search highlight] ',
+        \' --[command]--------------------------------------------- ',
+        \' (:TrainingWheelsProtocol) [training default vim]',
+        \' (:PlugInstall)      [plugins install] ',
+        \' (:PlugInstallCoc)   [coc extension install] ',
+        \' -------------------------------------------------------- ',
+        \' (Space*3)      [ON/OFF Cheat Sheet] ',
         \]
 endif
 
-let g:cheat_sheet_open_flg = 0
-let g:cheatwinid = 0
-let g:cheat_sheet_timer_id = 0
-fu! CheatSheetPopup(timer)
-  let g:cheatwinid = popup_create(g:my_vim_cheet_sheet, #{ title: ' Action Cheet Sheet ', border: [], zindex: 1, line: "cursor+1", col: "cursor" })
+let s:cheat_sheet_open_flg = 0
+let s:cheatwinid = 0
+let s:cheat_sheet_timer_id = 0
+fu! s:CheatSheetPopup(timer)
+  let s:cheatwinid = popup_create(s:my_vim_cheet_sheet, #{ title: ' Action Cheet Sheet ', border: [], zindex: 1, line: "cursor+1", col: "cursor" })
 endf
 
-fu! CheatSheet()
-  if g:show_cheat_sheet_flg == 0
+fu! s:CheatSheet()
+  if s:show_cheat_sheet_flg == 0
     return
   endif
-  if g:cheat_sheet_open_flg == 0
-    let g:cheat_sheet_open_flg = 1
-    let g:cheat_sheet_timer_id = timer_start(5000, function("CheatSheetPopup"))
+  if s:cheat_sheet_open_flg == 0
+    let s:cheat_sheet_open_flg = 1
+    let s:cheat_sheet_timer_id = timer_start(10000, function("s:CheatSheetPopup"))
   endif
 endf
-fu! CheatSheetClose()
-  if g:show_cheat_sheet_flg == 0
+fu! s:CheatSheetClose()
+  if s:show_cheat_sheet_flg == 0
     return
   endif
-  let g:cheat_sheet_open_flg = 0
-  call popup_close(g:cheatwinid)
-  call timer_stop(g:cheat_sheet_timer_id)
+  let s:cheat_sheet_open_flg = 0
+  call popup_close(s:cheatwinid)
+  call timer_stop(s:cheat_sheet_timer_id)
 endf
 
 nnoremap <silent><Leader><Leader><Leader> :call PopupFever()<CR>:call ToggleCheatHover()<CR>
-let g:show_cheat_sheet_flg = 1
-let g:recheatwinid = 0
+let s:show_cheat_sheet_flg = 1
+let s:recheatwinid = 0
 fu! PopupFever()
   call RunCat()
-  let g:recheatwinid = popup_create(g:my_vim_cheet_sheet, #{ title: ' Action Cheet Sheet ', border: [], line: &columns/4 })
-  let g:logowinid = popup_create(g:startify_custom_header, #{ border: [] })
+  let s:recheatwinid = popup_create(s:my_vim_cheet_sheet, #{ title: ' Action Cheet Sheet ', border: [], line: &columns/4 })
+  let s:logowinid = popup_create(g:startify_custom_header, #{ border: [] })
 endf
 fu! PopupFeverStop()
   call RunCatStop()
-  call popup_close(g:recheatwinid )
-  call popup_close(g:logowinid)
+  call popup_close(s:recheatwinid )
+  call popup_close(s:logowinid)
 endf
 fu! ToggleCheatHover()
   let msg = 'Disable Cheat Sheet Hover'
-  if g:show_cheat_sheet_flg == 1
-    let g:show_cheat_sheet_flg = 0
+  if s:show_cheat_sheet_flg == 1
+    let s:show_cheat_sheet_flg = 0
   else
     let msg = 'Enable Cheat Sheet Hover'
-    let g:show_cheat_sheet_flg = 1
+    let s:show_cheat_sheet_flg = 1
   endif
-  let g:checkwinid = popup_notification(msg, #{ border: [], line: &columns/4-&columns/37, close: "button" })
+  let s:checkwinid = popup_notification(msg, #{ border: [], line: &columns/4-&columns/37, close: "button" })
   call timer_start(3000, { -> PopupFeverStop()})
 endf
 
@@ -250,13 +274,13 @@ nnoremap <silent><C-f> :cal Scroll(1, 10)<CR>
 " custom scroll just like
 " yuttie/comfortable-motion.vim
 fu! Scroll(vector, delta)
-  cal ScrollToggle(0)
+  cal s:ScrollToggle(0)
   let vec = a:vector == 0 ? "\<C-y>" : "\<C-e>"
   let tmp = timer_start(a:delta, { -> feedkeys(vec) }, {'repeat': -1})
   cal timer_start(600, { -> timer_stop(tmp) })
-  cal timer_start(600, { -> ScrollToggle(1) })
+  cal timer_start(600, { -> s:ScrollToggle(1) })
 endf
-fu! ScrollToggle(flg)
+fu! s:ScrollToggle(flg)
   set cursorcolumn!
   set cursorline!
 endf
@@ -268,6 +292,7 @@ if glob('~/.vim/pack/plugins/start/vim-bookmarks') == ''
   nnoremap mm :call Marking()<CR>
   nnoremap mn :call MarkHank("down")<CR>
   nnoremap mp :call MarkHank("up")<CR>
+  nnoremap mc :delmarks!<CR>
   nnoremap <silent><Leader>m :call MarkMenu()<CR>
 endif
 
@@ -337,7 +362,7 @@ set shortmess-=S " show hit word's number at right bottom
 
 " no move search word
 nnoremap <silent>* *N:call HiSet()<CR>
-nnoremap <silent># #N:call HiSet()<CR>
+nnoremap <silent># *N:call HiSet()<CR>
 
 " disable highlight
 nnoremap <silent><Leader>q :noh<CR>:cal clearmatches()<CR>
@@ -471,7 +496,7 @@ nnoremap <silent><leader>b :CocCommand fzf-preview.AllBuffers<CR>
 " search highlight
 if glob('~/.vim/pack/plugins/start/vim-quickhl') != ''
   nnoremap <silent>* *N<Plug>(quickhl-manual-this)
-  nnoremap <silent># #N<Plug>(quickhl-manual-this)
+  nnoremap <silent># *N<Plug>(quickhl-manual-this)
   nnoremap <silent><Leader>q <Plug>(quickhl-manual-reset):noh<CR>
 endif
 if glob('~/.vim/pack/plugins/start/coc.nvim') != ''
@@ -560,21 +585,21 @@ fu! Grep() abort
   execute('CocCommand fzf-preview.ProjectGrep -w --ignore-case '.w)
 endf
 
-let g:my_ide_menu_items = [
-      \'[Format]        applay format for this file',
-      \'[ReName]        rename current word recursively',
-      \'[Git]           git actions',
-      \'[ALL PUSH]      commit & push all changes',
-      \'[QuickFix-Grep] Open Preview Popup from quickfix - from fzfpreview Ctrl+Q',
-      \'[Snippet]       edit snippets',
-      \'[Run]           run current program',
-      \'[Debug]         debug current program',
-      \'[Run as Shell]  run current row as shell command',
-      \'[Term popup]    open terminal on popup window',
-      \'[Color random]  change colorscheme at random',
+let s:my_ide_menu_items = [
+      \'[Format]         applay format for this file',
+      \'[ReName*]        rename current word recursively',
+      \'[Git*]           git actions',
+      \'[ALL PUSH]       commit & push all changes',
+      \'[QuickFix-Grep*] Open Preview Popup from quickfix - from fzfpreview Ctrl+Q',
+      \'[Snippet*]       edit snippets',
+      \'[Run*]           run current program',
+      \'[Debug*]         debug current program',
+      \'[Run as Shell]   run current row as shell command',
+      \'[Term popup]     open terminal on popup window',
+      \'[Color random]   change colorscheme at random',
       \]
 
-let g:my_ide_action_cheet_sheet = [
+let s:my_ide_action_cheet_sheet = [
       \' (Space d) [Definition]     Go to Definition ',
       \' (Space r) [Reference]      Reference ',
       \' (Space o) [Outline]        view outline on popup ',
@@ -583,13 +608,13 @@ let g:my_ide_action_cheet_sheet = [
       \' (Space .) [Prev Diagnosis] jump prev diagnosis ',
       \]
 
-let s:colorscheme_arr_default = ['torte']
+let s:colorscheme_arr_default = ['torte', 'elflord', 'pablo']
 let s:colorscheme_arr = ['onedark', 'hybrid_material', 'molokai']
 
 let s:popid = 0
 fu! IDEMenu() abort
-  let s:popid = popup_create(g:my_ide_action_cheet_sheet, #{ title: ' Other KeyMaps ', border: [], line: &columns/4 })
-  cal popup_menu(g:my_ide_menu_items, #{ title: ' IDE MENU (j / k choose) ', border: [], filter: function('IDEChoose', [{'idx': 0, 'files': g:my_ide_menu_items }]) })
+  let s:popid = popup_create(s:my_ide_action_cheet_sheet, #{ title: ' Other Plugin KeyMaps ', border: [], line: &columns/4 })
+  cal popup_menu(s:my_ide_menu_items, #{ title: ' IDE MENU (j / k) Enter choose | * require plugin ', border: [], filter: function('IDEChoose', [{'idx': 0, 'files': s:my_ide_menu_items }]) })
 endf
 
 fu! IDEChoose(ctx, winid, key) abort
@@ -632,11 +657,14 @@ fu! IDEChoose(ctx, winid, key) abort
     elseif a:ctx.idx == 9
       call popup_create(term_start([&shell], #{ hidden: 1, term_finish: 'close'}), #{ border: [], minwidth: &columns/2, minheight: &lines/2 })
     elseif a:ctx.idx == 10
+      let g:newcolorscheme = ''
       if glob('~/.vim/colors') != ''
-        execute('colorscheme ' . s:colorscheme_arr[localtime() % len(s:colorscheme_arr)])
+        let g:newcolorscheme = s:colorscheme_arr[localtime() % len(s:colorscheme_arr)]
       else
-        execute('colorscheme ' . s:colorscheme_arr_default[localtime() % len(s:colorscheme_arr_default)])
+        let g:newcolorscheme = s:colorscheme_arr_default[localtime() % len(s:colorscheme_arr_default)]
       endif
+      execute('echo "change [".execute("colorscheme")[1:]."] -> [".g:newcolorscheme."]"')
+      call timer_start(500, { -> execute('colorscheme ' . g:newcolorscheme) })
     endif
     call popup_close(s:popid)
   endif
@@ -652,7 +680,7 @@ endf
 " ===================================================================
 " junegunn/fzf.vim
 " ===================================================================
-let g:not_path_arr = [
+let s:not_path_arr = [
       \'"*.vim/*"',
       \'"*.git/*"',
       \'"*.npm/*"',
@@ -670,105 +698,105 @@ let g:not_path_arr = [
       \'"*OneDrive/*"',
       \'"*Videos/*"'
       \]
-let g:fzf_find_cmd = 'find . -type f -name "*" -not -path ' . join(g:not_path_arr, ' -not -path ')
-let g:fzf_searched_dir = execute('pwd')[1:] " first char is ^@, so trim
-let g:fzf_find_result_tmp = []
+let s:fzf_find_cmd = 'find . -type f -name "*" -not -path ' . join(s:not_path_arr, ' -not -path ')
+let s:fzf_searched_dir = execute('pwd')[1:] " first char is ^@, so trim
+let s:fzf_find_result_tmp = []
 
 fu! FzfStart() " open window
-  if stridx(execute('pwd')[1:], g:fzf_searched_dir) == -1 || len(g:fzf_find_result_tmp) == 0
+  if stridx(execute('pwd')[1:], s:fzf_searched_dir) == -1 || len(s:fzf_find_result_tmp) == 0
     cal s:fzf_re_find()
   endif
-  let g:fzf_mode = 'his'
-  let g:fzf_searching_zone = '(*^-^) BUF & MRU'
-  let g:fzf_pwd_prefix = 'pwd:[' . execute('pwd')[1:] . ']>>'
-  let g:fzf_enter_keyword = []
-  let g:fzf_his_result = map(split(execute('ls'), '\n'), { i,v -> split(filter(split(v, ' '), { i,v -> v != '' })[2], '"')[0] }) + map(split(execute('oldfiles'), '\n'), { i,v -> split(v, ': ')[1] })
-  let g:fzf_find_result = g:fzf_his_result[0:29]
-  let g:fzf_enter_win = popup_create(g:fzf_pwd_prefix, #{ title: 'Type or <BS> / past:<Space> / MRU<>FZF:<Tab> / choose:<Enter> / end:<Esc> / chache refresh:<C-f>',  border: [], zindex: 99, minwidth: &columns/2, maxwidth: &columns/2, maxheight: 1, line: &columns/4-&columns/36, filter: function('s:fzf_refresh_result') })
-    cal win_execute(g:fzf_enter_win, "mapclear <buffer>")
+  let s:fzf_mode = 'his'
+  let s:fzf_searching_zone = '(*^-^) BUF & MRU'
+  let s:fzf_pwd_prefix = 'pwd:[' . execute('pwd')[1:] . ']>>'
+  let s:fzf_enter_keyword = []
+  let s:fzf_his_result = map(split(execute('ls'), '\n'), { i,v -> split(filter(split(v, ' '), { i,v -> v != '' })[2], '"')[0] }) + map(split(execute('oldfiles'), '\n'), { i,v -> split(v, ': ')[1] })
+  let s:fzf_find_result = s:fzf_his_result[0:29]
+  let s:fzf_enter_win = popup_create(s:fzf_pwd_prefix, #{ title: 'Type or <BS> / past:<Space> / MRU<>FZF:<Tab> / choose:<Enter> / end:<Esc> / chache refresh:<C-f>',  border: [], zindex: 99, minwidth: &columns/2, maxwidth: &columns/2, maxheight: 1, line: &columns/4-&columns/36, filter: function('s:fzf_refresh_result') })
+    cal win_execute(s:fzf_enter_win, "mapclear <buffer>")
   cal s:fzf_create_choose_win()
 endf
 fu! s:fzf_create_choose_win()
-  let g:fzf_c_idx = 0
-  let g:fzf_choose_win = popup_menu(g:fzf_find_result, #{ title: g:fzf_searching_zone, border: [], zindex: 98, minwidth: &columns/2, maxwidth: &columns/2, minheight: 2, maxheight: &lines/2, filter: function('s:fzf_choose') })
-    cal win_execute(g:fzf_enter_win, "mapclear <buffer>")
+  let s:fzf_c_idx = 0
+  let s:fzf_choose_win = popup_menu(s:fzf_find_result, #{ title: s:fzf_searching_zone, border: [], zindex: 98, minwidth: &columns/2, maxwidth: &columns/2, minheight: 2, maxheight: &lines/2, filter: function('s:fzf_choose') })
+    cal win_execute(s:fzf_enter_win, "mapclear <buffer>")
 endf
 
 fu! s:fzf_re_find() " async find command
   cal RunCat()
-  let g:fzf_find_result_tmp = []
-  let g:fzf_searched_dir = execute('pwd')[1:]
-  echo 'find files in ['.g:fzf_searched_dir.'] and chache ...'
-  cal job_start(g:fzf_find_cmd, {'out_cb': function('s:fzf_find_start'), 'close_cb': function('s:fzf_find_end')})
+  let s:fzf_find_result_tmp = []
+  let s:fzf_searched_dir = execute('pwd')[1:]
+  echo 'find files in ['.s:fzf_searched_dir.'] and chache ...'
+  cal job_start(s:fzf_find_cmd, {'out_cb': function('s:fzf_find_start'), 'close_cb': function('s:fzf_find_end')})
 endf
 fu! s:fzf_find_start(ch, msg) abort
-  let g:fzf_find_result_tmp = add(g:fzf_find_result_tmp, a:msg)
+  let s:fzf_find_result_tmp = add(s:fzf_find_result_tmp, a:msg)
 endf
 fu! s:fzf_find_end(ch) abort
-  echo 'find files in ['.g:fzf_searched_dir.'] and chache is complete!!'
+  echo 'find files in ['.s:fzf_searched_dir.'] and chache is complete!!'
   cal RunCatStop()
 endf
 
 fu! s:fzf_refresh_result(winid, key) abort " event to draw search result
   if a:key is# "\<Esc>"
-    cal popup_close(g:fzf_enter_win)
-    cal popup_close(g:fzf_choose_win)
+    cal popup_close(s:fzf_enter_win)
+    cal popup_close(s:fzf_choose_win)
     retu 1
   elseif a:key is# "\<CR>"
-    call popup_close(g:fzf_enter_win)
+    call popup_close(s:fzf_enter_win)
     retu 1
   elseif a:key is# "\<C-f>"
     cal s:fzf_re_find()
   elseif a:key is# "\<Space>"
     for i in range(0,strlen(@")-1)
-      let g:fzf_enter_keyword = add(g:fzf_enter_keyword, strpart(@",i,1))
+      let s:fzf_enter_keyword = add(s:fzf_enter_keyword, strpart(@",i,1))
     endfor
   elseif a:key is# "\<Tab>"
-    let g:fzf_mode = g:fzf_mode == 'his' ? 'fzf' : 'his'
-    let g:fzf_searching_zone = g:fzf_mode == 'his' ? '(*^-^) BUF & MRU' : '(*^-^) FZF [' . g:fzf_searched_dir . ']'
-    cal popup_close(g:fzf_choose_win)
-    if g:fzf_mode == 'his'
-      let g:fzf_find_result = len(g:fzf_enter_keyword) != 0 ? matchfuzzy(g:fzf_his_result, join(g:fzf_enter_keyword, '')) : g:fzf_his_result
+    let s:fzf_mode = s:fzf_mode == 'his' ? 'fzf' : 'his'
+    let s:fzf_searching_zone = s:fzf_mode == 'his' ? '(*^-^) BUF & MRU' : '(*^-^) FZF [' . s:fzf_searched_dir . ']'
+    cal popup_close(s:fzf_choose_win)
+    if s:fzf_mode == 'his'
+      let s:fzf_find_result = len(s:fzf_enter_keyword) != 0 ? matchfuzzy(s:fzf_his_result, join(s:fzf_enter_keyword, '')) : s:fzf_his_result
     else
-      let g:fzf_find_result = len(g:fzf_enter_keyword) != 0 ? matchfuzzy(g:fzf_find_result_tmp, join(g:fzf_enter_keyword, '')) : g:fzf_find_result_tmp
+      let s:fzf_find_result = len(s:fzf_enter_keyword) != 0 ? matchfuzzy(s:fzf_find_result_tmp, join(s:fzf_enter_keyword, '')) : s:fzf_find_result_tmp
     endif
-    let g:fzf_find_result = g:fzf_find_result[0:29]
+    let s:fzf_find_result = s:fzf_find_result[0:29]
     cal s:fzf_create_choose_win()
     retu 1
-  elseif a:key is# "\<BS>" && len(g:fzf_enter_keyword) > 0
-    unlet g:fzf_enter_keyword[len(g:fzf_enter_keyword)-1]
-  elseif a:key is# "\<BS>" && len(g:fzf_enter_keyword) == 0
+  elseif a:key is# "\<BS>" && len(s:fzf_enter_keyword) > 0
+    unlet s:fzf_enter_keyword[len(s:fzf_enter_keyword)-1]
+  elseif a:key is# "\<BS>" && len(s:fzf_enter_keyword) == 0
   " noop
   elseif strtrans(a:key) == "<80><fd>`"
     " noop (for polyglot bug adhoc)
     retu
   else
-    let g:fzf_enter_keyword = add(g:fzf_enter_keyword, a:key)
+    let s:fzf_enter_keyword = add(s:fzf_enter_keyword, a:key)
   endif
 
-  if g:fzf_mode == 'his'
-    let g:fzf_find_result = len(g:fzf_enter_keyword) != 0 ? matchfuzzy(g:fzf_his_result, join(g:fzf_enter_keyword, '')) : g:fzf_his_result
+  if s:fzf_mode == 'his'
+    let s:fzf_find_result = len(s:fzf_enter_keyword) != 0 ? matchfuzzy(s:fzf_his_result, join(s:fzf_enter_keyword, '')) : s:fzf_his_result
   else
-    let g:fzf_find_result = len(g:fzf_enter_keyword) != 0 ? matchfuzzy(g:fzf_find_result_tmp, join(g:fzf_enter_keyword, '')) : g:fzf_find_result_tmp
+    let s:fzf_find_result = len(s:fzf_enter_keyword) != 0 ? matchfuzzy(s:fzf_find_result_tmp, join(s:fzf_enter_keyword, '')) : s:fzf_find_result_tmp
   endif
 
-  cal setbufline(winbufnr(g:fzf_enter_win), 1, g:fzf_pwd_prefix . join(g:fzf_enter_keyword, ''))
-  cal setbufline(winbufnr(g:fzf_choose_win), 1, map(range(1,30), { i,v -> '' }))
-  cal setbufline(winbufnr(g:fzf_choose_win), 1, g:fzf_find_result[0:29]) " re view only first 30 files
+  cal setbufline(winbufnr(s:fzf_enter_win), 1, s:fzf_pwd_prefix . join(s:fzf_enter_keyword, ''))
+  cal setbufline(winbufnr(s:fzf_choose_win), 1, map(range(1,30), { i,v -> '' }))
+  cal setbufline(winbufnr(s:fzf_choose_win), 1, s:fzf_find_result[0:29]) " re view only first 30 files
   retu a:key is# "x" || a:key is# "\<Space>" ? 1 : popup_filter_menu(a:winid, a:key)
 endf
 
 fu! s:fzf_choose(winid, key) abort
   if a:key is# 'j'
-    let g:fzf_c_idx = g:fzf_c_idx == len(g:fzf_find_result)-1 ? len(g:fzf_find_result)-1 : g:fzf_c_idx + 1
+    let s:fzf_c_idx = s:fzf_c_idx == len(s:fzf_find_result)-1 ? len(s:fzf_find_result)-1 : s:fzf_c_idx + 1
   elseif a:key is# 'k'
-    let g:fzf_c_idx = g:fzf_c_idx == 0 ? 0 : g:fzf_c_idx - 1
+    let s:fzf_c_idx = s:fzf_c_idx == 0 ? 0 : s:fzf_c_idx - 1
   elseif a:key is# "\<CR>"
-    retu s:fzf_open(a:winid, 'e', g:fzf_find_result[g:fzf_c_idx])
+    retu s:fzf_open(a:winid, 'e', s:fzf_find_result[s:fzf_c_idx])
   elseif a:key is# "\<C-v>"
-    retu s:fzf_open(a:winid, 'vnew', g:fzf_find_result[g:fzf_c_idx])
+    retu s:fzf_open(a:winid, 'vnew', s:fzf_find_result[s:fzf_c_idx])
   elseif a:key is# "\<C-t>"
-    retu s:fzf_open(a:winid, 'tabnew', g:fzf_find_result[g:fzf_c_idx])
+    retu s:fzf_open(a:winid, 'tabnew', s:fzf_find_result[s:fzf_c_idx])
   endif
   retu popup_filter_menu(a:winid, a:key)
 endf
@@ -779,22 +807,22 @@ fu! s:fzf_open(winid, op, f) abort
 endf
 
 " run cat (load animation)
-let g:cat_frame = 0
+let s:cat_frame = 0
 fu! s:RunCatM() abort
-  cal setbufline(winbufnr(g:runcat), 1, s:running_cat[g:cat_frame])
-  let g:cat_frame = g:cat_frame == 4 ? 0 : g:cat_frame + 1
-  if g:cat_stop == 1
-    cal popup_close(g:runcat)
+  cal setbufline(winbufnr(s:runcat), 1, s:running_cat[s:cat_frame])
+  let s:cat_frame = s:cat_frame == 4 ? 0 : s:cat_frame + 1
+  if s:cat_stop == 1
+    cal popup_close(s:runcat)
     retu
   endif
   cal timer_start(200, { -> s:RunCatM() })
 endf
 fu! RunCatStop()
-  let g:cat_stop = 1
+  let s:cat_stop = 1
 endf
 fu! RunCat()
-  let g:cat_stop = 0
-  let g:runcat = popup_create(s:running_cat[0], #{line: 1, border: [], zindex: 1})
+  let s:cat_stop = 0
+  let s:runcat = popup_create(s:running_cat[0], #{line: 1, border: [], zindex: 1})
   cal s:RunCatM()
 endf
 
@@ -882,7 +910,7 @@ let s:running_cat = [
 " MattesGroeger/vim-bookmarks
 " ===================================================================
 
-let g:mark_words = 'abcdefghijklmnopqrstuvwxyz'
+let s:mark_words = 'abcdefghijklmnopqrstuvwxyz'
 fu! s:get_mark(tar) abort
   try
     retu execute('marks ' . a:tar)
@@ -892,7 +920,7 @@ fu! s:get_mark(tar) abort
 endf
 
 fu! MarkMenu() abort
-  let get_marks = s:get_mark(g:mark_words)
+  let get_marks = s:get_mark(s:mark_words)
   if get_marks == ''
     echo 'no marks'
     retu
@@ -918,7 +946,7 @@ fu! MarkChoose(ctx, winid, key) abort
 endf
 
 fu! Marking() abort
-  let get_marks = s:get_mark(g:mark_words)
+  let get_marks = s:get_mark(s:mark_words)
   if get_marks == ''
     execute('mark a')
     cal MarkShow()
@@ -929,7 +957,7 @@ fu! Marking() abort
   let l:warr = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
   for row in split(get_marks , '\n')[1:]
     let l:r = filter(split(row, ' '), {i, v -> v != ''})
-    if stridx(g:mark_words, r[0]) != -1 && r[1] == line('.')
+    if stridx(s:mark_words, r[0]) != -1 && r[1] == line('.')
       cal MarkSignDel()
       execute('delmarks ' . r[0])
       cal MarkShow()
@@ -950,7 +978,7 @@ fu! Marking() abort
 endf
 
 fu! MarkSignDel()
-  let get_marks = s:get_mark(g:mark_words)
+  let get_marks = s:get_mark(s:mark_words)
   if get_marks == ''
     retu
   endif
@@ -960,14 +988,14 @@ fu! MarkSignDel()
     let mark_dict[r[0]] = r[1]
   endfor
   for mchar in keys(mark_dict)
-    let id = stridx(g:mark_words, mchar) + 1
+    let id = stridx(s:mark_words, mchar) + 1
     exe "sign unplace " . id . " file=" . expand("%:p")
     exe "sign undefine " . mchar
   endfor
 endf
 
 fu! MarkShow() abort
-  let get_marks = s:get_mark(g:mark_words)
+  let get_marks = s:get_mark(s:mark_words)
   if get_marks == ''
     retu
   endif
@@ -977,7 +1005,7 @@ fu! MarkShow() abort
     let mark_dict[r[0]] = r[1]
   endfor
   for mchar in keys(mark_dict)
-    let id = stridx(g:mark_words, mchar) + 1
+    let id = stridx(s:mark_words, mchar) + 1
     let txt = mchar
     let txthl = "CursorLineNr"
     exe "sign define " . mchar . " text=" . txt . " texthl=" . txthl
@@ -990,7 +1018,7 @@ aug sig_aus
 aug END
 
 fu! MarkHank(vector) abort " move to next/prev mark
-  let get_marks = s:get_mark(g:mark_words)
+  let get_marks = s:get_mark(s:mark_words)
   if get_marks == ''
     echo 'no marks'
     retu
@@ -1026,7 +1054,7 @@ aug QuickhlManual
   au!
   au! ColorScheme * cal HlIni()
 aug END
-let g:search_hl= [
+let s:search_hl= [
     \ "cterm=bold ctermfg=16 ctermbg=153 gui=bold guifg=#ffffff guibg=#0a7383",
     \ "cterm=bold ctermfg=7  ctermbg=1   gui=bold guibg=#a07040 guifg=#ffffff",
     \ "cterm=bold ctermfg=7  ctermbg=2   gui=bold guibg=#4070a0 guifg=#ffffff",
@@ -1041,10 +1069,10 @@ let g:search_hl= [
     \ "cterm=bold ctermfg=7  ctermbg=50  gui=bold guibg=#1060a0 guifg=#ffffff",
     \ "cterm=bold ctermfg=7  ctermbg=56  gui=bold guibg=#a0b0c0 guifg=black",
     \ ]
-let g:now_hi = 0
+let s:now_hi = 0
 fu! HlIni()
-  for v in g:search_hl
-    exe "hi UserSearchHi" . index(g:search_hl, v) . " " . v
+  for v in s:search_hl
+    exe "hi UserSearchHi" . index(s:search_hl, v) . " " . v
   endfor
 endf
 cal HlIni()
@@ -1056,8 +1084,8 @@ fu! HiSet() abort
     cal matchdelete(already[0]['id'])
     retu
   endif
-  cal matchadd("UserSearchHi" . g:now_hi, cw)
-  let g:now_hi = g:now_hi >= len(g:search_hl)-1 ? 0 : g:now_hi + 1
+  cal matchadd("UserSearchHi" . s:now_hi, cw)
+  let s:now_hi = s:now_hi >= len(s:search_hl)-1 ? 0 : s:now_hi + 1
 endf
 
 
