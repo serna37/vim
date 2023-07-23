@@ -1,9 +1,5 @@
 " vim:set foldmethod=marker:
 
-" TODO grep -> optional
-" TODO grep -> cheat sheet
-" TODO cheat sheet upgrade
-
 " ==============================================================================
 "  CONTENTS
 "
@@ -14,10 +10,10 @@
 "     ## FILE .................. | file encoding, charset, vim specific setting.
 "     ## VISUALIZATION ......... | enhanced visual information.
 "     ## WINDOW ................ | window forcus, resize, open terminal.
-"     ## MOVE .................. | row move, scroll, mark.
+"     ## MOTION ................ | row move, scroll, mark, IDE action menu.
 "     ## EDIT .................. | insert mode parenthese, cursor, block move.
 "     ## COMPLETION ............ | indent, word completion.
-"     ## SEARCH ................ | incremental search, grep, explorer.
+"     ## SEARCH ................ | incremental search, fzf, grep, explorer.
 "     ## OTHERS ................ | fast terminal, reg engin, fold.
 "
 "   # plugins setting
@@ -249,12 +245,15 @@ nnoremap <Right> 4<C-w>>
 nnoremap <Up> 4<C-w>-
 nnoremap <Down> 4<C-w>+
 
+" close buffer
+nnoremap <silent><Leader>x :call CloseBuf()<CR>
+
 " terminal
 nnoremap <silent><Leader>t :bo terminal ++rows=10<CR>
 
 
 " #############################################################
-" ##################          MOVE          ###################
+" ##################         MOTION         ###################
 " #############################################################
 
 " row move
@@ -296,6 +295,8 @@ if glob('~/.vim/pack/plugins/start/vim-bookmarks') == ''
   nnoremap <silent><Leader>m :call MarkMenu()<CR>
 endif
 
+" IDE action menu
+nnoremap <silent><Leader>v :cal IDEMenu()<CR>
 
 " #############################################################
 " ##################         EDIT           ###################
@@ -381,8 +382,16 @@ let g:netrw_liststyle = 3
 let g:netrw_altv = 1
 let g:netrw_winsize = 70
 set splitright " when opne file, split right window
-nnoremap <silent><Leader>e :Vex 30<CR>
+nnoremap <silent><Leader>e :Vex 15<CR>
 
+" fzf || fzf-mimic
+nnoremap <silent><leader>f :cal FzfG()<CR>
+
+" ripgrep || grep
+nnoremap <silent><Leader>g :cal Grep()<CR>
+
+" vimgrep current file
+nnoremap <silent><Leader><Leader>s :cal GrepCurrent()<CR>
 
 " #############################################################
 " ##################         OTHERS         ###################
@@ -483,13 +492,11 @@ let g:startify_custom_header = [
 " tabline motion
 nmap <silent><C-n> <Plug>AirlineSelectPrevTab
 nmap <silent><C-p> <Plug>AirlineSelectNextTab
-nnoremap <silent><Leader>x :call CloseBuf()<CR>
 
 " file search
 if glob('~/.vim/pack/plugins/start/coc.nvim') != ''
   nnoremap <silent><Leader>e :CocCommand explorer --width 30<CR>
 endif
-nnoremap <silent><leader>f :cal FzfG()<CR>
 nnoremap <silent><leader>h :CocCommand fzf-preview.MruFiles<CR>
 nnoremap <silent><leader>b :CocCommand fzf-preview.AllBuffers<CR>
 
@@ -513,8 +520,9 @@ if glob('~/.vim/pack/plugins/start/vim-easymotion') != ''
 endif
 
 " grep
-nnoremap <Leader><Leader>s :CocList words<CR>
-nnoremap <silent><Leader>g :cal Grep()<CR>
+if glob('~/.vim/pack/plugins/start/coc.nvim') != ''
+  nnoremap <Leader><Leader>s :CocList words<CR>
+endif
 
 " jump/mark
 if glob('~/.vim/pack/plugins/start/coc.nvim') != ''
@@ -532,7 +540,6 @@ if glob('~/.vim/pack/plugins/start/coc.nvim') != ''
 endif
 
 " IDE
-nnoremap <silent><Leader>v :cal IDEMenu()<CR>
 nnoremap <Leader>d <Plug>(coc-definition)
 nnoremap <Leader>r :CocCommand fzf-preview.CocReferences<CR>
 nnoremap <Leader>o :CocCommand fzf-preview.CocOutline<CR>
@@ -577,12 +584,53 @@ fu! FzfG() " if git repo, ref .gitignore. || no plugin
 endf
 
 fu! Grep() abort
-  let w = inputdialog("word [target]>>")
+  if glob('~/.vim/pack/plugins/start/coc.nvim') == '' || !executable('rg')
+    echo 'grep. choose [word] [ext] [target]'
+    let pwd = system('pwd')
+    let word = inputdialog("Enter [word]>>")
+    echo '<<'
+    if word == ''
+      echo 'cancel'
+      retu
+    endif
+    let ext = inputdialog("Enter [ext]>>")
+    echo '<<'
+    if ext == ''
+      echo 'all ext'
+      let ext = '*'
+    endif
+    let target = inputdialog("Enter [target (like ./*) pwd:".pwd."]>>")
+    if target == ''
+      echo 'search current directory'
+      let target = './*'
+    endif
+    echo '<<'
+    echo 'grep [' . word . '] processing in [' . target . '] [' . ext . '] ...'
+    cgetexpr system('grep -n -r --include="*.' . ext . '" "' . word . '" ' . target) | cw
+    echo 'grep end'
+    return
+  endif
+  " plugin mode
+  let w = inputdialog("start ripgrep [word] >>")
+  echo '<<'
   if w == ''
+    echo 'cancel'
     retu
   endif
-  echo '<<'
   execute('CocCommand fzf-preview.ProjectGrep -w --ignore-case '.w)
+endf
+
+fu! GrepCurrent() abort
+  echo 'grep from this file.'
+  let word = inputdialog("Enter [word]>>")
+  echo '<<'
+  if word == ''
+    echo 'cancel'
+    retu
+  endif
+  echo 'grep [' . word . '] processing in [' . expand('%') . '] ...'
+  cal execute('vimgrep /' . word . '/gj %') | cw
+  echo 'grep end'
 endf
 
 let s:my_ide_menu_items = [
