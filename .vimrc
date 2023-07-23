@@ -1,5 +1,7 @@
 " vim:set foldmethod=marker:
 
+" TODO WIP training wheels protocol
+
 " ==============================================================================
 "  CONTENTS
 "
