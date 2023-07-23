@@ -1331,10 +1331,11 @@ command! -nargs=? TrainingWheelsProtocol call TrainingWheelsProtocol(<f-args>)
 
 function! TrainingWheelsProtocol(...)
   if a:0 == 0 
-    let s:show_cheat_sheet_flg = 0
     call TrainingWheelsPopupsActivate()
   elseif a:1 == 0
     call TrainingWheelsPopupsDeActivate()
+  elseif a:1 == 1
+    call TrainingWheelsPopupsActivateQuick()
   endif
 endfunction
 
@@ -1351,6 +1352,9 @@ let s:training_popup_tips_win_flg = 0
 let s:training_popup_tips_win_tid = 0
 
 function! TrainingWheelsPopupsActivate()
+  let s:show_cheat_sheet_flg = 0 " my cheat sheet disable
+  call TrainingWheelsPopupsAllClose()
+  let s:training_info_idx = 0
   highlight TrainingNotification ctermfg=green guifg=green
   highlight Traininginfo ctermfg=cyan guifg=cyan cterm=BOLD gui=BOLD
   call popup_notification([
@@ -1385,7 +1389,28 @@ function! TrainingWheelsPopupsActivate()
   let s:training_popup_tips_win_tid = timer_start(53500, function('TrainingPopupTips'))
   call timer_start(53500, function('TrainingPopupTipsCursor'))
   call timer_start(56000, function('TrainingInfo'))
-  let s:training_info_idx = 0
+endfunction
+
+function! TrainingWheelsPopupsActivateQuick()
+  if s:training_info_idx != 0 && s:training_info_idx != len(s:training_info_txt)
+    echo 'Enjoy tutorial till the end.'
+    return
+  endif
+
+  let s:show_cheat_sheet_flg = 0 " my cheat sheet disable
+  call popup_notification([' Traning Wheels Activated. ',' :TrainingWheelsProtocol 0  to DeActivate. '],#{border:[]})
+  let s:training_info_idx = len(s:training_info_txt)
+  call TrainingWheelsPopupsAllClose()
+  call TrainingPopupCursor1(0)
+  call TrainingPopupCursor2(0)
+  call TrainingPopupWindow1(0)
+  call TrainingPopupWindow2(0)
+  call TrainingPopupMode1(0)
+  call TrainingPopupMode2(0)
+  call TrainingPopupSearch(0)
+  call TrainingPopupOpeObj(0)
+  let s:training_popup_tips_win_tid = timer_start(100, function('TrainingPopupTips'))
+  call TrainingPopupTipsCursor(0)
 endfunction
 
 function! TrainingWheelsPopupsDeActivate()
@@ -1396,9 +1421,18 @@ function! TrainingWheelsPopupsDeActivate()
     echo 'Enjoy tutorial till the end.'
     return
   endif
+
+  let s:show_cheat_sheet_flg = 1 " my cheat sheet enable
+  augroup training_tips_popup
+    au!
+  augroup END
+  call popup_notification([' Traning Wheels DeActivated. ',' :TrainingWheelsProtocol 1  to open popups without tutorial.  '],#{border:[]})
+  call TrainingWheelsPopupsAllClose()
+endfunction
+
+function! TrainingWheelsPopupsAllClose()
   let s:training_popup_tips_win_flg = 0
   call timer_stop(s:training_popup_tips_win_tid)
-  call popup_notification('Traning Wheels DeActivated.',#{border:[]})
   call popup_close(s:training_popup_cursor1_winid)
   call popup_close(s:training_popup_cursor2_winid)
   call popup_close(s:training_popup_window1_winid)
@@ -1559,12 +1593,14 @@ function! TrainingPopupMode1(timer)
         \'  O ',
         \'  This is | the test text.  ',
         \'  o     cursor      ',
+        \' -[insert_completion]------- ',
+        \' C-p      | completion ',
         \],#{title: ' INSERT (Esc NORMAL) ',
         \border: [], zindex: 1,
         \line: 49,
         \col: &columns - 105
         \})
-  cal matchaddpos("Identifier", [2,6,[8,3]], 16, -1, #{window: s:training_popup_mode1_winid})
+  cal matchaddpos("Identifier", [2,6,[8,3],[10,2,3]], 16, -1, #{window: s:training_popup_mode1_winid})
   cal matchaddpos("Comment", [[3,3,7],[3,13,14],[7,3,7],[7,13,14]], 16, -1, #{window: s:training_popup_mode1_winid})
 endfunction
 
@@ -1658,7 +1694,7 @@ function! TrainingPopupTipsCursor(timer)
   let s:training_popup_tips_win_flg = 1
   augroup training_tips_popup
     au!
-    autocmd CursorHold * silent call TrainingPopupTips(0)
+    autocmd CursorHold * silent call TrainingPopupTipsOpen()
     autocmd CursorMoved * silent call TrainingPopupTipsClose()
     autocmd CursorMovedI * silent call TrainingPopupTipsClose()
   augroup END
