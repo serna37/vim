@@ -1,4 +1,8 @@
 " vim:set foldmethod=marker:
+
+" TODO DELETE THIS FILE after fix quick-scope-mimic on .vimrc
+
+
 " ========================================
 " Setting
 " ========================================

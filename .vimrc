@@ -1901,7 +1901,7 @@ let g:training_wheels_practice_file = []
 " create practice file
 function! TrainingWheelsPratticeFileCreate()
   " TODO change branch
-  let repo = 'https://raw.githubusercontent.com/serna37/vim/develop-training-wheels-protocol/practice.md'
+  let repo = 'https://raw.githubusercontent.com/serna37/vim/develop-modify-vim-custom/practice.md'
   let cmd = 'curl '.repo.' > ~/practice.md'
   cal job_start(["/bin/zsh","-c",cmd], {'close_cb': function('TrainingWheelsPracticeFileOpen')})
 endfunction
