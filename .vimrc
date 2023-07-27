@@ -707,7 +707,7 @@ fu! IDEChoose(ctx, winid, key) abort
     elseif a:ctx.idx == 8
       execute('top terminal ++rows=10 ++shell eval ' . getline('.'))
     elseif a:ctx.idx == 9
-      call popup_create(term_start([&shell], #{ hidden: 1, term_finish: 'close'}), #{ border: [], minwidth: &columns/2, minheight: &lines/2 })
+      call popup_create(term_start([&shell], #{ hidden: 1, term_finish: 'close'}), #{ border: [], minwidth: &columns/2+&columns/4, minheight: &lines/2+&lines/4 })
     elseif a:ctx.idx == 10
       let g:newcolorscheme = ''
       if glob('~/.vim/colors') != ''
