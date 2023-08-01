@@ -259,6 +259,8 @@ nnoremap <silent><Leader>x :call CloseBuf()<CR>
 "nnoremap <silent><Leader>t :bo terminal ++rows=10<CR>
 nnoremap <silent><Leader>t :call popup_create(term_start([&shell], #{ hidden: 1, term_finish: 'close'}), #{ border: [], minwidth: &columns/2+&columns/4, minheight: &lines/2+&lines/4 })<CR>
 
+tnoremap <Esc> <C-w>N
+
 
 " #############################################################
 " ##################         MOTION         ###################
