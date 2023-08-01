@@ -126,7 +126,13 @@ fu! s:CheatSheetClose()
 endf
 
 nnoremap <silent><Leader><Leader><Leader> :call PopupFever()<CR>:call ToggleCheatHover()<CR>
-let s:show_cheat_sheet_flg = 1
+let s:show_cheat_sheet_flg = 0
+fu! CheatAlert(tid)
+  execute("echo '[INFO] Space * 3 to enable cheat sheet !!'")
+endf
+if has('vim_starting')
+  call timer_start(200, function("CheatAlert"))
+endif
 let s:recheatwinid = 0
 fu! PopupFever()
   call RunCat()
@@ -195,12 +201,9 @@ set listchars=tab:»-,trail:-,eol:↲,extends:»,precedes:«,nbsp:% " custom inv
 " row number
 set number " normal mode show row number as relative from current row
 " insert mode show row number as relative from current row
-" cannot recognized this by win32
-if has('macunix') || has('unix')
-  au ModeChanged [vV\x16]*:* let &l:rnu = mode() =~# '^[vV\x16]'
-  au ModeChanged *:[vV\x16]* let &l:rnu = mode() =~# '^[vV\x16]'
-  au WinEnter,WinLeave * let &l:rnu = mode() =~# '^[vV\x16]'
-endif
+au ModeChanged [vV\x16]*:* let &l:rnu = mode() =~# '^[vV\x16]'
+au ModeChanged *:[vV\x16]* let &l:rnu = mode() =~# '^[vV\x16]'
+au WinEnter,WinLeave * let &l:rnu = mode() =~# '^[vV\x16]'
 
 " cursor
 set scrolloff=5 " page top bottom offset view row
@@ -253,7 +256,8 @@ nnoremap <Down> 4<C-w>+
 nnoremap <silent><Leader>x :call CloseBuf()<CR>
 
 " terminal
-nnoremap <silent><Leader>t :bo terminal ++rows=10<CR>
+"nnoremap <silent><Leader>t :bo terminal ++rows=10<CR>
+nnoremap <silent><Leader>t :call popup_create(term_start([&shell], #{ hidden: 1, term_finish: 'close'}), #{ border: [], minwidth: &columns/2+&columns/4, minheight: &lines/2+&lines/4 })<CR>
 
 
 " #############################################################
@@ -287,6 +291,10 @@ fu! s:ScrollToggle(flg)
   set cursorcolumn!
   set cursorline!
 endf
+
+" mimic
+" unblevable/quick-scope
+nnoremap <silent><Leader>w :call FModeToggle()<CR>
 
 " mark
 if glob('~/.vim/pack/plugins/start/vim-bookmarks') == ''
@@ -515,7 +523,9 @@ if glob('~/.vim/pack/plugins/start/coc.nvim') != ''
 endif
 
 " f-scope
-nnoremap <Leader>w <plug>(QuickScopeToggle)
+if glob('~/.vim/pack/plugins/start/quick-scope') != ''
+  nnoremap <Leader>w <plug>(QuickScopeToggle)
+endif
 
 " easy motion
 if glob('~/.vim/pack/plugins/start/vim-easymotion') != ''
@@ -1131,7 +1141,7 @@ cal HlIni()
 
 fu! HiSet() abort
   let cw = expand('<cword>')
-  let already = filter(getmatches(), {i, v -> v['pattern'] == cw})
+  let already = filter(getmatches(), {i, v-> has_key(v, 'pattern') ? v['pattern'] == cw : 0})
   if len(already) > 0
     cal matchdelete(already[0]['id'])
     retu
@@ -1145,15 +1155,21 @@ endf
 " unblevable/quick-scope
 " ===================================================================
 
-" TODO something went wrong...
+highlight FSCopePrimary cterm=bold ctermfg=196 ctermbg=16 guifg=#66D9EF guibg=#000000
+highlight FSCodeSecondary ctermfg=161 ctermbg=16 guifg=#66D9EF guibg=#000000
+highlight QuickScopeBack ctermfg=51 ctermbg=16 guifg=#66D9EF guibg=#000000
+highlight QuickScopeBackSecond ctermfg=25 ctermbg=16 guifg=#66D9EF guibg=#000000
 
-aug qs_colors_mimic
-  au!
-  au ColorScheme * highlight FSCopePrimary cterm=bold ctermfg=196 ctermbg=16 guifg=#66D9EF guibg=#000000
-  au ColorScheme * highlight FSCodeSecondary ctermfg=161 ctermbg=16 guifg=#66D9EF guibg=#000000
-  au ColorScheme * highlight QuickScopeBack ctermfg=51 ctermbg=16 guifg=#66D9EF guibg=#000000
-  au ColorScheme * highlight QuickScopeBackSecond ctermfg=25 ctermbg=16 guifg=#66D9EF guibg=#000000
-aug END
+let g:fmode_flg = 0
+fu! FModeToggle()
+  if g:fmode_flg == 1
+    let g:fmode_flg = 0
+    call FModeDeactivate()
+  else
+    let g:fmode_flg = 1
+    call FModeActivate()
+  endif
+endf
 
 fu! FModeActivate()
   aug f_scope
