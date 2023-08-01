@@ -275,8 +275,8 @@ vnoremap <Tab> 5gj
 vnoremap <S-Tab> 5gk
 
 " comfortable scroll
-nnoremap <silent><C-u> :cal Scroll(0, 25)<CR>
-nnoremap <silent><C-d> :cal Scroll(1, 25)<CR>
+nnoremap <silent><C-u> :cal Scroll(0, 30)<CR>
+nnoremap <silent><C-d> :cal Scroll(1, 30)<CR>
 nnoremap <silent><C-b> :cal Scroll(0, 10)<CR>
 nnoremap <silent><C-f> :cal Scroll(1, 10)<CR>
 
