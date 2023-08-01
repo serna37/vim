@@ -363,6 +363,13 @@ inoremap <expr> <CR> pumvisible() ? '<C-y>' : '<CR>'
 inoremap <expr> <Tab> '<C-n>'
 inoremap <expr> <S-Tab> pumvisible() ? '<C-p>' : '<S-Tab>'
 
+function! Completion()
+  if !pumvisible()
+    call feedkeys("\<Tab>")
+  endif
+endfunction
+autocmd TextChangedI,TextChangedP * silent call Completion()
+
 
 " #############################################################
 " ##################         SEARCH         ###################
