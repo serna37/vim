@@ -866,6 +866,7 @@ fu! s:fzf_choose(winid, key) abort
 endf
 fu! s:fzf_open(winid, op, f) abort
   cal popup_close(a:winid)
+  cal RunCatStop()
   exe a:op a:f
   retu 1
 endf
