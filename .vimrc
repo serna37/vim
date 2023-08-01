@@ -1298,6 +1298,13 @@ let s:coc_extentions = [
     \ 'coc-java',
     \ ]
 
+fu! ColorInstall()
+  let cmd = "mkdir -p ~/.vim/colors && cd ~/.vim/colors"
+        \ . " && colors=('".join(s:colors, "' '")."')"
+        \ . " && for v in ${colors[@]};do curl https://raw.githubusercontent.com/serna37/vim-color/master/${v} > ${v};done"
+  execute("bo terminal ++shell echo 'start' && ".cmd." && echo 'end'")
+endf
+
 fu! PlugInstall(...)
   " color
   let repo = 'https://raw.githubusercontent.com/serna37/vim-color/master/'
@@ -1309,10 +1316,12 @@ fu! PlugInstall(...)
   let cmd = cmd . " && repos=('".join(s:repos,"' '")."') && mkdir -p ~/.vim/pack/plugins/start && cd ~/.vim/pack/plugins/start"
     \ . " && for v in ${repos[@]};do git clone --depth 1 https://github.com/${v} ;done"
     \ . " && fzf/install --no-key-bindings --completion --no-bash --no-zsh --no-fish"
+  cal RunCat()
   cal job_start(["/bin/zsh","-c",cmd], {'close_cb': function('s:coc_setup')})
   echo 'plug install processing...'
 endf
 fu! s:coc_setup(ch) abort
+  cal RunCatStop()
   echo 'coc install. please reboot vim, and call "PlugInstallCoc"'
   cal coc#util#install()
 endf
@@ -1334,6 +1343,7 @@ fu! PlugUnInstall(...)
   execute("bo terminal ++shell echo 'start' && rm -rf ~/.vim && echo 'end'")
 endf
 
+command! ColorInstall cal ColorInstall()
 command! PlugInstall cal PlugInstall()
 command! PlugInstallCoc cal PlugInstallCoc()
 command! PlugUnInstall cal PlugUnInstall()
