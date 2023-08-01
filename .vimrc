@@ -303,7 +303,7 @@ if glob('~/.vim/pack/plugins/start/vim-bookmarks') == ''
   nnoremap mm :call Marking()<CR>
   nnoremap mn :call MarkHank("down")<CR>
   nnoremap mp :call MarkHank("up")<CR>
-  nnoremap mc :delmarks!<CR>
+  nnoremap mc :call MarkSignDel()<CR>:delmarks!<CR>
   nnoremap <silent><Leader>m :call MarkMenu()<CR>
 endif
 
