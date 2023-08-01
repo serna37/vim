@@ -1,3 +1,11 @@
+# TODO
+工事中
+
+
+# WIP
+this is in working for update ...
+no funtion: QuickScope 
+
 # dependency
 - vim 9.0~ +python Huge (should get from [repo](https://github.com/vim/vim) and complie)
 - git
@@ -21,6 +29,11 @@ git clone --depth 1 https://github.com/vim/vim.git \
 1. get this vimrc
 ```sh
 curl https://raw.githubusercontent.com/serna37/vim/master/.vimrc > ~/.vimrc
+```
+or
+```sh
+git clone --depth 1 https://github.com/serna37/vim
+ln -s vim/.vimrc ~/.vimrc
 ```
 2. execute command on vim
 ```
