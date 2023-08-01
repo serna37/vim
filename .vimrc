@@ -33,6 +33,7 @@ let mapleader = "\<SPACE>"
 " #############################################################
 " ##################       CheatSheet       ###################
 " #############################################################
+" {{{
 
 " cursor hold
 " motion cheat sheet on popup
@@ -44,6 +45,7 @@ augroup cheat_sheet_hover
   autocmd CursorMovedI * silent call s:CheatSheetClose()
 augroup END
 
+" TODO fix it
 let s:my_vim_cheet_sheet = [
       \' --[window]---------------------------------------------- ',
       \' (C-n/p)(Space x)   [buffer tab][next/prev/close] ',
@@ -156,11 +158,12 @@ fu! ToggleCheatHover()
   call timer_start(3000, { -> PopupFeverStop()})
 endf
 
-
+" }}}
 
 " #############################################################
 " ##################          FILE          ###################
 " #############################################################
+" {{{
 
 " file
 set fileformat=unix " LF
@@ -176,14 +179,15 @@ set clipboard+=unnamed " copy yanked fot clipboard
 
 " reopen, go row
 augroup vimrcEx
-  au BufRead * if line("'\"") > 0 && line("'\"") <= line("$") |
-  \ exe "normal g`\"" | endif
+  au BufRead * if line("'\"") > 0 && line("'\"") <= line("$") | exe "normal g`\"" | endif
 augroup END
 
+" }}}
 
 " #############################################################
 " ##################     VISUALIZATION      ###################
 " #############################################################
+" {{{
 
 " enable syntax highlight, set colorscheme
 syntax on
@@ -228,10 +232,12 @@ fu! SetStatusLine()
 endf
 set stl=%!SetStatusLine()
 
+" }}}
 
 " #############################################################
 " ##################         WINDOW        ###################
 " #############################################################
+" {{{
 
 " just like
 " simeji/winresizer
@@ -262,10 +268,12 @@ nnoremap <silent><Leader>t :call popup_create(term_start([&shell], #{ hidden: 1,
 " terminal read only mode (i to return terminal mode)
 tnoremap <Esc> <C-w>N
 
+" }}}
 
 " #############################################################
 " ##################         MOTION         ###################
 " #############################################################
+" {{{
 
 " row move
 nnoremap j gj
@@ -300,6 +308,7 @@ endf
 nnoremap <silent><Leader>w :call FModeToggle()<CR>
 
 " mark
+" TODO removed plugin
 if glob('~/.vim/pack/plugins/start/vim-bookmarks') == ''
   " vim-bookmarks can read all buffer's marks by fzf-preview marks
   " this vimscript function can only call inner buffer
@@ -313,9 +322,12 @@ endif
 " IDE action menu
 nnoremap <silent><Leader>v :cal IDEMenu()<CR>
 
+" }}}
+
 " #############################################################
 " ##################         EDIT           ###################
 " #############################################################
+" {{{
 
 " basic
 set virtualedit=all " virtual cursor movement
@@ -340,9 +352,12 @@ vnoremap d "_d
 vnoremap <C-j> "zx"zp`[V`]
 vnoremap <C-k> "zx<Up>"zP`[V`]
 
+" }}}
+
 " #############################################################
 " ##################       COMPLETION       ###################
 " #############################################################
+" {{{
 
 " indent
 set autoindent " uses the indent from the previous line
@@ -366,19 +381,19 @@ inoremap <expr> <S-Tab> pumvisible() ? '<C-p>' : '<S-Tab>'
 
 " auto completion
 function! Completion()
-  if col('.') == 1 || getline('.')[col('.')] == ' '
-   return
-  endif
-  if !pumvisible()
-    call feedkeys("\<Tab>")
-  endif
+  if col('.') == 1 || getline('.')[col('.')-2] == ' ' | return | endif
+  if !pumvisible() | call feedkeys("\<Tab>") | endif
 endfunction
-autocmd TextChangedI,TextChangedP * silent call Completion()
+if glob('~/.vim/pack/plugins/start/coc.nvim')  == ''
+  autocmd TextChangedI,TextChangedP * silent call Completion()
+endif
 
+" }}}
 
 " #############################################################
 " ##################         SEARCH         ###################
 " #############################################################
+" {{{
 
 " search
 set incsearch " incremental search
@@ -390,6 +405,11 @@ set shortmess-=S " show hit word's number at right bottom
 " no move search word
 nnoremap <silent>* *N:call HiSet()<CR>
 nnoremap <silent># *N:call HiSet()<CR>
+
+" incremental search
+" TODO add like easymotion
+nnoremap s :echo('no easymotion')<CR>
+nnoremap <Leader>s /
 
 " disable highlight
 nnoremap <silent><Leader>q :noh<CR>:cal clearmatches()<CR>
@@ -429,9 +449,12 @@ nnoremap <silent><Leader>g :cal Grep()<CR>
 " vimgrep current file
 nnoremap <silent><Leader><Leader>s :cal GrepCurrent()<CR>
 
+" }}}
+
 " #############################################################
 " ##################         OTHERS         ###################
 " #############################################################
+" {{{
 
 " basic
 scriptencoding utf-8 " this file's charset
@@ -444,10 +467,12 @@ set foldlevel=0 " fold max depth
 set foldlevelstart=0 " fold depth on start view
 set foldcolumn=1 " fold preview
 
+" }}}
 
 " #############################################################
 " ##################    PLUGIN VARIABLES    ###################
 " #############################################################
+" {{{
 
 if glob('~/.vim/colors/') != ''
   colorscheme onedark
@@ -464,6 +489,7 @@ let g:vimspector_enable_mappings = 'VISUAL_STUDIO'
 set rtp+=~/.vim/pack/plugins/start/fzf
 
 " f-scope
+" TODO removed
 augroup qs_colors
   autocmd!
   autocmd ColorScheme * highlight QuickScopePrimary guifg='#afff5f' gui=underline ctermfg=196 cterm=underline
@@ -485,6 +511,7 @@ let g:airline_powerline_fonts = 1
 let g:AutoPairsMapCh = 0
 
 " gitgutter
+" TODO removed
 let g:gitgutter_map_keys = 0
 
 " zen
@@ -518,10 +545,12 @@ let g:startify_custom_header = [
     \]
 "}}}
 
+" }}}
 
 " #############################################################
 " ##################      PLUGIN KEYMAP     ###################
 " #############################################################
+" {{{
 
 " for no override default motion, if glob( plugin path ) is need
 
@@ -537,6 +566,7 @@ nnoremap <silent><leader>h :CocCommand fzf-preview.MruFiles<CR>
 nnoremap <silent><leader>b :CocCommand fzf-preview.AllBuffers<CR>
 
 " search highlight
+" TODO removed
 if glob('~/.vim/pack/plugins/start/vim-quickhl') != ''
   nnoremap <silent>* *N<Plug>(quickhl-manual-this)
   nnoremap <silent># *N<Plug>(quickhl-manual-this)
@@ -547,6 +577,7 @@ if glob('~/.vim/pack/plugins/start/coc.nvim') != ''
 endif
 
 " f-scope
+" TODO removed
 if glob('~/.vim/pack/plugins/start/quick-scope') != ''
   nnoremap <Leader>w <plug>(QuickScopeToggle)
 endif
@@ -563,7 +594,8 @@ if glob('~/.vim/pack/plugins/start/coc.nvim') != ''
 endif
 
 " jump/mark
-if glob('~/.vim/pack/plugins/start/coc.nvim') != ''
+" TODO mark removed
+if glob('~/.vim/pack/plugins/start/vim-bookmarks') != ''
   nnoremap <silent><Leader>m :CocCommand fzf-preview.Bookmarks<CR>
 endif
 nnoremap <silent><Leader>l :CocCommand fzf-preview.Lines<CR>
@@ -592,10 +624,12 @@ endif
 " zen mode
 nnoremap <silent><Leader>z :Goyo<CR>
 
+" }}}
 
 " #############################################################
 " ##################       FUNCTIONS        ###################
 " #############################################################
+" {{{
 
 fu! CloseBuf()
   let l:now_b = bufnr('%')
@@ -604,20 +638,11 @@ fu! CloseBuf()
 endf
 
 fu! FzfG() " if git repo, ref .gitignore. || no plugin
-  if glob('~/.vim/pack/plugins/start/coc.nvim') == ''
-    cal FzfStart()
-    return
-  endif
+  if glob('~/.vim/pack/plugins/start/coc.nvim') == '' | cal FzfStart() | return | endif
   let pwd = system('pwd')
-  try
-    exe 'lcd %:h'
-  catch
-  endtry
+  try | exe 'lcd %:h' | catch | endtry
   let gitroot = system('git rev-parse --show-superproject-working-tree --show-toplevel')
-  try
-    exe 'lcd ' . pwd
-  catch
-  endtry
+  try | exe 'lcd ' . pwd | catch | endtry
   execute(!v:shell_error ? 'CocCommand fzf-preview.ProjectFiles' : 'Files')
 endf
 
@@ -627,21 +652,12 @@ fu! Grep() abort
     let pwd = system('pwd')
     let word = inputdialog("Enter [word]>>")
     echo '<<'
-    if word == ''
-      echo 'cancel'
-      retu
-    endif
+    if word == '' | echo 'cancel' | retu | endif
     let ext = inputdialog("Enter [ext]>>")
     echo '<<'
-    if ext == ''
-      echo 'all ext'
-      let ext = '*'
-    endif
+    if ext == '' | echo 'all ext' | let ext = '*' | endif
     let target = inputdialog("Enter [target (like ./*) pwd:".pwd."]>>")
-    if target == ''
-      echo 'search current directory'
-      let target = './*'
-    endif
+    if target == '' | echo 'search current directory' | let target = './*' | endif
     echo '<<'
     echo 'grep [' . word . '] processing in [' . target . '] [' . ext . '] ...'
     cgetexpr system('grep -n -r --include="*.' . ext . '" "' . word . '" ' . target) | cw
@@ -651,10 +667,7 @@ fu! Grep() abort
   " plugin mode
   let w = inputdialog("start ripgrep [word] >>")
   echo '<<'
-  if w == ''
-    echo 'cancel'
-    retu
-  endif
+  if w == '' | echo 'cancel' | retu | endif
   execute('CocCommand fzf-preview.ProjectGrep -w --ignore-case '.w)
 endf
 
@@ -662,10 +675,7 @@ fu! GrepCurrent() abort
   echo 'grep from this file.'
   let word = inputdialog("Enter [word]>>")
   echo '<<'
-  if word == ''
-    echo 'cancel'
-    retu
-  endif
+  if word == '' | echo 'cancel' | retu | endif
   echo 'grep [' . word . '] processing in [' . expand('%') . '] ...'
   cal execute('vimgrep /' . word . '/gj %') | cw
   echo 'grep end'
@@ -674,14 +684,12 @@ endf
 let s:my_ide_menu_items = [
       \'[Format]         applay format for this file',
       \'[ReName*]        rename current word recursively',
-      \'[Git*]           git actions',
       \'[ALL PUSH]       commit & push all changes',
       \'[QuickFix-Grep*] Open Preview Popup from quickfix - from fzfpreview Ctrl+Q',
       \'[Snippet*]       edit snippets',
       \'[Run*]           run current program',
       \'[Debug*]         debug current program',
       \'[Run as Shell]   run current row as shell command',
-      \'[Term popup]     open terminal on popup window',
       \'[Color random]   change colorscheme at random',
       \]
 
@@ -722,27 +730,20 @@ fu! IDEChoose(ctx, winid, key) abort
     elseif a:ctx.idx == 1
       cal CocActionAsync('rename')
     elseif a:ctx.idx == 2
-      execute("CocCommand fzf-preview.GitActions")
-    elseif a:ctx.idx == 3
       let w = inputdialog("commit message>>")
-      if w == ''
-        echo 'cancel'
-        retu
-      endif
+      if w == '' | echo 'cancel' | retu | endif
       cal execute('top terminal ++rows=10 ++shell git add . && git commit -m "'.w.'" && git push')
-    elseif a:ctx.idx == 4
+    elseif a:ctx.idx == 3
       execute("CocCommand fzf-preview.QuickFix")
-    elseif a:ctx.idx == 5
+    elseif a:ctx.idx == 4
       execute("CocCommand snippets.editSnippets")
-    elseif a:ctx.idx == 6
+    elseif a:ctx.idx == 5
       exe "QuickRun -hook/time/enable 1"
-    elseif a:ctx.idx == 7
+    elseif a:ctx.idx == 6
       cal vimspector#Launch()
-    elseif a:ctx.idx == 8
+    elseif a:ctx.idx == 7
       execute('top terminal ++rows=10 ++shell eval ' . getline('.'))
-    elseif a:ctx.idx == 9
-      call popup_create(term_start([&shell], #{ hidden: 1, term_finish: 'close'}), #{ border: [], minwidth: &columns/2+&columns/4, minheight: &lines/2+&lines/4 })
-    elseif a:ctx.idx == 10
+    elseif a:ctx.idx == 8
       let g:newcolorscheme = ''
       if glob('~/.vim/colors') != ''
         let g:newcolorscheme = s:colorscheme_arr[localtime() % len(s:colorscheme_arr)]
@@ -757,7 +758,7 @@ fu! IDEChoose(ctx, winid, key) abort
   retu popup_filter_menu(a:winid, a:key)
 endf
 
-
+" }}}
 
 " #############################################################
 " ##################       IMITATION        ###################
@@ -766,6 +767,8 @@ endf
 " ===================================================================
 " junegunn/fzf.vim
 " ===================================================================
+" {{{
+
 let s:not_path_arr = [
       \'"*.vim/*"',
       \'"*.git/*"',
@@ -789,23 +792,21 @@ let s:fzf_searched_dir = execute('pwd')[1:] " first char is ^@, so trim
 let s:fzf_find_result_tmp = []
 
 fu! FzfStart() " open window
-  if stridx(execute('pwd')[1:], s:fzf_searched_dir) == -1 || len(s:fzf_find_result_tmp) == 0
-    cal s:fzf_re_find()
-  endif
+  if stridx(execute('pwd')[1:], s:fzf_searched_dir) == -1 || len(s:fzf_find_result_tmp) == 0 | cal s:fzf_re_find() | endif
   let s:fzf_mode = 'his'
-  let s:fzf_searching_zone = '(*^-^) BUF & MRU'
+  let s:fzf_searching_zone = '(*^-^)/ BUF & MRU'
   let s:fzf_pwd_prefix = 'pwd:[' . execute('pwd')[1:] . ']>>'
   let s:fzf_enter_keyword = []
   let s:fzf_his_result = map(split(execute('ls'), '\n'), { i,v -> split(filter(split(v, ' '), { i,v -> v != '' })[2], '"')[0] }) + map(split(execute('oldfiles'), '\n'), { i,v -> split(v, ': ')[1] })
   let s:fzf_find_result = s:fzf_his_result[0:29]
-  let s:fzf_enter_win = popup_create(s:fzf_pwd_prefix, #{ title: 'Type or <BS> / past:<Space> / MRU<>FZF:<Tab> / choose:<Enter> / end:<Esc> / chache refresh:<C-f>',  border: [], zindex: 99, minwidth: &columns/2, maxwidth: &columns/2, maxheight: 1, line: &columns/4-&columns/36, filter: function('s:fzf_refresh_result') })
-    cal win_execute(s:fzf_enter_win, "mapclear <buffer>")
+  let s:fzf_enter_win = popup_create(s:fzf_pwd_prefix, #{ title: 'MRU<>FZF:<Tab>/choose:<CR>/end:<Esc>/chache refresh:<C-f>',  border: [], zindex: 99, minwidth: &columns/2, maxwidth: &columns/2, maxheight: 1, line: &columns/4-&columns/36, filter: function('s:fzf_refresh_result') })
+  cal win_execute(s:fzf_enter_win, "mapclear <buffer>")
   cal s:fzf_create_choose_win()
 endf
 fu! s:fzf_create_choose_win()
   let s:fzf_c_idx = 0
   let s:fzf_choose_win = popup_menu(s:fzf_find_result, #{ title: s:fzf_searching_zone, border: [], zindex: 98, minwidth: &columns/2, maxwidth: &columns/2, minheight: 2, maxheight: &lines/2, filter: function('s:fzf_choose') })
-    cal win_execute(s:fzf_enter_win, "mapclear <buffer>")
+  cal win_execute(s:fzf_enter_win, "mapclear <buffer>")
 endf
 
 fu! s:fzf_re_find() " async find command
@@ -833,13 +834,13 @@ fu! s:fzf_refresh_result(winid, key) abort " event to draw search result
     retu 1
   elseif a:key is# "\<C-f>"
     cal s:fzf_re_find()
-  elseif a:key is# "\<Space>"
+  elseif a:key is# "\<C-v>"
     for i in range(0,strlen(@")-1)
       let s:fzf_enter_keyword = add(s:fzf_enter_keyword, strpart(@",i,1))
     endfor
   elseif a:key is# "\<Tab>"
     let s:fzf_mode = s:fzf_mode == 'his' ? 'fzf' : 'his'
-    let s:fzf_searching_zone = s:fzf_mode == 'his' ? '(*^-^) BUF & MRU' : '(*^-^) FZF [' . s:fzf_searched_dir . ']'
+    let s:fzf_searching_zone = s:fzf_mode == 'his' ? '(*^-^)/ BUF & MRU' : '(*"@w@)/ FZF [' . s:fzf_searched_dir . ']'
     cal popup_close(s:fzf_choose_win)
     if s:fzf_mode == 'his'
       let s:fzf_find_result = len(s:fzf_enter_keyword) != 0 ? matchfuzzy(s:fzf_his_result, join(s:fzf_enter_keyword, '')) : s:fzf_his_result
@@ -853,6 +854,8 @@ fu! s:fzf_refresh_result(winid, key) abort " event to draw search result
     unlet s:fzf_enter_keyword[len(s:fzf_enter_keyword)-1]
   elseif a:key is# "\<BS>" && len(s:fzf_enter_keyword) == 0
   " noop
+  elseif a:key is# "\<C-w>"
+    let s:fzf_enter_keyword = []
   elseif strtrans(a:key) == "<80><fd>`"
     " noop (for polyglot bug adhoc)
     retu
@@ -893,15 +896,17 @@ fu! s:fzf_open(winid, op, f) abort
   retu 1
 endf
 
+
+" }}}
+
+
 " run cat (load animation)
+" {{{
 let s:cat_frame = 0
 fu! s:RunCatM() abort
   cal setbufline(winbufnr(s:runcat), 1, s:running_cat[s:cat_frame])
   let s:cat_frame = s:cat_frame == 4 ? 0 : s:cat_frame + 1
-  if s:cat_stop == 1
-    cal popup_close(s:runcat)
-    retu
-  endif
+  if s:cat_stop == 1 | cal popup_close(s:runcat) | retu | endif
   cal timer_start(200, { -> s:RunCatM() })
 endf
 fu! RunCatStop()
@@ -993,25 +998,21 @@ let s:running_cat = [
 \]
 " }}}
 
+" }}}
+
 " ===================================================================
 " MattesGroeger/vim-bookmarks
 " ===================================================================
+" {{{
 
 let s:mark_words = 'abcdefghijklmnopqrstuvwxyz'
 fu! s:get_mark(tar) abort
-  try
-    retu execute('marks ' . a:tar)
-  catch
-    retu ''
-  endtry
+  try | retu execute('marks ' . a:tar) | catch | retu '' | endtry
 endf
 
 fu! MarkMenu() abort
   let get_marks = s:get_mark(s:mark_words)
-  if get_marks == ''
-    echo 'no marks'
-    retu
-  endif
+  if get_marks == '' | echo 'no marks' | retu | endif
   let markdicarr = []
   for v in split(get_marks , '\n')[1:]
     cal add(markdicarr, {'linenum': str2nr(filter(split(v, ' '), { i,v -> v != '' })[1]), 'val': v})
@@ -1034,30 +1035,20 @@ endf
 
 fu! Marking() abort
   let get_marks = s:get_mark(s:mark_words)
-  if get_marks == ''
-    execute('mark a')
-    cal MarkShow()
-    echo 'marked'
-    retu
-  endif
+  if get_marks == '' | execute('mark a') | cal MarkShow() | echo 'marked' | retu | endif
   let l:now_marks = []
   let l:warr = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
   for row in split(get_marks , '\n')[1:]
     let l:r = filter(split(row, ' '), {i, v -> v != ''})
     if stridx(s:mark_words, r[0]) != -1 && r[1] == line('.')
-      cal MarkSignDel()
-      execute('delmarks ' . r[0])
-      cal MarkShow()
-      echo 'delete mark '.r[0]
-      retu
+      cal MarkSignDel() | execute('delmarks ' . r[0]) | cal MarkShow()
+      echo 'delete mark '.r[0] | retu
     endif
     let l:now_marks = add(now_marks, r[0])
   endfor
   let l:can_use = filter(warr, {i, v -> stridx(join(now_marks, ''), v) == -1})
   if len(can_use) != 0
-    cal MarkSignDel()
-    execute('mark ' . can_use[0])
-    cal MarkShow()
+    cal MarkSignDel() | execute('mark ' . can_use[0]) | cal MarkShow()
     echo 'marked '.can_use[0]
   else
     echo 'over limit markable char'
@@ -1066,9 +1057,7 @@ endf
 
 fu! MarkSignDel()
   let get_marks = s:get_mark(s:mark_words)
-  if get_marks == ''
-    retu
-  endif
+  if get_marks == '' | retu | endif
   let mark_dict = {}
   for row in split(get_marks, '\n')[1:]
     let l:r = filter(split(row, ' '), {i, v -> v != ''})
@@ -1083,9 +1072,7 @@ endf
 
 fu! MarkShow() abort
   let get_marks = s:get_mark(s:mark_words)
-  if get_marks == ''
-    retu
-  endif
+  if get_marks == '' | retu | endif
   let mark_dict = {}
   for row in split(get_marks, '\n')[1:]
     let l:r = filter(split(row, ' '), {i, v -> v != ''})
@@ -1106,10 +1093,7 @@ aug END
 
 fu! MarkHank(vector) abort " move to next/prev mark
   let get_marks = s:get_mark(s:mark_words)
-  if get_marks == ''
-    echo 'no marks'
-    retu
-  endif
+  if get_marks == '' | echo 'no marks' | retu | endif
   let mark_dict = {} " [linenum: mark char]
   let rownums = []
   for row in split(get_marks, '\n')[1:]
@@ -1132,10 +1116,12 @@ fu! MarkHank(vector) abort " move to next/prev mark
   echo "last mark"
 endf
 
+" }}}
 
 " ===================================================================
 " t9md/vim-quickhl
 " ===================================================================
+" {{{
 
 aug QuickhlManual
   au!
@@ -1158,66 +1144,46 @@ let s:search_hl= [
     \ ]
 let s:now_hi = 0
 fu! HlIni()
-  for v in s:search_hl
-    exe "hi UserSearchHi" . index(s:search_hl, v) . " " . v
-  endfor
+  for v in s:search_hl | exe "hi UserSearchHi" . index(s:search_hl, v) . " " . v | endfor
 endf
 cal HlIni()
 
+let s:hi_reaseted = 0
+fu! HiClear(cw) abort
+  let s:hi_reaseted = 0
+  let already = filter(getmatches(), {i, v-> has_key(v, 'pattern') ? v['pattern'] == a:cw : 0})
+  if len(already) > 0 | cal matchdelete(already[0]['id']) | let s:hi_reaseted = 1 | endif
+endf
 fu! HiSet() abort
   let cw = expand('<cword>')
-  let already = filter(getmatches(), {i, v-> has_key(v, 'pattern') ? v['pattern'] == cw : 0})
-  if len(already) > 0
-    cal matchdelete(already[0]['id'])
-    retu
-  endif
-  cal matchadd("UserSearchHi" . s:now_hi, cw)
+  windo cal HiClear(cw)
+  if s:hi_reaseted == 1 | retu | endif
+  windo cal matchadd("UserSearchHi" . s:now_hi, cw)
   let s:now_hi = s:now_hi >= len(s:search_hl)-1 ? 0 : s:now_hi + 1
 endf
 
+" }}}
 
 " ===================================================================
 " unblevable/quick-scope
 " ===================================================================
+" {{{
 
-highlight FSCopePrimary cterm=bold ctermfg=196 ctermbg=16 guifg=#66D9EF guibg=#000000
-highlight FSCodeSecondary ctermfg=161 ctermbg=16 guifg=#66D9EF guibg=#000000
-highlight QuickScopeBack ctermfg=51 ctermbg=16 guifg=#66D9EF guibg=#000000
-highlight QuickScopeBackSecond ctermfg=25 ctermbg=16 guifg=#66D9EF guibg=#000000
+" TODO カラースキーム帰ると消える、やっぱautogroupにしたいなぁ
+highlight FSCopePrimary ctermfg=196 cterm=underline guifg=#66D9EF guibg=#000000
+highlight FSCodeSecondary ctermfg=219 cterm=underline guifg=#66D9EF guibg=#000000
+highlight QuickScopeBack ctermfg=51 cterm=underline guifg=#66D9EF guibg=#000000
+highlight QuickScopeBackSecond ctermfg=33 cterm=underline guifg=#66D9EF guibg=#000000
 
-let g:fmode_flg = 0
+let g:fmode_flg = 1
 fu! FModeToggle()
-  if g:fmode_flg == 1
-    let g:fmode_flg = 0
-    call FModeDeactivate()
-  else
-    let g:fmode_flg = 1
-    call FModeActivate()
-  endif
-endf
-
-fu! FModeActivate()
-  aug f_scope
-    au!
-    au CursorMoved * cal HiFLine()
-  aug End
-  cal HiFLine()
-endf
-
-fu! FModeDeactivate()
-  aug f_scope
-    au!
-  aug End
-  let current_win = win_getid()
-  windo cal clearmatches() " reset highlight on all window in tab
-  cal win_gotoid(current_win) " return current window
+  if g:fmode_flg == 1 | let g:fmode_flg = 0 | call FModeDeactivate()
+  else | let g:fmode_flg = 1 | call FModeActivate() | endif
 endf
 
 fu! HiReset(group_name)
   let already = filter(getmatches(), {i, v -> v['group'] == a:group_name})
-  if len(already) > 0
-    cal matchdelete(already[0]['id'])
-  endif
+  if len(already) > 0 | cal matchdelete(already[0]['id']) | endif
 endf
 
 fu! HiFLine()
@@ -1252,25 +1218,31 @@ fu! HiFLine()
     endif
   endwhile
 
-  if len(target_arr) != 0
-    cal matchaddpos("FSCopePrimary", target_arr, 16)
-  endif
-  if len(target_arr_second) != 0
-    cal matchaddpos("FSCodeSecondary", target_arr_second, 16)
-  endif
-  if len(target_arr_back) != 0
-    cal matchaddpos("QuickScopeBack", target_arr_back, 16)
-  endif
-  if len(target_arr_back_second) != 0
-    cal matchaddpos("QuickScopeBackSecond", target_arr_back_second, 16)
-  endif
+  if len(target_arr) != 0 | cal matchaddpos("FSCopePrimary", target_arr, 16) | endif
+  if len(target_arr_second) != 0 | cal matchaddpos("FSCodeSecondary", target_arr_second, 16) | endif
+  if len(target_arr_back) != 0 | cal matchaddpos("QuickScopeBack", target_arr_back, 16) | endif
+  if len(target_arr_back_second) != 0 | cal matchaddpos("QuickScopeBackSecond", target_arr_back_second, 16) | endif
 endf
 
+fu! FModeActivate()
+  aug f_scope | au! |  au CursorMoved * cal HiFLine() | aug End
+  cal HiFLine()
+endf
+cal FModeActivate()
+
+fu! FModeDeactivate()
+  aug f_scope | au! |  aug End
+  let current_win = win_getid()
+  windo cal clearmatches() " reset highlight on all window in tab
+  cal win_gotoid(current_win) " return current window
+endf
+
+" }}}
 
 " #############################################################
 " ##################         PLUGINS        ###################
 " #############################################################
-
+" {{{
 
 " my colorscheme
 let s:colors = [ 'onedark.vim', 'hybrid_material.vim', 'molokai.vim' ]
@@ -1280,15 +1252,9 @@ let s:repos = [
     \ 'junegunn/fzf',
     \ 'junegunn/fzf.vim',
     \ 'neoclide/coc.nvim',
-    \ 'unblevable/quick-scope',
     \ 'easymotion/vim-easymotion',
-    \ 'obcat/vim-hitspop',
-    \ 't9md/vim-quickhl',
-    \ 'MattesGroeger/vim-bookmarks',
     \ 'jiangmiao/auto-pairs',
     \ 'markonm/traces.vim',
-    \ 'tpope/vim-fugitive',
-    \ 'airblade/vim-gitgutter',
     \ 'mhinz/vim-startify',
     \ 'vim-airline/vim-airline',
     \ 'vim-airline/vim-airline-themes',
@@ -1348,6 +1314,8 @@ fu! s:coc_setup(ch) abort
   cal coc#util#install()
 endf
 
+" TODO ここ2段階なのめんどいので辞めたい:
+
 " coc extentions
 fu! PlugInstallCoc()
   execute("CocInstall " . join(s:coc_extentions," "))
@@ -1365,6 +1333,8 @@ fu! PlugUnInstall(...)
   execute("bo terminal ++shell echo 'start' && rm -rf ~/.vim && echo 'end'")
 endf
 
+" }}}
+
 command! ColorInstall cal ColorInstall()
 command! PlugInstall cal PlugInstall()
 command! PlugInstallCoc cal PlugInstallCoc()
@@ -1374,6 +1344,7 @@ command! PlugUnInstall cal PlugUnInstall()
 " #############################################################
 " ##################        TRAINING        ###################
 " #############################################################
+" {{{
 
 command! Popupclear call popup_clear()
 command! -nargs=? TrainingWheelsProtocol call TrainingWheelsProtocol(<f-args>)
@@ -1962,4 +1933,5 @@ function! TrainingWheelsPracticeFileOpen(ch) abort
   call cursor(26, 6)
 endfunction
 
+" }}}
 
