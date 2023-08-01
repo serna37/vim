@@ -259,6 +259,7 @@ nnoremap <silent><Leader>x :call CloseBuf()<CR>
 "nnoremap <silent><Leader>t :bo terminal ++rows=10<CR>
 nnoremap <silent><Leader>t :call popup_create(term_start([&shell], #{ hidden: 1, term_finish: 'close'}), #{ border: [], minwidth: &columns/2+&columns/4, minheight: &lines/2+&lines/4 })<CR>
 
+" terminal read only mode (i to return terminal mode)
 tnoremap <Esc> <C-w>N
 
 
@@ -363,7 +364,11 @@ inoremap <expr> <CR> pumvisible() ? '<C-y>' : '<CR>'
 inoremap <expr> <Tab> '<C-n>'
 inoremap <expr> <S-Tab> pumvisible() ? '<C-p>' : '<S-Tab>'
 
+" auto completion
 function! Completion()
+  if col('.') == 1 || getline('.')[col('.')] == ' '
+   return
+  endif
   if !pumvisible()
     call feedkeys("\<Tab>")
   endif
@@ -404,6 +409,16 @@ let g:netrw_altv = 1
 let g:netrw_winsize = 70
 set splitright " when opne file, split right window
 nnoremap <silent><Leader>e :Vex 15<CR>
+
+" TODO doeesn't work
+augroup netrw_motion
+  autocmd!
+  autocmd FileType netrw call NetrwMotion()
+augroup END
+
+function! NetrwMotion()
+  nnoremap <buffer><C-h> <C-w>h
+endfunction
 
 " fzf || fzf-mimic
 nnoremap <silent><leader>f :cal FzfG()<CR>
