@@ -226,7 +226,7 @@ fu! SetStatusLine()
   let mode = match(keys(dict), mode()) != -1 ? dict[mode()] : '5* SP'
   retu '%' . mode . ' %* %<%F%m%r%h%w%=%2* %p%% %l/%L %02v [%{&fenc!=""?&fenc:&enc}][%{ff_table[&ff]}] %*'
 endf
-set statusline=%!SetStatusLine()
+set stl=%!SetStatusLine()
 
 
 " #############################################################
