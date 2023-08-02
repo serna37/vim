@@ -402,7 +402,7 @@ nnoremap s :echo('no easymotion')<CR>
 nnoremap <Leader>s /
 
 " disable highlight
-nnoremap <silent><Leader>q :noh<CR>:cal clearmatches()<CR>
+nnoremap <silent><Leader>q :windo noh<CR>:windo cal clearmatches()<CR>
 
 " grep result -> quickfix
 au QuickFixCmdPost *grep* cwindow
