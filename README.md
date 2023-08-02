@@ -56,4 +56,5 @@ other commands / keymaps details are in cheat sheet.<br>
 
 # How to use
 see [wiki-cheat-sheet](https://github.com/serna37/vim/wiki/Cheat-Sheet)<br>
-also see [wiki-plugins-list](https://github.com/serna37/vim/wiki/Plugins)
+also see [wiki-plugins-list](https://github.com/serna37/vim/wiki/Plugins)<br>
+also see [wiki-debug](https://github.com/serna37/vim/wiki/Debug)
