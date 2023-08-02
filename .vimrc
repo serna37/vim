@@ -221,16 +221,58 @@ set laststatus=2 " status line at bottom
 " vim-airline/vim-airline
 let ff_table = {'dos' : 'CRLF', 'unix' : 'LF', 'mac' : 'CR'}
 fu! SetStatusLine()
-  hi User1 cterm=bold ctermfg=7 ctermbg=4 gui=bold guibg=#70a040 guifg=#ffffff
-  hi User2 cterm=bold ctermfg=2 ctermbg=0 gui=bold guibg=#4070a0 guifg=#ffffff
+  hi User1 cterm=bold ctermfg=7 ctermbg=4
+  hi User2 cterm=bold ctermfg=7 ctermbg=28
   hi User3 cterm=bold ctermbg=5 ctermfg=0
-  hi User4 cterm=bold ctermfg=7 ctermbg=56 gui=bold guibg=#a0b0c0 guifg=black
-  hi User5 cterm=bold ctermfg=7 ctermbg=5 gui=bold guibg=#0070e0 guifg=#ffffff
+  hi User4 cterm=bold ctermfg=7 ctermbg=56
+  hi User5 cterm=bold ctermfg=7 ctermbg=5
+  hi User6 ctermfg=7 ctermbg=8
   let dict = {'i': '1* INSERT', 'n': '2* NORMAL', 'R': '3* REPLACE', 'c': '4* COMMAND', 't': '4* TERMIAL', 'v': '5* VISUAL', 'V': '5* VISUAL', "\<C-v>": '5* VISUAL'}
   let mode = match(keys(dict), mode()) != -1 ? dict[mode()] : '5* SP'
-  retu '%' . mode . ' %* %<%F%m%r%h%w%=%2* %p%% %l/%L %02v [%{&fenc!=""?&fenc:&enc}][%{ff_table[&ff]}] %*'
+  retu '%' . mode . ' %*➤ %6*%<%F%m%r%h%w %0* %=%' . split(mode, ' ')[0] . ' %p%% %l/%L %02v [%{&fenc!=""?&fenc:&enc}][%{ff_table[&ff]}] %*'
 endf
 set stl=%!SetStatusLine()
+
+" tabline
+function! MakeTabLine()
+  if tabpagenr('$') == 1
+    return s:buffers_label()
+  endif
+  let titles = map(range(1, tabpagenr('$')), 's:tabpage_label(v:val)')
+  let sep = ' '
+  let tabpages = join(titles, sep).sep.'%#TabLineFill#%T'
+  return tabpages
+endfunction
+
+function! s:buffers_label()
+  let bufline = ''
+  for v in map(split(execute("ls"), '\n'), { i,v -> split(v, ' ')})
+    if stridx(v[1], 'F') == -1 && stridx(v[1], 'R') == -1
+      hi UserBuflineActive ctermfg=7 ctermbg=28
+      hi UserBuflineDeactive ctermfg=7 ctermbg=8
+      let x = filter(v, { i,v -> v != ''})
+      let hi = stridx(v[1], '%') != -1 ? '%#UserBuflineActive#' : '%#UserBuflineDeactive#'
+      let filename = x[2] == '+' ? '✗'.x[3] : x[2]
+      let bufline = bufline.'%'.v[0].'T'.hi.filename.' ⁍|'.'%T%#TabLineFill# '
+    endif
+  endfor
+  return bufline
+endfunction
+
+function! s:tabpage_label(n)
+  hi UserTablineActive ctermfg=7 ctermbg=28
+  hi UserTablineDeactive ctermfg=7 ctermbg=8
+  let hi = a:n is tabpagenr() ? '%#UserTablineActive#' : '%#UserTablineDeactive#'
+  let bufnrs = tabpagebuflist(a:n)
+  let no = len(bufnrs) | if no is 1 | let no = '' | endif
+  let mod = len(filter(copy(bufnrs), 'getbufvar(v:val, "&modified")')) ? '✗' : ''
+  let fname = pathshorten(bufname(bufnrs[tabpagewinnr(a:n) - 1]))
+  let sep = ' ⁍|'
+  return '%'.a:n.'T'.hi.no.mod.fname.sep.'%T%#TabLineFill#'
+endfunction
+
+set tabline=%!MakeTabLine()
+set showtabline=2
 
 " }}}
 
@@ -248,6 +290,10 @@ tnoremap <C-h> <C-w>h|tnoremap <C-l> <C-w>l|tnoremap <C-k> <C-w>k|tnoremap <C-j>
 
 " window resize
 nnoremap <Left> 4<C-w><|nnoremap <Right> 4<C-w>>|nnoremap <Up> 4<C-w>-|nnoremap <Down> 4<C-w>+
+
+" move buffer
+nmap <silent><C-n> :call MoveBuf('prev')<CR>
+nmap <silent><C-p> :call MoveBuf('next')<CR>
 
 " close buffer
 nnoremap <silent><Leader>x :call CloseBuf()<CR>
@@ -533,8 +579,10 @@ let g:startify_custom_header = [
 " for no override default motion, if glob( plugin path ) is need
 
 " tabline motion
-nmap <silent><C-n> <Plug>AirlineSelectPrevTab
-nmap <silent><C-p> <Plug>AirlineSelectNextTab
+if glob('~/.vim/pack/plugins/start/vim-airline') != ''
+  nmap <silent><C-n> <Plug>AirlineSelectPrevTab
+  nmap <silent><C-p> <Plug>AirlineSelectNextTab
+endif
 
 " coc
 if glob('~/.vim/pack/plugins/start/coc.nvim') != ''
@@ -585,6 +633,19 @@ nnoremap <silent><Leader>z :Goyo<CR>
 " ##################       FUNCTIONS        ###################
 " #############################################################
 " {{{
+
+fu! MoveBuf(flg)
+  let current_id = '' | let buf_arr = []
+  for v in map(split(execute("ls"), '\n'), { i,v -> split(v, ' ')})
+    if stridx(v[1], 'F') == -1 && stridx(v[1], 'R') == -1
+      let buf_arr = add(buf_arr, v[0])
+      if stridx(v[1], '%') != -1 | let current_id = v[0] | endif
+    endif
+  endfor
+  let buf_idx = a:flg == 'next' ? match(buf_arr, current_id) + 1 : match(buf_arr, current_id) - 1
+  let buf_id = buf_idx == len(buf_arr) ? buf_arr[0] : buf_arr[buf_idx]
+  execute("b ".buf_id)
+endf
 
 fu! CloseBuf()
   let l:now_b = bufnr('%')
