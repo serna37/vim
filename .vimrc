@@ -86,7 +86,7 @@ if glob('~/.vim/pack/plugins/start') == ''
         \' INSERT(C-hjkl) [cursor move] ',
         \' VISUAL(C-jk)   [blok up/down] ',
         \' --[search]---------------------------------------------- ',
-        \' (Space f)   [fzf-mimic][files/histories/buffers] ',
+        \' (Space fhb)   [fzf-mimic][files/histories/buffers] ',
         \' (Space em)  [explorer(netrw)/marks] ',
         \' (Space g)(Space*2 s)   [grep][buffer grep] ',
         \' (Space q)   [clear search highlight] ',
@@ -432,6 +432,8 @@ endfunction
 
 " fzf || fzf-mimic
 nnoremap <silent><leader>f :cal FzfG()<CR>
+nnoremap <silent><leader>h :cal FzfG()<CR>
+nnoremap <silent><leader>b :cal FzfG()<CR>
 
 " ripgrep || grep
 nnoremap <silent><Leader>g :cal Grep()<CR>
