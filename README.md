@@ -59,3 +59,28 @@ other commands / keymaps details are in cheat sheet.<br>
 # How to use
 see [wiki-cheat-sheet](https://github.com/serna37/vim/wiki/Cheat-Sheet)<br>
 also see [wiki-debug](https://github.com/serna37/vim/wiki/Debug)
+
+# Inspired plugins
+- [junegunn/fzf.vim](https://github.com/junegunn/fzf.vim)
+- [vim-airline](https://github.com/vim-airline/vim-airline)
+- [simeji/winresizer](https://github.com/simeji/winresizer)
+- [yuttie/comfortable-motion.vim](https://github.com/yuttie/comfortable-motion.vim)
+- [MattesGroeger/vim-bookmarks](https://github.com/MattesGroeger/vim-bookmarks)
+- [preservim/nerdtree](https://github.com/preservim/nerdtree)
+- [unblevable/quick-scope](https://github.com/unblevable/quick-scope)
+- [t9md/vim-quickhl](https://github.com/t9md/vim-quickhl)
+- [jiangmiao/auto-pairs](https://github.com/jiangmiao/auto-pairs)
+- [mhinz/vim-startify](https://github.com/mhinz/vim-startify)
+- [easymotion/vim-easymotion](https://github.com/easymotion/vim-easymotion)
+- [junegunn/goyo.vim](https://github.com/junegunn/goyo.vim)
+- [junegunn/limelight.vim](https://github.com/junegunn/limelight.vim)
+
+# Original
+- cheat sheet
+- TrainingWheelsProtocol
+- PlugInstall / PlugUnInstall
+- IDE menu
+- interactive grep
+- popup terminal
+
+
