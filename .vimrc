@@ -1211,10 +1211,9 @@ let s:repos = [
     \ 'easymotion/vim-easymotion',
     \ 'mhinz/vim-startify',
     \ 'junegunn/fzf', 'junegunn/fzf.vim',
-    \ 'github/copilot.vim',
+    \ 'github/copilot.vim', 'thinca/vim-quickrun', 'puremourning/vimspector',
     \ 'sheerun/vim-polyglot', 'uiiaoo/java-syntax.vim',
     \ 'vim-airline/vim-airline', 'vim-airline/vim-airline-themes',
-    \ 'thinca/vim-quickrun', 'puremourning/vimspector',
     \ 'junegunn/goyo.vim', 'junegunn/limelight.vim',
     \ ]
 
@@ -1254,7 +1253,6 @@ fu! s:coc_setup(ch) abort
   cal popup_notification('colors, plugins installed. coc-extentions installing. PLEASE REBOOT VIM after this.', #{ border: [], line: &columns/4-&columns/37, close: "button" })
   execute("source ~/.vim/pack/plugins/start/coc.nvim/plugin/coc.vim")
   execute("CocInstall " . join(s:coc_extentions," "))
-  let cmd = "touch ~/.vim/coc-settings.json"
   let cocconfig = ['{',
     \ '  \"snippets.ultisnips.pythonPrompt\": false,',
     \ '  \"explorer.icon.enableNerdfont\": true,',
@@ -1316,7 +1314,6 @@ let s:training_popup_tips_win_tid = 0
 
 function! TrainingWheelsPopupsActivate()
   call TrainingWheelsPratticeFileCreate()
-  "call timer_start(200, function('TrainingWheelsPracticeFileOpen'))
   let s:show_cheat_sheet_flg = 0 " my cheat sheet disable
   call TrainingWheelsPopupsAllClose()
   let s:training_info_idx = 0
@@ -1865,7 +1862,10 @@ let g:training_wheels_practice_file = []
 
 " create practice file
 function! TrainingWheelsPratticeFileCreate()
-  let repo = 'https://raw.githubusercontent.com/serna37/vim/develop/practice.md'
+  " TODO
+  " if すでにあるなら開くだけ
+  " if vimレポ落としてるならコピー
+  let repo = 'https://raw.githubusercontent.com/serna37/vim/master/practice.md'
   let cmd = 'curl '.repo.' > ~/practice.md'
   cal job_start(["/bin/zsh","-c",cmd], {'close_cb': function('TrainingWheelsPracticeFileOpen')})
 endfunction
