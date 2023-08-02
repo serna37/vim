@@ -356,15 +356,27 @@ inoremap <expr> <S-Tab> pumvisible() ? '<C-p>' : '<S-Tab>'
 
 " auto completion
 function! Completion()
-  if col('.') == 1 || getline('.')[col('.')-2] == ' ' | return | endif
+  let exclude_completion_chars = [" ", "(", "[", "{", "<", "'", '"', "`"]
+  if col('.') == 1 || match(exclude_completion_chars, getline('.')[col('.')-2]) != -1 | return | endif
   if !pumvisible() | call feedkeys("\<Tab>") | endif
 endfunction
 if glob('~/.vim/pack/plugins/start/coc.nvim')  == ''
   autocmd TextChangedI,TextChangedP * silent call Completion()
 endif
 
-" TODO auto pair
 " jiangmiao/auto-pairs
+inoremap ( ()<LEFT>|inoremap [ []<LEFT>|inoremap { {}<LEFT>|inoremap < <><LEFT>
+inoremap ' ''<LEFT>|inoremap " ""<LEFT>|inoremap ` ``<LEFT>
+
+function! AutoPairsDelete()
+  let pairs_start = ["(", "[", "{", "<", "'", '"', "`"] | let pairs_end = [")", "]", "}", ">", "'", '"', "`"]
+  let pre_cursor_char = getline('.')[col('.')-2] | let on_cursor_char = getline('.')[col('.')-1]
+  let pre_chk = match(pairs_start, pre_cursor_char) | let on_chk = match(pairs_end, on_cursor_char)
+  if pre_chk != -1 && pre_chk == on_chk | return "\<RIGHT>\<BS>\<BS>" | endif
+  return "\<BS>"
+endfunction
+inoremap <buffer><silent><BS> <C-R>=AutoPairsDelete()<CR>
+
 
 " }}}
 
