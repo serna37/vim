@@ -727,14 +727,8 @@ endf
 " {{{
 
 let s:not_path_arr = [
-      \'"*.vim/*"',
-      \'"*.git/*"',
-      \'"*.npm/*"',
-      \'"*.yarn/*"',
-      \'"*.m2/*"',
-      \'"*.class"',
-      \'"*.vscode/*"',
-      \'"*.config/*"',
+      \'"*/.**/*"',
+      \'"*node_modules/*"',
       \'"*Applications/*"',
       \'"*Library/*"',
       \'"*Music/*"',
