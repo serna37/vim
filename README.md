@@ -55,5 +55,5 @@ other commands / keymaps details are in cheat sheet.<br>
 ```
 
 # How to use
-see wiki
-TODO
+see [wiki-cheat-sheet](https://github.com/serna37/vim/wiki/Cheat-Sheet)<br>
+also see [wiki-plugins-list](https://github.com/serna37/vim/wiki/Plugins)

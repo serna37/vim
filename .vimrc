@@ -1209,7 +1209,6 @@ let s:colors = [ 'onedark.vim', 'hybrid_material.vim', 'molokai.vim' ]
 " neoclide/coc.nvim has special args
 let s:repos = [
     \ 'easymotion/vim-easymotion',
-    \ 'jiangmiao/auto-pairs',
     \ 'mhinz/vim-startify',
     \ 'junegunn/fzf', 'junegunn/fzf.vim',
     \ 'github/copilot.vim',
