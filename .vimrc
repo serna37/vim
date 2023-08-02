@@ -247,12 +247,12 @@ endfunction
 function! s:buffers_label()
   let bufline = ''
   for v in map(split(execute("ls"), '\n'), { i,v -> split(v, ' ')})
-    if stridx(v[1], 'F') == -1 && stridx(v[1], 'R') == -1
+    let x = filter(v, { i,v -> v != ''})
+    if stridx(x[1], 'F') == -1 && stridx(x[1], 'R') == -1
       hi UserBuflineActive ctermfg=7 ctermbg=28
       hi UserBuflineDeactive ctermfg=7 ctermbg=8
       hi UserBuflineModified ctermfg=7 ctermbg=4
-      let x = filter(v, { i,v -> v != ''})
-      let hi = stridx(v[1], '%') != -1 ? '%#UserBuflineActive#' : '%#UserBuflineDeactive#'
+      let hi = stridx(x[1], '%') != -1 ? '%#UserBuflineActive#' : '%#UserBuflineDeactive#'
       let filename = x[2] == '+' ? '✗'.x[3] : x[2]
       if x[2] == '+' | let hi = '%#UserBuflineModified#' | endif
       let bufline = bufline.'%'.v[0].'T'.hi.filename.' ⁍|'.'%T%#TabLineFill# '
@@ -639,9 +639,10 @@ nnoremap <silent><Leader>z :Goyo<CR>
 fu! MoveBuf(flg)
   let current_id = '' | let buf_arr = []
   for v in map(split(execute("ls"), '\n'), { i,v -> split(v, ' ')})
-    if stridx(v[1], 'F') == -1 && stridx(v[1], 'R') == -1
-      let buf_arr = add(buf_arr, v[0])
-      if stridx(v[1], '%') != -1 | let current_id = v[0] | endif
+    let x = filter(v, { i,v -> v != ''})
+    if stridx(x[1], 'F') == -1 && stridx(x[1], 'R') == -1
+      let buf_arr = add(buf_arr, x[0])
+      if stridx(x[1], '%') != -1 | let current_id = x[0] | endif
     endif
   endfor
   let buf_idx = a:flg == 'next' ? match(buf_arr, current_id) + 1 : match(buf_arr, current_id) - 1
