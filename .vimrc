@@ -466,16 +466,32 @@ let g:netrw_liststyle = 3
 let g:netrw_altv = 1
 let g:netrw_winsize = 70
 set splitright " when opne file, split right window
-nnoremap <silent><Leader>e :Vex 15<CR>
+nnoremap <silent><Leader>e :call NetrwToggle()<CR>
 
-" TODO doeesn't work
 augroup netrw_motion
   autocmd!
-  autocmd FileType netrw call NetrwMotion()
+  autocmd fileType netrw call NetrwMotion()
 augroup END
 
 function! NetrwMotion()
-  nnoremap <buffer><C-h> <C-w>h
+  nnoremap <buffer><C-l> <C-w>l
+endfunction
+
+function! s:create_winid2bufnr_dict() abort " {{{
+  let winid2bufnr_dict = {}
+  for bnr in range(1, bufnr('$'))
+    for wid in win_findbuf(bnr) | let winid2bufnr_dict[wid] = bnr | endfor
+  endfor | return winid2bufnr_dict
+endfunction
+function! s:winid2bufnr(wid) abort
+  return s:create_winid2bufnr_dict()[a:wid]
+endfunction " }}}
+
+function! NetrwToggle()
+  for win_no in range(1, winnr('$'))
+    let win_id = win_getid(win_no)
+    if bufname(s:winid2bufnr(win_id)) == 'NetrwTreeListing' | call win_execute(win_id, 'close') | return | endif
+  endfor | execute('Vex 15')
 endfunction
 
 " fzf || fzf-mimic
