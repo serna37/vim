@@ -35,10 +35,12 @@ git clone --depth 1 https://github.com/vim/vim.git \
 ## 2. get this vimrc
 ```sh
 git clone --depth 1 https://github.com/serna37/vim && ln -s vim/.vimrc ~/.vimrc
+echo '[optional] colorscheme' && mkdir -p ~/.vim/colors && cp -f vim/onedark.vim ~/.vim/colors
 ```
 or
 ```sh
 curl https://raw.githubusercontent.com/serna37/vim/master/.vimrc > ~/.vimrc
+
 ```
 ## 3. [optional] execute command on vim
 ```
