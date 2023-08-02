@@ -45,7 +45,7 @@ augroup cheat_sheet_hover
   autocmd CursorMovedI * silent call s:CheatSheetClose()
 augroup END
 
-" TODO fix it
+" TODO fix color
 let s:my_vim_cheet_sheet = [
       \' --[window]---------------------------------------------- ',
       \' (C-n/p)(Space x)   [buffer tab][next/prev/close] ',
@@ -56,7 +56,7 @@ let s:my_vim_cheet_sheet = [
       \' (Tab S-Tab)    [jump][5rows] ',
       \' (s)(Space s)   [easymotion incremental(Tab)] ',
       \' (Space w)      [f-scope toggle] ',
-      \' (m minpcx)     [mark(toggle)/info/next/prev/clear/all] ',
+      \' (mm/mn/mp/mc)  [mark(toggle)/next/prev/clear] ',
       \' INSERT(C-hjkl) [cursor move] ',
       \' VISUAL(C-jk)   [blok up/down] ',
       \' --[search]---------------------------------------------- ',
@@ -88,7 +88,7 @@ if glob('~/.vim/pack/plugins/start') == ''
         \' --[search]---------------------------------------------- ',
         \' (Space f)   [fzf-mimic][files/histories/buffers] ',
         \' (Space em)  [explorer(netrw)/marks] ',
-        \' (Space g)   [grep] ',
+        \' (Space g)(Space*2 s)   [grep][buffer grep] ',
         \' (Space q)   [clear search highlight] ',
         \' --[command]--------------------------------------------- ',
         \' (:TrainingWheelsProtocol) [training default vim]',
@@ -243,20 +243,11 @@ set stl=%!SetStatusLine()
 " simeji/winresizer
 
 " window forcus move
-nnoremap <C-h> <C-w>h
-nnoremap <C-l> <C-w>l
-nnoremap <C-k> <C-w>k
-nnoremap <C-j> <C-w>j
-tnoremap <C-h> <C-w>h
-tnoremap <C-l> <C-w>l
-tnoremap <C-k> <C-w>k
-tnoremap <C-j> <C-w>j
+nnoremap <C-h> <C-w>h|nnoremap <C-l> <C-w>l|nnoremap <C-k> <C-w>k|nnoremap <C-j> <C-w>j
+tnoremap <C-h> <C-w>h|tnoremap <C-l> <C-w>l|tnoremap <C-k> <C-w>k|tnoremap <C-j> <C-w>j
 
 " window resize
-nnoremap <Left> 4<C-w><
-nnoremap <Right> 4<C-w>>
-nnoremap <Up> 4<C-w>-
-nnoremap <Down> 4<C-w>+
+nnoremap <Left> 4<C-w><|nnoremap <Right> 4<C-w>>|nnoremap <Up> 4<C-w>-|nnoremap <Down> 4<C-w>+
 
 " close buffer
 nnoremap <silent><Leader>x :call CloseBuf()<CR>
@@ -276,18 +267,12 @@ tnoremap <Esc> <C-w>N
 " {{{
 
 " row move
-nnoremap j gj
-nnoremap k gk
-nnoremap <Tab> 5gj
-nnoremap <S-Tab> 5gk
-vnoremap <Tab> 5gj
-vnoremap <S-Tab> 5gk
+nnoremap j gj|nnoremap k gk
+nnoremap <Tab> 5gj|nnoremap <S-Tab> 5gk|vnoremap <Tab> 5gj|vnoremap <S-Tab> 5gk
 
 " comfortable scroll
-nnoremap <silent><C-u> :cal Scroll(0, 30)<CR>
-nnoremap <silent><C-d> :cal Scroll(1, 30)<CR>
-nnoremap <silent><C-b> :cal Scroll(0, 10)<CR>
-nnoremap <silent><C-f> :cal Scroll(1, 10)<CR>
+nnoremap <silent><C-u> :cal Scroll(0, 30)<CR>|nnoremap <silent><C-d> :cal Scroll(1, 30)<CR>
+nnoremap <silent><C-b> :cal Scroll(0, 10)<CR>|nnoremap <silent><C-f> :cal Scroll(1, 10)<CR>
 
 " custom scroll just like
 " yuttie/comfortable-motion.vim
@@ -308,16 +293,11 @@ endf
 nnoremap <silent><Leader>w :call FModeToggle()<CR>
 
 " mark
-" TODO removed plugin
-if glob('~/.vim/pack/plugins/start/vim-bookmarks') == ''
-  " vim-bookmarks can read all buffer's marks by fzf-preview marks
-  " this vimscript function can only call inner buffer
-  nnoremap mm :call Marking()<CR>
-  nnoremap mn :call MarkHank("down")<CR>
-  nnoremap mp :call MarkHank("up")<CR>
-  nnoremap mc :call MarkSignDel()<CR>:delmarks!<CR>
-  nnoremap <silent><Leader>m :call MarkMenu()<CR>
-endif
+nnoremap mm :call Marking()<CR>
+nnoremap mn :call MarkHank("down")<CR>
+nnoremap mp :call MarkHank("up")<CR>
+nnoremap mc :call MarkSignDel()<CR>:delmarks!<CR>
+nnoremap <silent><Leader>m :call MarkMenu()<CR>
 
 " IDE action menu
 nnoremap <silent><Leader>v :cal IDEMenu()<CR>
@@ -339,18 +319,13 @@ set showmatch " jump pair of parentheses when write
 set matchtime=3 " jump term sec
 
 " move cursor at insert mode
-inoremap <C-h> <C-o>h
-inoremap <C-l> <C-o>l
-inoremap <C-k> <C-o>k
-inoremap <C-j> <C-o>j
+inoremap <C-h> <C-o>h|inoremap <C-l> <C-o>l|inoremap <C-k> <C-o>k|inoremap <C-j> <C-o>j
 
 " d = delete(no clipboard)
-nnoremap d "_d
-vnoremap d "_d
+nnoremap d "_d|vnoremap d "_d
 
 " block move at visual mode
-vnoremap <C-j> "zx"zp`[V`]
-vnoremap <C-k> "zx<Up>"zP`[V`]
+vnoremap <C-j> "zx"zp`[V`]|vnoremap <C-k> "zx<Up>"zP`[V`]
 
 " }}}
 
@@ -387,6 +362,9 @@ endfunction
 if glob('~/.vim/pack/plugins/start/coc.nvim')  == ''
   autocmd TextChangedI,TextChangedP * silent call Completion()
 endif
+
+" TODO auto pair
+" jiangmiao/auto-pairs
 
 " }}}
 
@@ -474,9 +452,7 @@ set foldcolumn=1 " fold preview
 " #############################################################
 " {{{
 
-if glob('~/.vim/colors/') != ''
-  colorscheme onedark
-endif
+if glob('~/.vim/colors/') != '' | colorscheme onedark | endif
 
 " coc
 let g:coc_snippet_next = '<Tab>'
@@ -487,14 +463,6 @@ let g:vimspector_enable_mappings = 'VISUAL_STUDIO'
 
 " fzf
 set rtp+=~/.vim/pack/plugins/start/fzf
-
-" f-scope
-" TODO removed
-augroup qs_colors
-  autocmd!
-  autocmd ColorScheme * highlight QuickScopePrimary guifg='#afff5f' gui=underline ctermfg=196 cterm=underline
-  autocmd ColorScheme * highlight QuickScopeSecondary guifg='#5fffff' gui=underline ctermfg=81 cterm=underline
-augroup END
 
 " easy motion
 let g:EasyMotion_do_mapping = 0
@@ -509,10 +477,6 @@ let g:airline_powerline_fonts = 1
 
 " auto pair
 let g:AutoPairsMapCh = 0
-
-" gitgutter
-" TODO removed
-let g:gitgutter_map_keys = 0
 
 " zen
 let g:limelight_conceal_ctermfg = 'gray'
@@ -558,67 +522,44 @@ let g:startify_custom_header = [
 nmap <silent><C-n> <Plug>AirlineSelectPrevTab
 nmap <silent><C-p> <Plug>AirlineSelectNextTab
 
-" file search
+" coc
 if glob('~/.vim/pack/plugins/start/coc.nvim') != ''
+  " file search
   nnoremap <silent><Leader>e :CocCommand explorer --width 30<CR>
-endif
-nnoremap <silent><leader>h :CocCommand fzf-preview.MruFiles<CR>
-nnoremap <silent><leader>b :CocCommand fzf-preview.AllBuffers<CR>
+  nnoremap <silent><leader>h :CocCommand fzf-preview.MruFiles<CR>
+  nnoremap <silent><leader>b :CocCommand fzf-preview.AllBuffers<CR>
 
-" search highlight
-" TODO removed
-if glob('~/.vim/pack/plugins/start/vim-quickhl') != ''
-  nnoremap <silent>* *N<Plug>(quickhl-manual-this)
-  nnoremap <silent># *N<Plug>(quickhl-manual-this)
-  nnoremap <silent><Leader>q <Plug>(quickhl-manual-reset):noh<CR>
-endif
-if glob('~/.vim/pack/plugins/start/coc.nvim') != ''
+  " cursor  highlight
   autocmd CursorHold * silent call CocActionAsync('highlight')
-endif
 
-" f-scope
-" TODO removed
-if glob('~/.vim/pack/plugins/start/quick-scope') != ''
-  nnoremap <Leader>w <plug>(QuickScopeToggle)
+  " grep
+  nnoremap <Leader><Leader>s :CocList words<CR>
+
+  " jump
+  nnoremap <silent><Leader>l :CocCommand fzf-preview.Lines<CR>
+  nnoremap <silent><Leader>j :CocCommand fzf-preview.Jumps<CR>
+  nnoremap <silent><Leader>c :CocCommand fzf-preview.Changes<CR>
+
+  " completion @ coc
+  inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
+  inoremap <silent><expr> <Tab> coc#pum#visible() ? coc#pum#next(1) : "\<Tab>"
+  inoremap <silent><expr> <S-Tab> coc#pum#visible() ? coc#pum#prev(1) : "\<S-Tab>"
+
+  " IDE
+  nnoremap <Leader>d <Plug>(coc-definition)
+  nnoremap <Leader>r :CocCommand fzf-preview.CocReferences<CR>
+  nnoremap <Leader>o :CocCommand fzf-preview.CocOutline<CR>
+  nnoremap <Leader>? :cal CocAction('doHover')<CR>
+  nnoremap <Leader>, <plug>(coc-diagnostic-next)
+  nnoremap <Leader>. <plug>(coc-diagnostic-prev)
+  nnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) :  Scroll(1, 10)
+  nnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) :  Scroll(0, 10)
 endif
 
 " easy motion
 if glob('~/.vim/pack/plugins/start/vim-easymotion') != ''
   nnoremap s <Plug>(easymotion-bd-w)
   nnoremap <Leader>s <Plug>(easymotion-sn)
-endif
-
-" grep
-if glob('~/.vim/pack/plugins/start/coc.nvim') != ''
-  nnoremap <Leader><Leader>s :CocList words<CR>
-endif
-
-" jump/mark
-" TODO mark removed
-if glob('~/.vim/pack/plugins/start/vim-bookmarks') != ''
-  nnoremap <silent><Leader>m :CocCommand fzf-preview.Bookmarks<CR>
-endif
-nnoremap <silent><Leader>l :CocCommand fzf-preview.Lines<CR>
-nnoremap <silent><Leader>j :CocCommand fzf-preview.Jumps<CR>
-nnoremap <silent><Leader>c :CocCommand fzf-preview.Changes<CR>
-
-" completion @ coc
-if glob('~/.vim/pack/plugins/start/coc.nvim') != ''
-  inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
-  inoremap <silent><expr> <Tab> coc#pum#visible() ? coc#pum#next(1) : "\<Tab>"
-  inoremap <silent><expr> <S-Tab> coc#pum#visible() ? coc#pum#prev(1) : "\<S-Tab>"
-endif
-
-" IDE
-nnoremap <Leader>d <Plug>(coc-definition)
-nnoremap <Leader>r :CocCommand fzf-preview.CocReferences<CR>
-nnoremap <Leader>o :CocCommand fzf-preview.CocOutline<CR>
-nnoremap <Leader>? :cal CocAction('doHover')<CR>
-nnoremap <Leader>, <plug>(coc-diagnostic-next)
-nnoremap <Leader>. <plug>(coc-diagnostic-prev)
-if glob('~/.vim/pack/plugins/start/coc.nvim') != ''
-  nnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) :  Scroll(1, 10)
-  nnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) :  Scroll(0, 10)
 endif
 
 " zen mode
@@ -647,28 +588,30 @@ fu! FzfG() " if git repo, ref .gitignore. || no plugin
 endf
 
 fu! Grep() abort
-  if glob('~/.vim/pack/plugins/start/coc.nvim') == '' || !executable('rg')
-    echo 'grep. choose [word] [ext] [target]'
-    let pwd = system('pwd')
-    let word = inputdialog("Enter [word]>>")
+  " plugin mode
+  if glob('~/.vim/pack/plugins/start/coc.nvim') != '' || executable('rg')
+    let w = inputdialog("start ripgrep [word] >>")
     echo '<<'
-    if word == '' | echo 'cancel' | retu | endif
-    let ext = inputdialog("Enter [ext]>>")
-    echo '<<'
-    if ext == '' | echo 'all ext' | let ext = '*' | endif
-    let target = inputdialog("Enter [target (like ./*) pwd:".pwd."]>>")
-    if target == '' | echo 'search current directory' | let target = './*' | endif
-    echo '<<'
-    echo 'grep [' . word . '] processing in [' . target . '] [' . ext . '] ...'
-    cgetexpr system('grep -n -r --include="*.' . ext . '" "' . word . '" ' . target) | cw
-    echo 'grep end'
+    if w == '' | echo 'cancel' | retu | endif
+    execute('CocCommand fzf-preview.ProjectGrep -w --ignore-case '.w)
     return
   endif
-  " plugin mode
-  let w = inputdialog("start ripgrep [word] >>")
+  " no plugin
+  echo 'grep. choose [word] [ext] [target]'
+  let pwd = system('pwd')
+  let word = inputdialog("Enter [word]>>")
   echo '<<'
-  if w == '' | echo 'cancel' | retu | endif
-  execute('CocCommand fzf-preview.ProjectGrep -w --ignore-case '.w)
+  if word == '' | echo 'cancel' | retu | endif
+  let ext = inputdialog("Enter [ext]>>")
+  echo '<<'
+  if ext == '' | echo 'all ext' | let ext = '*' | endif
+  let target = inputdialog("Enter [target (like ./*) pwd:".pwd."]>>")
+  if target == '' | echo 'search current directory' | let target = './*' | endif
+  echo '<<'
+  echo 'grep [' . word . '] processing in [' . target . '] [' . ext . '] ...'
+  cgetexpr system('grep -n -r --include="*.' . ext . '" "' . word . '" ' . target) | cw
+  echo 'grep end'
+  return
 endf
 
 fu! GrepCurrent() abort
@@ -1169,7 +1112,14 @@ endf
 " ===================================================================
 " {{{
 
-" TODO カラースキーム帰ると消える、やっぱautogroupにしたいなぁ
+augroup qs_colors
+  autocmd!
+  autocmd ColorScheme * highlight FSCopePrimary ctermfg=196 cterm=underline guifg=#66D9EF guibg=#000000
+  autocmd ColorScheme * highlight FSCodeSecondary ctermfg=219 cterm=underline guifg=#66D9EF guibg=#000000
+  autocmd ColorScheme * highlight QuickScopeBack ctermfg=51 cterm=underline guifg=#66D9EF guibg=#000000
+  autocmd ColorScheme * highlight QuickScopeBackSecond ctermfg=33 cterm=underline guifg=#66D9EF guibg=#000000
+augroup END
+
 highlight FSCopePrimary ctermfg=196 cterm=underline guifg=#66D9EF guibg=#000000
 highlight FSCodeSecondary ctermfg=219 cterm=underline guifg=#66D9EF guibg=#000000
 highlight QuickScopeBack ctermfg=51 cterm=underline guifg=#66D9EF guibg=#000000
@@ -1248,77 +1198,66 @@ endf
 let s:colors = [ 'onedark.vim', 'hybrid_material.vim', 'molokai.vim' ]
 
 " repo
+" neoclide/coc.nvim has special args
 let s:repos = [
-    \ 'junegunn/fzf',
-    \ 'junegunn/fzf.vim',
-    \ 'neoclide/coc.nvim',
     \ 'easymotion/vim-easymotion',
     \ 'jiangmiao/auto-pairs',
-    \ 'markonm/traces.vim',
     \ 'mhinz/vim-startify',
-    \ 'vim-airline/vim-airline',
-    \ 'vim-airline/vim-airline-themes',
-    \ 'sheerun/vim-polyglot',
-    \ 'uiiaoo/java-syntax.vim',
-    \ 'thinca/vim-quickrun',
-    \ 'puremourning/vimspector',
+    \ 'junegunn/fzf', 'junegunn/fzf.vim',
     \ 'github/copilot.vim',
-    \ 'junegunn/goyo.vim',
-    \ 'junegunn/limelight.vim',
+    \ 'sheerun/vim-polyglot', 'uiiaoo/java-syntax.vim',
+    \ 'vim-airline/vim-airline', 'vim-airline/vim-airline-themes',
+    \ 'thinca/vim-quickrun', 'puremourning/vimspector',
+    \ 'junegunn/goyo.vim', 'junegunn/limelight.vim',
     \ ]
 
 " extentions
 let s:coc_extentions = [
-    \ 'coc-explorer',
-    \ 'coc-lists',
-    \ 'coc-fzf-preview',
-    \ 'coc-snippets',
-    \ 'coc-sh',
-    \ 'coc-vimlsp',
-    \ 'coc-json',
-    \ 'coc-sql',
-    \ 'coc-html',
-    \ 'coc-css',
-    \ 'coc-tsserver',
-    \ 'coc-clangd',
-    \ 'coc-go',
-    \ 'coc-pyright',
-    \ 'coc-java',
+    \ 'coc-fzf-preview', 'coc-explorer', 'coc-lists', 'coc-snippets',
+    \ 'coc-sh', 'coc-vimlsp', 'coc-json', 'coc-sql', 'coc-html', 'coc-css',
+    \ 'coc-tsserver', 'coc-clangd', 'coc-go', 'coc-pyright', 'coc-java',
     \ ]
 
 fu! ColorInstall()
-  let cmd = "mkdir -p ~/.vim/colors && cd ~/.vim/colors"
-        \ . " && colors=('".join(s:colors, "' '")."')"
-        \ . " && for v in ${colors[@]};do curl https://raw.githubusercontent.com/serna37/vim-color/master/${v} > ${v};done"
+  let cmd = "mkdir -p ~/.vim/colors && cd ~/.vim/colors && colors=('".join(s:colors, "' '")."')"
+    \ . " && for v in ${colors[@]};do curl https://raw.githubusercontent.com/serna37/vim-color/master/${v} > ${v};done"
   execute("bo terminal ++shell echo 'start' && ".cmd." && echo 'end'")
 endf
 
 fu! PlugInstall(...)
-  " color
-  let repo = 'https://raw.githubusercontent.com/serna37/vim-color/master/'
-  let cmd = "mkdir -p ~/.vim/colors && cd ~/.vim/colors "
-  for scheme in s:colors
-    let cmd = cmd . ' && curl ' . repo . scheme . ' > ' . scheme
-  endfor
+  " colors
+  let color_cmd = "mkdir -p ~/.vim/colors && cd ~/.vim/colors && colors=('".join(s:colors, "' '")."')"
+    \ . " && for v in ${colors[@]};do curl https://raw.githubusercontent.com/serna37/vim-color/master/${v} > ${v};done"
   " plugins
-  let cmd = cmd . " && repos=('".join(s:repos,"' '")."') && mkdir -p ~/.vim/pack/plugins/start && cd ~/.vim/pack/plugins/start"
+  let cmd = "mkdir -p ~/.vim/pack/plugins/start && cd ~/.vim/pack/plugins/start && repos=('".join(s:repos,"' '")."')"
     \ . " && for v in ${repos[@]};do git clone --depth 1 https://github.com/${v} ;done"
+    \ . " && git clone -b release https://github.com/neoclide/coc.nvim"
     \ . " && fzf/install --no-key-bindings --completion --no-bash --no-zsh --no-fish"
   cal RunCat()
+  cal job_start(["/bin/zsh","-c",color_cmd])
   cal job_start(["/bin/zsh","-c",cmd], {'close_cb': function('s:coc_setup')})
-  echo 'plug install processing...'
+  echo 'colors, plugins installing...'
+  cal popup_notification("colors, plugins installing...", #{ border: [], line: &columns/4-&columns/37, close: "button" })
 endf
-fu! s:coc_setup(ch) abort
-  cal RunCatStop()
-  echo 'coc install. please reboot vim, and call "PlugInstallCoc"'
-  cal coc#util#install()
-endf
-
-" TODO ここ2段階なのめんどいので辞めたい:
 
 " coc extentions
-fu! PlugInstallCoc()
+fu! s:coc_setup(ch) abort
+  cal RunCatStop()
+  echo 'colors, plugins installed. coc-extentions installing. PLEASE REBOOT VIM after this.'
+  cal popup_notification('colors, plugins installed. coc-extentions installing. PLEASE REBOOT VIM after this.', #{ border: [], line: &columns/4-&columns/37, close: "button" })
+  execute("source ~/.vim/pack/plugins/start/coc.nvim/plugin/coc.vim")
   execute("CocInstall " . join(s:coc_extentions," "))
+  let cmd = "touch ~/.vim/coc-settings.json"
+  let cocconfig = ['{',
+    \ '  \"snippets.ultisnips.pythonPrompt\": false,',
+    \ '  \"explorer.icon.enableNerdfont\": true,',
+    \ '  \"explorer.file.showHiddenFiles\": true,',
+    \ '  \"python.formatting.provider\": \"yapf\",',
+    \ '  \"pyright.inlayHints.variableTypes\": false',
+    \ '}',
+    \]
+  for v in cocconfig | cal system('echo "'.v.'" >> ~/.vim/coc-settings.json') | endfor
+  "cal coc#util#install() if git clone --depth 1, need this statement
 endf
 
 " uninstall
@@ -1326,31 +1265,28 @@ fu! PlugUnInstall(...)
   echo 'delete ~/.vim'
   echo 'are you sure to delete these folder ?'
   let w = inputdialog("YES (Y) / NO (N)")
-  if w != 'Y' || w != 'y'
-    echo 'cancel'
-    retu
-  endif
-  execute("bo terminal ++shell echo 'start' && rm -rf ~/.vim && echo 'end'")
+  if w != 'Y' || w != 'y' | echo 'cancel' | retu | endif
+  execute("bo terminal ++shell echo 'start' && rm -rf ~/.vim && echo 'end. PLEASE REBOOT VIM'")
 endf
 
 " }}}
 
 command! ColorInstall cal ColorInstall()
 command! PlugInstall cal PlugInstall()
-command! PlugInstallCoc cal PlugInstallCoc()
 command! PlugUnInstall cal PlugUnInstall()
 
 
 " #############################################################
 " ##################        TRAINING        ###################
 " #############################################################
-" {{{
 
 command! Popupclear call popup_clear()
 command! -nargs=? TrainingWheelsProtocol call TrainingWheelsProtocol(<f-args>)
 
+" {{{
+
 function! TrainingWheelsProtocol(...)
-  if a:0 == 0 
+  if a:0 == 0
     call TrainingWheelsPopupsActivate()
   elseif a:1 == 0
     call TrainingWheelsPopupsDeActivate()
@@ -1934,4 +1870,6 @@ function! TrainingWheelsPracticeFileOpen(ch) abort
 endfunction
 
 " }}}
+
+
 
