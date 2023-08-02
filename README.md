@@ -1,3 +1,9 @@
+# Demo (only vimrc)
+WIP
+
+# Demo (plugin mode)
+WIP
+
 # Dependencies
 - vim 8.2~
 
