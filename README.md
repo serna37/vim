@@ -1,6 +1,15 @@
 # Dependencies
 - vim 8.2~
-- git
+
+# Plugin's dependencies
+if install plugins by `:PlugInstall` command, need here.<br>
+also see [wiki-plugins-list](https://github.com/serna37/vim/wiki/Plugins)
+
+|plugins|dependencies|
+|--|--|
+|[coc.nvim](https://github.com/neoclide/coc.nvim)|<ul><li>[node.js](https://github.com/nodejs/node)<li>yarn: `npm install -g yarn`|
+|language server with coc|see [here](https://github.com/neoclide/coc.nvim/wiki/Language-servers)|
+|[vimspector](https://github.com/puremourning/vimspector)|Vim 8.2 Huge build compiled with Python 3.10 or later<br>※also see [here](https://github.com/puremourning/vimspector#dependencies)|
 
 # Recommendation commands / packages
 |command / package|purpose|use in vim if include|
@@ -11,13 +20,6 @@
 |[powerline/fonts](https://github.com/powerline/fonts)|font|<ul><li>[x] </ul>|
 |[ryanoasis/nerd-fonts](https://github.com/ryanoasis/nerd-fonts)|font|<ul><li>[x] </ul>|
 |[ryanoasis/vim-devicons](https://github.com/ryanoasis/vim-devicons)|icon|<ul><li>[x] </ul>|
-
-# Plugin's dependencies
-|plugins|dependencies|
-|--|--|
-|[coc.nvim](https://github.com/neoclide/coc.nvim)|<ul><li>[node.js](https://github.com/nodejs/node)<li>yarn: `npm install -g yarn`|
-|language server with coc|see [here](https://github.com/neoclide/coc.nvim/wiki/Language-servers)|
-|[vimspector](https://github.com/puremourning/vimspector)|Vim 8.2 Huge build compiled with Python 3.10 or later<br>※also see [here](https://github.com/puremourning/vimspector#dependencies)|
 
 # Installation
 ## 1. get vim 8.2~
@@ -56,5 +58,4 @@ other commands / keymaps details are in cheat sheet.<br>
 
 # How to use
 see [wiki-cheat-sheet](https://github.com/serna37/vim/wiki/Cheat-Sheet)<br>
-also see [wiki-plugins-list](https://github.com/serna37/vim/wiki/Plugins)<br>
 also see [wiki-debug](https://github.com/serna37/vim/wiki/Debug)
