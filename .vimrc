@@ -475,6 +475,18 @@ augroup END
 
 function! NetrwMotion()
   nnoremap <buffer><C-l> <C-w>l
+  autocmd CursorMoved * call NetrwOpenJudge()
+endfunction
+
+function! NetrwOpenJudge()
+  nnoremap <buffer><CR> <Plug>NetrwLocalBrowseCheck
+  if getline('.')[len(getline('.'))-1] != '/'
+    nnoremap <buffer><CR> <Plug>NetrwLocalBrowseCheck:call NetrwOpen()<CR>
+  endif
+endfunction
+
+function! NetrwOpen()
+  call feedkeys("\<C-l>:q\<CR>\<Space>e")
 endfunction
 
 function! s:create_winid2bufnr_dict() abort " {{{
