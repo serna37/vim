@@ -453,7 +453,10 @@ nnoremap s :echo('no easymotion')<CR>
 nnoremap <Leader>s /
 
 " disable highlight
-nnoremap <silent><Leader>q :windo noh<CR>:windo cal clearmatches()<CR>
+nnoremap <silent><Leader>q :noh<CR>:call Delhighlight()<CR>
+function! Delhighlight()
+  let current_win = winnr() | windo cal clearmatches() | exe current_win . 'wincmd w'
+endfunction
 
 " grep result -> quickfix
 au QuickFixCmdPost *grep* cwindow
@@ -482,6 +485,8 @@ function! NetrwMotion()
 endfunction
 
 function! NetrwOpenJudge()
+  " TODO windows gitbashだとmapしたら上手く動かない
+  " キー入力監視に変えるか？
   nnoremap <buffer><CR> <Plug>NetrwLocalBrowseCheck
   if getline('.')[len(getline('.'))-1] != '/'
     nnoremap <buffer><CR> <Plug>NetrwLocalBrowseCheck:call NetrwOpen()<CR>
@@ -1205,11 +1210,13 @@ fu! HiClear(cw) abort
   if len(already) > 0 | cal matchdelete(already[0]['id']) | let s:hi_reaseted = 1 | endif
 endf
 fu! HiSet() abort
+  let current_win = winnr()
   let cw = expand('<cword>')
   windo cal HiClear(cw)
   if s:hi_reaseted == 1 | retu | endif
   windo cal matchadd("UserSearchHi" . s:now_hi, cw)
   let s:now_hi = s:now_hi >= len(s:search_hl)-1 ? 0 : s:now_hi + 1
+  exe current_win . 'wincmd w'
 endf
 
 " }}}
@@ -1282,13 +1289,18 @@ fu! HiFLine()
 endf
 
 fu! FModeActivate()
-  aug f_scope | au! |  au CursorMoved * cal HiFLine() | aug End
+  aug f_scope
+    au!
+    au CursorMoved * cal HiFLine()
+  aug End
   cal HiFLine()
 endf
 cal FModeActivate()
 
 fu! FModeDeactivate()
-  aug f_scope | au! |  aug End
+  aug f_scope
+    au!
+  aug End
   let current_win = win_getid()
   windo cal clearmatches() " reset highlight on all window in tab
   cal win_gotoid(current_win) " return current window
@@ -1302,35 +1314,27 @@ endf
 " {{{
 
 let g:zen_mode_flg = 0
-let g:asis_colorscheme = execute("colorscheme")[1:]
 function! ZenModeToggle()
   let g:zen_mode_flg = g:zen_mode_flg == 0 ? 1 : 0
 
   if g:zen_mode_flg == 1
-    tab split
-    call FModeDeactivate()
+    tab split | execute("normal zR")
     set nonumber nocursorline nocursorcolumn laststatus=0 showtabline=0
     vertical topleft new
     setlocal buftype=nofile bufhidden=wipe nomodifiable nobuflisted noswapfile nonu noru winfixheight
-    vertical resize 40
-    execute winnr('#') . 'wincmd w'
+    vertical resize 40 | execute winnr('#') . 'wincmd w'
     vertical botright new
     setlocal buftype=nofile bufhidden=wipe nomodifiable nobuflisted noswapfile nonu noru winfixheight
-    vertical resize 40
-    execute winnr('#') . 'wincmd w'
-    setlocal relativenumber
+    vertical resize 40 | execute winnr('#') . 'wincmd w'
     for grp in ['NonText', 'FoldColumn', 'ColorColumn', 'VertSplit', 'StatusLine', 'StatusLineNC', 'SignColumn']
-      execute('hi '.grp.' ctermfg=black')
-      execute('hi '.grp.' ctermbg=NONE')
-      execute('hi '.grp.' cterm=NONE')
+      execute('hi '.grp.' ctermfg=black') | execute('hi '.grp.' ctermbg=NONE') | execute('hi '.grp.' cterm=NONE')
     endfor
+    setlocal number relativenumber
   else
     set number cursorline cursorcolumn laststatus=2 showtabline=2
-    q | q | q
-    execute('colorscheme '.g:asis_colorscheme)
-    call FModeActivate()
+    tabclose
+    syntax enable
   endif
-
 endfunction
 
 " }}}
@@ -1347,8 +1351,6 @@ endfunction
 
 
 
-
-
 " }}}
 
 " ===================================================================
@@ -1356,7 +1358,7 @@ endfunction
 " ===================================================================
 " {{{
 
-" TGoyo<CR>ODO startify
+" TODO startify
 
 
 
