@@ -45,7 +45,7 @@ augroup cheat_sheet_hover
   autocmd CursorMovedI * silent call s:CheatSheetClose()
 augroup END
 
-" TODO fix color
+" TODO fix cheatsheet color
 let s:my_vim_cheet_sheet = [
       \' --[window]---------------------------------------------- ',
       \' (C-n/p)(Space x)   [buffer tab][next/prev/close] ',
@@ -75,9 +75,9 @@ let s:my_vim_cheet_sheet = [
 if glob('~/.vim/pack/plugins/start') == ''
   let s:my_vim_cheet_sheet = [
         \' --[window]---------------------------------------------- ',
-        \' (Space x)       [buffer][close] ',
+        \' (C-n/p)(Space x)   [buffer tab][next/prev/close] ',
         \' (←↑↓→)(C-hjkl)  [window][resize/forcus] ',
-        \' (Space t)       [terminal] ',
+        \' (Space t)(Space z) [terminal][Zen Mode] ',
         \' --[motion]---------------------------------------------- ',
         \' (Space v)      [IDE Action Menu] some are dosabled ',
         \' (Tab S-Tab)    [jump][5rows] ',
@@ -91,9 +91,8 @@ if glob('~/.vim/pack/plugins/start') == ''
         \' (Space g)(Space*2 s)   [grep][buffer grep] ',
         \' (Space q)   [clear search highlight] ',
         \' --[command]--------------------------------------------- ',
-        \' (:TrainingWheelsProtocol) [training default vim]',
         \' (:PlugInstall)      [plugins install] ',
-        \' (:PlugInstallCoc)   [coc extension install] ',
+        \' (:TrainingWheelsProtocol) [training default vim]',
         \' -------------------------------------------------------- ',
         \' (Space*3)      [ON/OFF Cheat Sheet] ',
         \]
@@ -139,7 +138,7 @@ let s:recheatwinid = 0
 fu! PopupFever()
   call RunCat()
   let s:recheatwinid = popup_create(s:my_vim_cheet_sheet, #{ title: ' Action Cheet Sheet ', border: [], line: &columns/4 })
-  let s:logowinid = popup_create(g:startify_custom_header, #{ border: [] })
+  let s:logowinid = popup_create(g:btr_logo, #{ border: [] })
 endf
 fu! PopupFeverStop()
   call RunCatStop()
@@ -306,6 +305,10 @@ nnoremap <silent><Leader>t :call popup_create(term_start([&shell], #{ hidden: 1,
 
 " terminal read only mode (i to return terminal mode)
 tnoremap <Esc> <C-w>N
+
+" zen
+nnoremap <silent><Leader>z :call ZenModeToggle()<CR>
+
 
 " }}}
 
@@ -575,7 +578,7 @@ autocmd! User GoyoLeave Limelight!
 
 " startify
 " ぼっちざろっく{{{
-let g:startify_custom_header = [
+let g:btr_logo = [
     \'                                                                                                                           dN',
     \'                                                                                           ..                             JMF',
     \'                                                                                      ..gMMMM%                           JMF',
@@ -597,7 +600,10 @@ let g:startify_custom_header = [
     \'   ?MN,                                                                      ',
     \'     TMNg,                                                                     '
     \]
+
 "}}}
+
+let g:startify_custom_header = g:btr_logo
 
 " }}}
 
@@ -655,7 +661,9 @@ if glob('~/.vim/pack/plugins/start/vim-easymotion') != ''
 endif
 
 " zen mode
-nnoremap <silent><Leader>z :Goyo<CR>
+if glob('~/.vim/pack/plugins/start/goyo.vim') != ''
+  nnoremap <silent><Leader>z :Goyo<CR>
+endif
 
 " }}}
 
@@ -941,7 +949,6 @@ endf
 
 
 " }}}
-
 
 " run cat (load animation)
 " {{{
@@ -1289,6 +1296,76 @@ endf
 
 " }}}
 
+" ===================================================================
+" junegunn/goyo.vim
+" ===================================================================
+" {{{
+
+let g:zen_mode_flg = 0
+let g:asis_colorscheme = execute("colorscheme")[1:]
+function! ZenModeToggle()
+  let g:zen_mode_flg = g:zen_mode_flg == 0 ? 1 : 0
+
+  if g:zen_mode_flg == 1
+    tab split
+    call FModeDeactivate()
+    set nonumber nocursorline nocursorcolumn laststatus=0 showtabline=0
+    vertical topleft new
+    setlocal buftype=nofile bufhidden=wipe nomodifiable nobuflisted noswapfile nonu noru winfixheight
+    vertical resize 40
+    execute winnr('#') . 'wincmd w'
+    vertical botright new
+    setlocal buftype=nofile bufhidden=wipe nomodifiable nobuflisted noswapfile nonu noru winfixheight
+    vertical resize 40
+    execute winnr('#') . 'wincmd w'
+    setlocal relativenumber
+    for grp in ['NonText', 'FoldColumn', 'ColorColumn', 'VertSplit', 'StatusLine', 'StatusLineNC', 'SignColumn']
+      execute('hi '.grp.' ctermfg=black')
+      execute('hi '.grp.' ctermbg=NONE')
+      execute('hi '.grp.' cterm=NONE')
+    endfor
+  else
+    set number cursorline cursorcolumn laststatus=2 showtabline=2
+    q | q | q
+    execute('colorscheme '.g:asis_colorscheme)
+    call FModeActivate()
+  endif
+
+endfunction
+
+" }}}
+
+" ===================================================================
+" easymotion/vim-easymotion
+" ===================================================================
+" {{{
+
+" TODO easymotion
+
+
+
+
+
+
+
+
+" }}}
+
+" ===================================================================
+" mhinz/vim-startify
+" ===================================================================
+" {{{
+
+" TGoyo<CR>ODO startify
+
+
+
+
+
+
+" }}}
+
+
 " #############################################################
 " ##################         PLUGINS        ###################
 " #############################################################
@@ -1302,11 +1379,11 @@ let s:colors = [ 'onedark.vim', 'hybrid_material.vim', 'molokai.vim' ]
 let s:repos = [
     \ 'easymotion/vim-easymotion',
     \ 'mhinz/vim-startify',
+    \ 'junegunn/goyo.vim', 'junegunn/limelight.vim',
     \ 'junegunn/fzf', 'junegunn/fzf.vim',
     \ 'github/copilot.vim', 'thinca/vim-quickrun', 'puremourning/vimspector',
     \ 'sheerun/vim-polyglot', 'uiiaoo/java-syntax.vim',
     \ 'vim-airline/vim-airline', 'vim-airline/vim-airline-themes',
-    \ 'junegunn/goyo.vim', 'junegunn/limelight.vim',
     \ ]
 
 " extentions
@@ -1954,7 +2031,7 @@ let g:training_wheels_practice_file = []
 
 " create practice file
 function! TrainingWheelsPratticeFileCreate()
-  " TODO
+  " TODO get practice.md
   " if すでにあるなら開くだけ
   " if vimレポ落としてるならコピー
   let repo = 'https://raw.githubusercontent.com/serna37/vim/master/practice.md'
