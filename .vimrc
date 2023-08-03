@@ -228,23 +228,24 @@ fu! SetStatusLine()
   hi User6 ctermfg=7 ctermbg=8
   let dict = {'i': '1* INSERT', 'n': '2* NORMAL', 'R': '3* REPLACE', 'c': '4* COMMAND', 't': '4* TERMIAL', 'v': '5* VISUAL', 'V': '5* VISUAL', "\<C-v>": '5* VISUAL'}
   let mode = match(keys(dict), mode()) != -1 ? dict[mode()] : '5* SP'
-  cal GetGitDiffSummary()
   retu '%' . mode . ' %*➤ %6* %<%F%m%r%h%w %0* %6* %{g:gitinf}%0* %=%' . split(mode, ' ')[0] . ' %p%% %l/%L %02v [%{&fenc!=""?&fenc:&enc}][%{ff_table[&ff]}] %*'
 endf
 set stl=%!SetStatusLine()
 
 " show git status
-let g:gitinf = 'no git'
+let g:gitinf = 'no git '
+let g:current_dir = trim(system('pwd'))
 fu! GetGitDiffSummary()
   try | cal system('git status') | catch | return | endtry
-  if trim(system('git status')) =~ "^fatal:" | let g:gitinf = 'no repo ' | retu | endif
-  let cmd = "git status --short | awk -F ' ' '{print($1)}' | grep -c "
+  if trim(system('cd '.expand('%:h').' && git status')) =~ "^fatal:" | let g:gitinf = 'no repo ' | retu | endif
+  let cmd = "cd ".expand('%:h')." && git status --short | awk -F ' ' '{print($1)}' | grep -c "
   let a = trim(system(cmd."'A'")) | let aa = a !='0'?'+'.a :''
   let m = trim(system(cmd."-e 'M' -e 'D'")) | let mm = m !='0'?'!'.m :''
   let nw = trim(system(cmd."'??'")) | let nwnw = nw !='0'?'?'.nw :''
   let er = trim(system(cmd."'U'")) | let ee = er !='0'?'✗'.er :''
   let g:gitinf = trim(system("git branch | awk -F '*' '{print($2)}'")).join([aa,mm,nwnw,ee],' ')
 endf
+autocmd BufWinEnter,BufWritePost * call GetGitDiffSummary()
 
 " tabline
 function! MakeTabLine()
