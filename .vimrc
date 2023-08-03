@@ -515,9 +515,9 @@ function! NetrwToggle()
 endfunction
 
 " fzf || fzf-mimic
-nnoremap <silent><leader>f :cal FzfG()<CR>
-nnoremap <silent><leader>h :cal FzfG()<CR>
-nnoremap <silent><leader>b :cal FzfG()<CR>
+nnoremap <silent><leader>f :cal FzfG('fz')<CR>
+nnoremap <silent><leader>h :cal FzfG('his')<CR>
+nnoremap <silent><leader>b :cal FzfG('buf')<CR>
 
 " ripgrep || grep
 nnoremap <silent><Leader>g :cal Grep()<CR>
@@ -697,8 +697,8 @@ fu! CloseBuf()
   execute('bd ' . now_b)
 endf
 
-fu! FzfG() " if git repo, ref .gitignore. || no plugin
-  if glob('~/.vim/pack/plugins/start/coc.nvim') == '' | cal FzfStart() | return | endif
+fu! FzfG(fz) " if git repo, ref .gitignore. || no plugin
+  if glob('~/.vim/pack/plugins/start/coc.nvim') == '' | cal FzfStart(a:fz) | return | endif
   let pwd = system('pwd')
   try | exe 'lcd %:h' | catch | endtry
   let gitroot = system('git rev-parse --show-superproject-working-tree --show-toplevel')
@@ -846,8 +846,9 @@ let s:not_path_arr = [
 let s:fzf_find_cmd = 'find . -type f -name "*" -not -path ' . join(s:not_path_arr, ' -not -path ')
 let s:fzf_searched_dir = execute('pwd')[1:] " first char is ^@, so trim
 let s:fzf_find_result_tmp = []
+let s:fzf_start_fz = ''
 
-fu! FzfStart() " open window
+fu! FzfStart(fz) " open window
   if stridx(execute('pwd')[1:], s:fzf_searched_dir) == -1 || len(s:fzf_find_result_tmp) == 0 | cal s:fzf_re_find() | endif
   let s:fzf_mode = 'his'
   let s:fzf_searching_zone = '(*^-^)/ BUF & MRU'
@@ -857,7 +858,11 @@ fu! FzfStart() " open window
   let s:fzf_find_result = s:fzf_his_result[0:29]
   let s:fzf_enter_win = popup_create(s:fzf_pwd_prefix, #{ title: 'MRU<>FZF:<Tab>/choose:<CR>/end:<Esc>/chache refresh:<C-f>',  border: [], zindex: 99, minwidth: &columns/2, maxwidth: &columns/2, maxheight: 1, line: &columns/4-&columns/36, filter: function('s:fzf_refresh_result') })
   cal win_execute(s:fzf_enter_win, "mapclear <buffer>")
+  let s:fzf_start_fz = a:fz
   cal s:fzf_create_choose_win()
+  if stridx(execute('pwd')[1:], s:fzf_searched_dir) != -1 && len(s:fzf_find_result_tmp) != 0 && s:fzf_start_fz == 'fz' && s:fzf_mode == 'his'
+    cal win_execute(s:fzf_enter_win, 'call feedkeys("\<Tab>")')
+  endif
 endf
 fu! s:fzf_create_choose_win()
   let s:fzf_c_idx = 0
@@ -878,6 +883,9 @@ endf
 fu! s:fzf_find_end(ch) abort
   echo 'find files in ['.s:fzf_searched_dir.'] and chache is complete!!'
   cal RunCatStop()
+  if s:fzf_start_fz == 'fz' && s:fzf_mode == 'his'
+    cal win_execute(s:fzf_enter_win, 'call feedkeys("\<Tab>")')
+  endif
 endf
 
 fu! s:fzf_refresh_result(winid, key) abort " event to draw search result
@@ -1345,8 +1353,6 @@ endfunction
 " {{{
 
 " TODO easymotion
-
-
 
 
 
