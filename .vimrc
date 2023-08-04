@@ -202,16 +202,15 @@ set list " show invisible char
 set listchars=tab:»-,trail:-,eol:↲,extends:»,precedes:«,nbsp:% " custom invisible char
 
 " row number
-set number " normal mode show row number as relative from current row
+set number relativenumber
 " insert mode show row number as relative from current row
-au ModeChanged [vV\x16]*:* let &l:rnu = mode() =~# '^[vV\x16]'
-au ModeChanged *:[vV\x16]* let &l:rnu = mode() =~# '^[vV\x16]'
-au WinEnter,WinLeave * let &l:rnu = mode() =~# '^[vV\x16]'
+"au ModeChanged [vV\x16]*:* let &l:rnu = mode() =~# '^[vV\x16]'
+"au ModeChanged *:[vV\x16]* let &l:rnu = mode() =~# '^[vV\x16]'
+"au WinEnter,WinLeave * let &l:rnu = mode() =~# '^[vV\x16]'
 
 " cursor
 set scrolloff=5 " page top bottom offset view row
-set cursorline " show cursor line
-set cursorcolumn " show cursor column
+set cursorline cursorcolumn " show cursor line/column
 set ruler " show row/col position number at right bottom
 
 " status
@@ -349,9 +348,16 @@ fu! Scroll(vector, delta)
   cal timer_start(600, { -> timer_stop(tmp) })
   cal timer_start(600, { -> s:ScrollToggle(1) })
 endf
-fu! s:ScrollToggle(flg)
-  set cursorcolumn!
-  set cursorline!
+let s:scroll_curL = '' | let s:scroll_curC = ''
+fu! s:ScrollToggle(tid)
+  if a:tid == 0
+    let s:scroll_curL = trim(execute('set cursorline?'))
+    let s:scroll_curC = trim(execute('set cursorcolumn?'))
+    set nocursorline nocursorcolumn
+    retu
+  endif
+  if s:scroll_curL !~'^no' | set cursorline | endif
+  if s:scroll_curC !~'^no' | set cursorcolumn | endif
 endf
 
 " mimic
@@ -389,6 +395,13 @@ inoremap <C-h> <C-o>h|inoremap <C-l> <C-o>l|inoremap <C-k> <C-o>k|inoremap <C-j>
 
 " d = delete(no clipboard)
 nnoremap d "_d|vnoremap d "_d
+
+" x = cut(yank register)
+nnoremap x "0x|vnoremap x "0x
+
+" p P = paste(from yank register)
+nnoremap p "0p|nnoremap P "0P
+vnoremap p "0p|vnoremap P "0P
 
 " block move at visual mode
 vnoremap <C-j> "zx"zp`[V`]|vnoremap <C-k> "zx<Up>"zP`[V`]
@@ -500,7 +513,7 @@ function! NetrwMotion()
 endfunction
 
 function! NetrwOpenJudge()
-  " TODO windows gitbashだとmapしたら上手く動かない
+  " XXX windows gitbashだとmapしたら上手く動かない
   " キー入力監視に変えるか？
   nnoremap <buffer><CR> <Plug>NetrwLocalBrowseCheck
   if getline('.')[len(getline('.'))-1] != '/'
@@ -865,19 +878,16 @@ let s:fzf_start_fz = ''
 
 fu! FzfStart(fz) " open window
   if stridx(execute('pwd')[1:], s:fzf_searched_dir) == -1 || len(s:fzf_find_result_tmp) == 0 | cal s:fzf_re_find() | endif
-  let s:fzf_mode = 'his'
-  let s:fzf_searching_zone = '(*^-^)/ BUF & MRU'
+  let s:fzf_start_fz = a:fz
+  let s:fzf_mode = s:fzf_start_fz == 'fz' ? 'fzf' : 'his'
+  let s:fzf_searching_zone = s:fzf_mode == 'his' ? '(*^-^)/ BUF & MRU' : '(*"@w@)/ FZF [' . s:fzf_searched_dir . ']'
   let s:fzf_pwd_prefix = 'pwd:[' . execute('pwd')[1:] . ']>>'
   let s:fzf_enter_keyword = []
   let s:fzf_his_result = map(split(execute('ls'), '\n'), { i,v -> split(filter(split(v, ' '), { i,v -> v != '' })[2], '"')[0] }) + map(split(execute('oldfiles'), '\n'), { i,v -> split(v, ': ')[1] })
-  let s:fzf_find_result = s:fzf_his_result[0:29]
+  let s:fzf_find_result = s:fzf_mode == 'his' ? s:fzf_his_result[0:29] : s:fzf_find_result_tmp[0:29]
   let s:fzf_enter_win = popup_create(s:fzf_pwd_prefix, #{ title: 'MRU<>FZF:<Tab>/choose:<CR>/end:<Esc>/chache refresh:<C-f>',  border: [], zindex: 99, minwidth: &columns/2, maxwidth: &columns/2, maxheight: 1, line: &columns/4-&columns/36, filter: function('s:fzf_refresh_result') })
   cal win_execute(s:fzf_enter_win, "mapclear <buffer>")
-  let s:fzf_start_fz = a:fz
   cal s:fzf_create_choose_win()
-  if stridx(execute('pwd')[1:], s:fzf_searched_dir) != -1 && len(s:fzf_find_result_tmp) != 0 && s:fzf_start_fz == 'fz' && s:fzf_mode == 'his'
-    cal win_execute(s:fzf_enter_win, 'call feedkeys("\<Tab>")')
-  endif
 endf
 fu! s:fzf_create_choose_win()
   let s:fzf_c_idx = 0
@@ -893,13 +903,16 @@ fu! s:fzf_re_find() " async find command
   cal job_start(s:fzf_find_cmd, {'out_cb': function('s:fzf_find_start'), 'close_cb': function('s:fzf_find_end')})
 endf
 fu! s:fzf_find_start(ch, msg) abort
-  let s:fzf_find_result_tmp = add(s:fzf_find_result_tmp, a:msg)
+  cal add(s:fzf_find_result_tmp, a:msg)
 endf
 fu! s:fzf_find_end(ch) abort
   echo 'find files in ['.s:fzf_searched_dir.'] and chache is complete!!'
   cal RunCatStop()
+  " after init, see fzf if specified
   if s:fzf_start_fz == 'fz' && s:fzf_mode == 'his'
     cal win_execute(s:fzf_enter_win, 'call feedkeys("\<Tab>")')
+  elseif s:fzf_start_fz == 'fz' && s:fzf_mode == 'fzf'
+    cal win_execute(s:fzf_enter_win, 'call feedkeys("\<Tab>\<Tab>")')
   endif
 endf
 
@@ -915,7 +928,7 @@ fu! s:fzf_refresh_result(winid, key) abort " event to draw search result
     cal s:fzf_re_find()
   elseif a:key is# "\<C-v>"
     for i in range(0,strlen(@")-1)
-      let s:fzf_enter_keyword = add(s:fzf_enter_keyword, strpart(@",i,1))
+      cal add(s:fzf_enter_keyword, strpart(@",i,1))
     endfor
   elseif a:key is# "\<Tab>"
     let s:fzf_mode = s:fzf_mode == 'his' ? 'fzf' : 'his'
@@ -1236,7 +1249,7 @@ fu! HiSet() abort
   let current_win = winnr()
   let cw = expand('<cword>')
   windo cal HiClear(cw)
-  if s:hi_reaseted == 1 | retu | endif
+  if s:hi_reaseted == 1 | exe current_win . 'wincmd w' | retu | endif
   windo cal matchadd("UserSearchHi" . s:now_hi, cw)
   let s:now_hi = s:now_hi >= len(s:search_hl)-1 ? 0 : s:now_hi + 1
   exe current_win . 'wincmd w'
@@ -1293,9 +1306,9 @@ fu! HiFLine()
     let start = matchstrpos(now_line, '\<.', offset)
     let offset = matchstrpos(now_line, '.\>', offset)[2]
     let ashiato = start[1] >= col ? now_line[col:start[1]-1] : now_line[start[2]+1:col]
-    if stridx(ashiato, start[0]) == -1
+    if stridx(ashiato, start[0]) == -1 && start[0] =~ '[ -~]'
       cal add(start[1] >= col ? target_arr : target_arr_back, [line, start[2]]) " uniq char
-    elseif start[2] > 0
+    elseif start[2] > 0 && start[0] =~ '[ -~]'
       let next_char = now_line[start[2]:start[2]]
       if start[1] >= col
         cal add(stridx(ashiato, next_char) == -1 ? target_arr : target_arr_second, [line, start[2]+1]) " uniq char
@@ -1342,7 +1355,7 @@ function! ZenModeToggle()
 
   if g:zen_mode_flg == 1
     tab split | execute("normal zR")
-    set nonumber nocursorline nocursorcolumn laststatus=0 showtabline=0
+    set nonumber norelativenumber nocursorline nocursorcolumn laststatus=0 showtabline=0
     vertical topleft new
     setlocal buftype=nofile bufhidden=wipe nomodifiable nobuflisted noswapfile nonu noru winfixheight
     vertical resize 40 | execute winnr('#') . 'wincmd w'
@@ -1366,8 +1379,6 @@ endfunction
 " easymotion/vim-easymotion
 " ===================================================================
 " {{{
-
-" TODO easymotion
 
 
 
