@@ -333,7 +333,17 @@ nnoremap <silent><Leader>z :call ZenModeToggle()<CR>
 
 " row move
 nnoremap j gj|nnoremap k gk
-nnoremap <Tab> 5gj|nnoremap <S-Tab> 5gk|vnoremap <Tab> 5gj|vnoremap <S-Tab> 5gk
+nnoremap <Tab> 5gj:cal Anchor()<CR>|nnoremap <S-Tab> 5gk:cal Anchor()<CR>|vnoremap <Tab> 5gj|vnoremap <S-Tab> 5gk
+sign define anch text=> texthl=Identifier
+let s:anch_tid = 0
+fu! Anchor()
+  cal timer_stop(s:anch_tid) | cal AnchorRes(0) | let u=line('.')+5 | let d=line('.')-5
+  exe "sign place 99 line=".u." name=anch" | exe "sign place 100 line=".d." name=anch" | exe "sign place 101 line=".line('.')." name=anch"
+  let s:anch_tid = timer_start(3000, function('AnchorRes'))
+endf
+fu! AnchorRes(tid)
+  exe "sign unplace 99"|exe "sign unplace 100"|exe "sign unplace 101"
+endf
 
 " comfortable scroll
 nnoremap <silent><C-u> :cal Scroll(0, 30)<CR>|nnoremap <silent><C-d> :cal Scroll(1, 30)<CR>
@@ -1379,7 +1389,6 @@ endfunction
 " easymotion/vim-easymotion
 " ===================================================================
 " {{{
-
 
 
 
