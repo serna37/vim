@@ -1394,6 +1394,145 @@ endfunction
 " ===================================================================
 " {{{
 
+let s:emotion_keypos = []
+let s:emotion_klen = 1
+" m, g read some function? doesn't work just as I want
+let g:emotion_keys = ['s', 'w', 'a', 'd', 'j', 'k', 'h', 'l']
+
+fu! Emotion()
+  " fold all open
+  normal zR
+  " get target chars in current window without empty line
+  " [{'row': row number, 'col': [ col number, ... ]}...]
+  let s:emotion_keypos = [] | let wininfo = [] | let tarcnt = 0 | let rn = line('w0') | let crn = line('.') | let s:emotion_klen = 1
+  for l in getline('w0', 'w$')
+    " loop row without 'including MultiByte' and 'empty', get head chars
+    " 日本語は1文字でマルチバイト3文字分だが、カーソル幅は2なのでめんどい、日本語を含む行は弾く
+    if l !~ '^[ -~]\+$' | let rn+=1 | continue | endif
+    let chars = [] | let ofst = 0
+    while ofst != -1
+      let st = matchstrpos(l, '\<.', ofst) | let ofst = matchstrpos(l, '.\>', ofst)[2]
+      if st[0] != '' | cal add(chars, st[2]) | endif
+    endwhile
+    if !empty(chars) | cal add(wininfo, #{row: rn, col: chars}) | endif
+    let tarcnt = tarcnt+len(chars) | let rn+=1
+  endfor
+  if tarcnt==0 | retu | endif
+  " calc key stroke length, keyOrder is 'ssw' = [0,0,1]
+  while tarcnt > pow(len(g:emotion_keys), s:emotion_klen) | let s:emotion_klen+=1 | endwhile
+  let keyOrder = range(1, s:emotion_klen)->map({->0})
+  " sort near current line, create 's:emotion_keypos' map like this
+  " [{'row': 1000, 'col': [{'key': 'ssw', 'pos': 7}, ... ]}, ... ]
+  for r in sort(deepcopy(wininfo), { x,y -> abs(x.row-crn) - abs(y.row-crn) })
+    let tmp = []
+    for col in r.col
+      cal add(tmp, #{key: copy(keyOrder)->map({i,v->g:emotion_keys[v]})->join(''), pos: col})
+      let keyOrder = s:incrementNOrder(len(g:emotion_keys)-1, keyOrder)
+    endfor
+    cal add(s:emotion_keypos, #{row: r.row, col: tmp})
+  endfor
+  " draw , disable f-scope(with clear matches)
+  cal FModeDeactivate()
+  for rn in range(line('w0'), line('w$')) | cal matchaddpos('EmotionBase', [rn], 98) | endfor
+  cal s:emotion_draw(s:emotion_keypos) | cal popup_close(s:emotion_popid)
+  let s:emotion_popid = popup_create('e-motion', #{line: &lines, col: &columns*-1, mapping: 0, filter: function('s:emotion_char_enter')})
+  cal win_execute(s:emotion_popid, "mapclear <buffer>") | echo ''
+endf
+
+" function: increment N order
+" 配列をN進法とみなし、1増やす. 使うキーがssf → sws と繰り上がる仕組み
+fu! s:incrementNOrder(nOrder, keyOrder)
+  if len(a:keyOrder) == 1 | retu [a:keyOrder[0]+1] | endif
+  let tmp = [] | let overflow = 0
+  for idx in reverse(range(0, len(a:keyOrder)-1))
+    " 1. increment last digit
+    if idx == len(a:keyOrder)-1
+      cal insert(tmp, a:keyOrder[idx] == a:nOrder ? 0 : a:keyOrder[idx]+1)
+      if tmp[0] == 0 | let overflow = 1 | endif | continue
+    endif
+    " 2. check next digit
+    if overflow
+      cal insert(tmp, a:keyOrder[idx] == a:nOrder ? 0 : a:keyOrder[idx]+1)
+      let overflow = a:keyOrder[idx] == a:nOrder ? 1 : 0
+    else
+      cal insert(tmp, a:keyOrder[idx])
+    endif
+  endfor
+  return tmp
+endf
+
+" about highlight setting
+augroup emotion_hl
+  autocmd!
+  autocmd ColorScheme * highlight EmotionBase ctermfg=59
+  autocmd ColorScheme * highlight EmotionWip ctermfg=166 cterm=bold
+  autocmd ColorScheme * highlight EmotionFin ctermfg=196 cterm=bold
+augroup END
+highlight EmotionBase ctermfg=59
+highlight EmotionWip ctermfg=166 cterm=bold
+highlight EmotionFin ctermfg=196 cterm=bold
+fu! HiResetAll(group_name)
+  cal getmatches()->filter({ _,v -> v.group == a:group_name })->map('execute("cal matchdelete(v:val.id)")')
+endf
+
+" draw keystroke
+" 日本語は1文字でマルチバイト3文字分だが、カーソル幅は2なのでめんどいから弾いてある
+" posの次文字がマルチバイトだと、strokeが2回以上残ってる時、変に文字を書き換えてカラム数変わる
+fu! s:emotion_draw(keypos)
+  cal HiResetAll('EmotionFin') | cal HiResetAll('EmotionWip')
+  let hlpos_wip = [] | let hlpos_fin = []
+  for r in a:keypos | let line = getline(r.row)
+    for c in r.col
+      let colidx = c.pos-1 | let view_keystroke = c.key[:0] | let offset = colidx-1
+      cal add(hlpos_fin, [r.row, c.pos])
+      if len(c.key)>=2
+        let view_keystroke = c.key[:1]
+        cal add(hlpos_wip, [r.row, c.pos, 2])
+      endif
+      let line = colidx == 0
+       \ ? view_keystroke.line[len(view_keystroke):]
+       \ : line[0:offset].view_keystroke.line[colidx+len(view_keystroke):]
+    endfor
+    cal setline(r.row, line)
+  endfor
+  for t in hlpos_fin | cal matchaddpos('EmotionFin', [t], 99) | endfor
+  for t in hlpos_wip | cal matchaddpos('EmotionWip', [t], 100) | endfor
+endf
+
+let s:emotion_popid = 0
+fu! s:emotion_char_enter(winid, key)
+  " noop (for polyglot bug adhoc)
+  if strtrans(a:key) == "<80><fd>`" | retu 1 | endif
+  " only accept defined emotion key
+  if g:emotion_keys->index(a:key) == -1
+    " go out e-motion
+    cal popup_close(s:emotion_popid)
+    let p = getpos('.') | u | cal cursor(p[1],p[2])
+    cal HiResetAll('EmotionFin') | cal HiResetAll('EmotionWip') | cal HiResetAll('EmotionBase')
+    " restore f-scope
+    if g:fmode_flg == 1 | cal FModeActivate() | else | cal FModeDeactivate() | endif
+    echohl Special | echo 'e-motion: go out' | echohl None | retu 1
+  endif
+  " upd emotion_keypos
+  let tmp = s:emotion_keypos->deepcopy()->map({ _,r -> #{row: r.row,
+   \col: r.col->filter({_,v->v.key[0]==a:key})->map({_,v->#{key: v.key[1:], pos: v.pos}})} })
+   \->filter({_,v->!empty(v.col)})
+  " nomatch -> noop
+  if empty(tmp) | retu 1 | else | let s:emotion_keypos = tmp | endif
+  " if last match -> end e-motion
+  if len(s:emotion_keypos) == 1 && len(s:emotion_keypos[0].col) == 1
+    cal popup_close(s:emotion_popid)
+    u | cal cursor(s:emotion_keypos[0].row, s:emotion_keypos[0].col[0].pos)
+    cal HiResetAll('EmotionFin') | cal HiResetAll('EmotionWip') | cal HiResetAll('EmotionBase')
+    " restore f-scope
+    if g:fmode_flg == 1 | cal FModeActivate() | else | cal FModeDeactivate() | endif
+    echohl Special | echo 'e-motion: finish' | echohl None | retu 1
+  endif
+  " redraw
+  let p = getpos('.') | u | cal cursor(p[1],p[2]) | echo '' | cal s:emotion_draw(s:emotion_keypos)
+  retu 1
+endf
+
 
 " }}}
 
