@@ -129,7 +129,7 @@ endf
 nnoremap <silent><Leader><Leader><Leader> :call PopupFever()<CR>:call ToggleCheatHover()<CR>
 let s:show_cheat_sheet_flg = 0
 fu! CheatAlert(tid)
-  execute("echo '[INFO] Space * 3 to enable cheat sheet !!'")
+  execute("echohl ErrorMsg | echo '[INFO] Space * 3 to enable cheat sheet !!' | echohl None")
 endf
 if has('vim_starting')
   call timer_start(200, function("CheatAlert"))
@@ -333,7 +333,7 @@ nnoremap <silent><Leader>z :call ZenModeToggle()<CR>
 
 " row move
 nnoremap j gj|nnoremap k gk
-nnoremap <Tab> 5gj:cal Anchor()<CR>|nnoremap <S-Tab> 5gk:cal Anchor()<CR>|vnoremap <Tab> 5gj|vnoremap <S-Tab> 5gk
+nnoremap <silent><Tab> 5gj:cal Anchor()<CR>|nnoremap <silent><S-Tab> 5gk:cal Anchor()<CR>|vnoremap <Tab> 5gj|vnoremap <S-Tab> 5gk
 sign define anch text=> texthl=Identifier
 let s:anch_tid = 0
 fu! Anchor()
@@ -457,6 +457,7 @@ endif
 inoremap ( ()<LEFT>|inoremap [ []<LEFT>|inoremap { {}<LEFT>|inoremap < <><LEFT>
 inoremap ' ''<LEFT>|inoremap " ""<LEFT>|inoremap ` ``<LEFT>
 
+" TODO doesn't work?'
 function! AutoPairsDelete()
   let pairs_start = ["(", "[", "{", "<", "'", '"', "`"] | let pairs_end = [")", "]", "}", ">", "'", '"', "`"]
   let pre_cursor_char = getline('.')[col('.')-2] | let on_cursor_char = getline('.')[col('.')-1]
@@ -486,8 +487,7 @@ nnoremap <silent>* *N:call HiSet()<CR>
 nnoremap <silent># *N:call HiSet()<CR>
 
 " incremental search
-" TODO add like easymotion
-nnoremap s :echo('no easymotion')<CR>
+nnoremap <silent>s :call Emotion()<CR>
 nnoremap <Leader>s /
 
 " disable highlight
@@ -600,6 +600,7 @@ let g:vimspector_enable_mappings = 'VISUAL_STUDIO'
 " fzf
 set rtp+=~/.vim/pack/plugins/start/fzf
 
+" TODO delete
 " easy motion
 let g:EasyMotion_do_mapping = 0
 let g:EasyMotion_smartcase = 1
@@ -611,9 +612,11 @@ let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#buffer_idx_mode = 1
 let g:airline_powerline_fonts = 1
 
+" TODO delete
 " auto pair
 let g:AutoPairsMapCh = 0
 
+" TODO delete
 " zen
 let g:limelight_conceal_ctermfg = 'gray'
 autocmd! User GoyoEnter Limelight
@@ -697,6 +700,7 @@ if glob('~/.vim/pack/plugins/start/coc.nvim') != ''
   nnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) :  Scroll(0, 10)
 endif
 
+" TODO delete
 " easy motion
 if glob('~/.vim/pack/plugins/start/vim-easymotion') != ''
   nnoremap s <Plug>(easymotion-bd-w)
@@ -746,39 +750,39 @@ endf
 
 fu! Grep() abort
   " plugin mode
-  if glob('~/.vim/pack/plugins/start/coc.nvim') != '' || executable('rg')
-    let w = inputdialog("start ripgrep [word] >>")
-    echo '<<'
-    if w == '' | echo 'cancel' | retu | endif
+  if glob('~/.vim/pack/plugins/start/coc.nvim') != '' && executable('rg')
+    echohl Special
+    let w = inputdialog("start ripgrep [word] >>") | echo '<<'
+    if w == '' | echo 'cancel' | echohl None | retu | endif
     execute('CocCommand fzf-preview.ProjectGrep -w --ignore-case '.w)
     return
   endif
   " no plugin
-  echo 'grep. choose [word] [ext] [target]'
+  echo 'grep. choose '
+  echohl ErrorMsg | echon '[word]'
+  echohl Special | echon ' [ext]'
+  echohl WarningMsg | echon ' [target]'
   let pwd = system('pwd')
-  let word = inputdialog("Enter [word]>>")
-  echo '<<'
-  if word == '' | echo 'cancel' | retu | endif
-  let ext = inputdialog("Enter [ext]>>")
-  echo '<<'
+  echohl ErrorMsg | let word = inputdialog("Enter [word]>>") | echon '<<'
+  if word == '' | echohl None | echo 'cancel' | retu | endif
+  echohl Special | let ext = inputdialog("Enter [ext]>>") | echon '<<'
   if ext == '' | echo 'all ext' | let ext = '*' | endif
-  let target = inputdialog("Enter [target (like ./*) pwd:".pwd."]>>")
+  echohl WarningMsg | let target = inputdialog("Enter [target (like ./*) pwd:".pwd."]>>")
   if target == '' | echo 'search current directory' | let target = './*' | endif
-  echo '<<'
-  echo 'grep [' . word . '] processing in [' . target . '] [' . ext . '] ...'
+  echon '<<'
+  echohl None | echo 'grep [' . word . '] processing in [' . target . '] [' . ext . '] ...'
   cgetexpr system('grep -n -r --include="*.' . ext . '" "' . word . '" ' . target) | cw
-  echo 'grep end'
-  return
+  echohl ErrorMsg | echo 'grep end' | echohl None
+  retu
 endf
 
 fu! GrepCurrent() abort
-  echo 'grep from this file.'
-  let word = inputdialog("Enter [word]>>")
-  echo '<<'
+  echohl Special | echo 'grep from this file.'
+  let word = inputdialog("Enter [word]>>") | echon '<<'
   if word == '' | echo 'cancel' | retu | endif
-  echo 'grep [' . word . '] processing in [' . expand('%') . '] ...'
+  echohl WarningMsg | echo 'grep [' . word . '] processing in [' . expand('%') . '] ...'
   cal execute('vimgrep /' . word . '/gj %') | cw
-  echo 'grep end'
+  echohl ErrorMsg | echon 'grep end' | echohl None
 endf
 
 let s:my_ide_menu_items = [
@@ -909,14 +913,14 @@ fu! s:fzf_re_find() " async find command
   cal RunCat()
   let s:fzf_find_result_tmp = []
   let s:fzf_searched_dir = execute('pwd')[1:]
-  echo 'find files in ['.s:fzf_searched_dir.'] and chache ...'
+  echohl WarningMsg | echo 'find files in ['.s:fzf_searched_dir.'] and chache ...' | echohl None
   cal job_start(s:fzf_find_cmd, {'out_cb': function('s:fzf_find_start'), 'close_cb': function('s:fzf_find_end')})
 endf
 fu! s:fzf_find_start(ch, msg) abort
   cal add(s:fzf_find_result_tmp, a:msg)
 endf
 fu! s:fzf_find_end(ch) abort
-  echo 'find files in ['.s:fzf_searched_dir.'] and chache is complete!!'
+  echohl Special | echo 'find files in ['.s:fzf_searched_dir.'] and chache is complete!!' | echohl None
   cal RunCatStop()
   " after init, see fzf if specified
   if s:fzf_start_fz == 'fz' && s:fzf_mode == 'his'
@@ -1389,7 +1393,6 @@ endfunction
 " easymotion/vim-easymotion
 " ===================================================================
 " {{{
-
 
 
 " }}}
