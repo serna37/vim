@@ -184,31 +184,6 @@ inoremap <expr> <CR> pumvisible() ? '<C-y>' : '<CR>'
 inoremap <expr> <Tab> '<C-n>'
 inoremap <expr> <S-Tab> pumvisible() ? '<C-p>' : '<S-Tab>'
 
-" auto completion
-fu! Completion()
-  let exclude_completion_chars = [" ", "(", "[", "{", "<", "'", '"', "`"]
-  if col('.') == 1 || match(exclude_completion_chars, getline('.')[col('.')-2]) != -1 | retu | endif
-  if !pumvisible() | cal feedkeys("\<Tab>") | endif
-endf
-if glob('~/.vim/pack/plugins/start/coc.nvim')  == ''
-  autocmd TextChangedI,TextChangedP * silent cal Completion()
-endif
-
-" jiangmiao/auto-pairs
-inoremap ( ()<LEFT>|inoremap [ []<LEFT>|inoremap { {}<LEFT>|inoremap < <><LEFT>
-inoremap ' ''<LEFT>|inoremap " ""<LEFT>|inoremap ` ``<LEFT>
-
-" TODO doesn't work?'
-fu! AutoPairsDelete()
-  let pairs_start = ["(", "[", "{", "<", "'", '"', "`"] | let pairs_end = [")", "]", "}", ">", "'", '"', "`"]
-  let pre_cursor_char = getline('.')[col('.')-2] | let on_cursor_char = getline('.')[col('.')-1]
-  let pre_chk = match(pairs_start, pre_cursor_char) | let on_chk = match(pairs_end, on_cursor_char)
-  if pre_chk != -1 && pre_chk == on_chk | retu "\<RIGHT>\<BS>\<BS>" | endif
-  retu "\<BS>"
-endf
-inoremap <buffer><silent><BS> <C-R>=AutoPairsDelete()<CR>
-
-
 " }}}
 
 " ##################         SEARCH         ################### {{{
@@ -223,66 +198,21 @@ set shortmess-=S " show hit word's number at right bottom
 " no move search word with multi highlight
 nnoremap <silent>* *N:ImitatedQuickHighlight<CR>
 nnoremap <silent># *N:ImitatedQuickHighlight<CR>
-" disable highlight
 nnoremap <silent><Leader>q :ImitatedQuickHighlightClear<CR>
 
 " incremental search
 nnoremap <silent>s :ImitatedEasymotion<CR>
-" TODO wip
 nnoremap <Leader>s /
+" TODO wip
 
 " grep result -> quickfix
 au QuickFixCmdPost *grep* cwindow
 if executable('rg') | let &grepprg = 'rg --vimgrep --hidden' | set grepformat=%f:%l:%c:%m | endif
 
 " explorer
-" enable netrw & custom
 filetype plugin on
-let g:netrw_liststyle = 3
-let g:netrw_altv = 1
-let g:netrw_winsize = 70
-set splitright " when opne file, split right window
+let g:netrw_liststyle = 3 | let g:netrw_altv = 1 | let g:netrw_winsize = 70
 nnoremap <silent><Leader>e :cal NetrwToggle()<CR>
-
-augroup netrw_motion
-  autocmd!
-  autocmd fileType netrw cal NetrwMotion()
-augroup END
-
-fu! NetrwMotion()
-  nnoremap <buffer><C-l> <C-w>l
-  autocmd CursorMoved * cal NetrwOpenJudge()
-endf
-
-fu! NetrwOpenJudge()
-  " XXX windows gitbashだとmapしたら上手く動かない
-  " キー入力監視に変えるか？
-  nnoremap <buffer><CR> <Plug>NetrwLocalBrowseCheck
-  if getline('.')[len(getline('.'))-1] != '/'
-    nnoremap <buffer><CR> <Plug>NetrwLocalBrowseCheck:cal NetrwOpen()<CR>
-  endif
-endf
-
-fu! NetrwOpen()
-  cal feedkeys("\<C-l>:q\<CR>\<Space>e")
-endf
-
-fu! s:create_winid2bufnr_dict() abort " {{{
-  let winid2bufnr_dict = {}
-  for bnr in range(1, bufnr('$'))
-    for wid in win_findbuf(bnr) | let winid2bufnr_dict[wid] = bnr | endfor
-  endfor | retu winid2bufnr_dict
-endf
-fu! s:winid2bufnr(wid) abort
-  retu s:create_winid2bufnr_dict()[a:wid]
-endf " }}}
-
-fu! NetrwToggle()
-  for win_no in range(1, winnr('$'))
-    let win_id = win_getid(win_no)
-    if bufname(s:winid2bufnr(win_id)) == 'NetrwTreeListing' | cal win_execute(win_id, 'close') | retu | endif
-  endfor | execute('Vex 15')
-endf
 
 " fzf || fzf-imitation
 nnoremap <silent><leader>f :SmartFzf fz<CR>
@@ -677,9 +607,90 @@ endf
 
 " }}}
 
+" completion {{{
+
+" TODO なんか変
+fu! s:completion()
+  let exclude_completion_chars = [" ", "(", "[", "{", "<", "'", '"', "`"]
+  if col('.') == 1 || match(exclude_completion_chars, getline('.')[col('.')-2]) != -1 | retu | endif
+  if !pumvisible() | cal feedkeys("\<Tab>") | endif
+endf
+if glob('~/.vim/pack/plugins/start/coc.nvim')  == ''
+  autocmd TextChangedI,TextChangedP * silent cal s:completion()
+endif
+
+
+" }}}
+
 " }}}
 
 " ##################       IMITATIONS       ################### {{{
+
+" ===================================================================
+" jiangmiao/auto-pairs
+" ===================================================================
+" {{{
+inoremap ( ()<LEFT>|inoremap [ []<LEFT>|inoremap { {}<LEFT>|inoremap < <><LEFT>
+inoremap ' ''<LEFT>|inoremap " ""<LEFT>|inoremap ` ``<LEFT>
+" TODO doesn't work?'
+fu! AutoPairsDelete()
+  let pairs_start = ["(", "[", "{", "<", "'", '"', "`"] | let pairs_end = [")", "]", "}", ">", "'", '"', "`"]
+  let pre_cursor_char = getline('.')[col('.')-2] | let on_cursor_char = getline('.')[col('.')-1]
+  let pre_chk = match(pairs_start, pre_cursor_char) | let on_chk = match(pairs_end, on_cursor_char)
+  if pre_chk != -1 && pre_chk == on_chk | retu "\<RIGHT>\<BS>\<BS>" | endif
+  retu "\<BS>"
+endf
+inoremap <buffer><silent><BS> <C-R>=AutoPairsDelete()<CR>
+" }}}
+
+" ===================================================================
+" preservim/nerdtree
+" ===================================================================
+" {{{
+
+" TODO
+""augroup netrw_motion
+""  autocmd!
+""  autocmd fileType netrw cal NetrwMotion()
+""augroup END
+
+fu! NetrwMotion()
+  nnoremap <buffer><C-l> <C-w>l
+  autocmd CursorMoved * cal NetrwOpenJudge()
+endf
+
+fu! NetrwOpenJudge()
+  " XXX windows gitbashだとmapしたら上手く動かない
+  " キー入力監視に変えるか？
+  nnoremap <buffer><CR> <Plug>NetrwLocalBrowseCheck
+  if getline('.')[len(getline('.'))-1] != '/'
+    nnoremap <buffer><CR> <Plug>NetrwLocalBrowseCheck:cal NetrwOpen()<CR>
+  endif
+endf
+
+fu! NetrwOpen()
+  cal feedkeys("\<C-l>:q\<CR>\<Space>e")
+endf
+
+fu! s:create_winid2bufnr_dict() abort
+  let winid2bufnr_dict = {}
+  for bnr in range(1, bufnr('$'))
+    for wid in win_findbuf(bnr) | let winid2bufnr_dict[wid] = bnr | endfor
+  endfor | retu winid2bufnr_dict
+endf
+fu! s:winid2bufnr(wid) abort
+  retu s:create_winid2bufnr_dict()[a:wid]
+endf
+
+fu! NetrwToggle()
+  for win_no in range(1, winnr('$'))
+    let win_id = win_getid(win_no)
+    if bufname(s:winid2bufnr(win_id)) == 'NetrwTreeListing' | cal win_execute(win_id, 'close') | retu | endif
+  endfor | execute('Vex 15')
+endf
+
+
+" }}}
 
 " ===================================================================
 " vim-airline/vim-airline

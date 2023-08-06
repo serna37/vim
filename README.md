@@ -84,6 +84,7 @@ also see [wiki-debug](https://github.com/serna37/vim/wiki/Debug)
 - cheat sheet
 - TrainingWheelsProtocol
 - ColorInstall / PlugInstall / PlugUnInstall
+- completion
 - IDE menu
 - Tab Anchor
 - Interactive Grep
