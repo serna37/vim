@@ -649,14 +649,14 @@ inoremap <buffer><silent><BS> <C-R>=AutoPairsDelete()<CR>
 " {{{
 
 " TODO
-""augroup netrw_motion
-""  autocmd!
-""  autocmd fileType netrw cal NetrwMotion()
-""augroup END
+augroup netrw_motion
+  autocmd!
+  autocmd fileType netrw cal NetrwMotion()
+augroup END
 
 fu! NetrwMotion()
   nnoremap <buffer><C-l> <C-w>l
-  autocmd CursorMoved * cal NetrwOpenJudge()
+  ""autocmd CursorMoved * cal NetrwOpenJudge()
 endf
 
 fu! NetrwOpenJudge()
