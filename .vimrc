@@ -696,8 +696,11 @@ endf
 " vim-airline/vim-airline
 " ===================================================================
 " {{{
+
 " status line with git info
-const g:modes = {'i':'1* INSERT', 'n':'2* NORMAL', 'R':'3* REPLACE', 'c':'4* COMMAND', 't':'4* TERMIAL', 'v':'5* VISUAL', 'V':'5* VISUAL', "\<C-v>":'5* VISUAL'}
+const g:right_arrow = '' | const g:left_arrow = ''
+const g:modes = {'i': ['#OneDarkBule#', '#OneDarkBlueChar#', 'INSERT'], 'n': ['#OneDarkGreen#', '#OneDarkGreenChar#', 'NORMAL'], 'R': ['#OneDarkRed#', '#OneDarkRedChar#', 'REPLACE'], 'c': ['#OneDarkGreen#', '#OneDarkGreenChar#', 'COMMAND'], 't': ['#OneDarkRed#', '#OneDarkRedChar#', 'TERMIAL'], 'v': ['#OneDarkPink#', '#OneDarkPinkChar#', 'VISUAL'], 'V': ['#OneDarkPink#', '#OneDarkPinkChar#', 'VISUAL'], "\<C-v>": ['#OneDarkPink#', '#OneDarkPinkChar#', 'VISUAL']}
+
 const g:ff_table = {'dos' : 'CRLF', 'unix' : 'LF', 'mac' : 'CR'}
 let g:gitinf = 'no git '
 fu! s:gitinfo() abort
@@ -710,43 +713,53 @@ fu! s:gitinfo() abort
   let er = trim(system(cmd."'U'")) | let ee = er !='0'?'✗'.er :''
   let g:gitinf = trim(system("git branch | awk -F '*' '{print($2)}'")).join([aa,mm,nwnw,ee],' ')
 endf
+
 aug statusLine
   au!
   au BufWinEnter,BufWritePost * cal s:gitinfo()
-  au ColorScheme * hi User1 cterm=bold ctermfg=7 ctermbg=4
-  au ColorScheme * hi User1 cterm=bold ctermfg=7 ctermbg=4
-  au ColorScheme * hi User2 cterm=bold ctermfg=7 ctermbg=34
-  au ColorScheme * hi User3 cterm=bold ctermbg=5 ctermfg=0
-  au ColorScheme * hi User4 cterm=bold ctermfg=7 ctermbg=56
-  au ColorScheme * hi User5 cterm=bold ctermfg=7 ctermbg=5
-  au ColorScheme * hi User6 ctermfg=7 ctermbg=8
+  au ColorScheme * hi OneDarkGreen cterm=bold ctermfg=235 ctermbg=114
+  au ColorScheme * hi OneDarkGreenChar ctermfg=114 ctermbg=235
+  au ColorScheme * hi OneDarkBule cterm=bold ctermfg=235 ctermbg=39
+  au ColorScheme * hi OneDarkBlueChar ctermfg=39 ctermbg=235
+  au ColorScheme * hi OneDarkPink cterm=bold ctermfg=235 ctermbg=170
+  au ColorScheme * hi OneDarkPinkChar ctermfg=170 ctermbg=235
+  au ColorScheme * hi OneDarkRed cterm=bold ctermfg=235 ctermbg=204
+  au ColorScheme * hi OneDarkRedChar ctermfg=204 ctermbg=235
+  au ColorScheme * hi OneDarkBlackArrow ctermfg=235 ctermbg=238
+  au ColorScheme * hi OneDarkChar ctermfg=114 ctermbg=238
+  au ColorScheme * hi OneDarkGrayArrow ctermfg=238 ctermbg=235
+  au ColorScheme * hi StatusLine ctermfg=114 ctermbg=238
 aug END
+
 fu! g:SetStatusLine() abort
-  let mode = match(keys(g:modes), mode()) != -1 ? g:modes[mode()] : '5* SP'
-  retu '%'.mode.' %*➤ %6* %<%F%m%r%h%w %0* %6* %{g:gitinf}%0* %=%'.split(mode,' ')[0].' %p%% %l/%L %02v [%{&fenc!=""?&fenc:&enc}][%{g:ff_table[&ff]}] %*'
+  let filetype_tmp = split(execute('set filetype?'), '=')
+  let filetype = len(filetype_tmp) >= 2 ? filetype_tmp[1] : ''
+  let mode = match(keys(g:modes), mode()) != -1 ? g:modes[mode()] : ['#OneDarkRed#', '#OneDarkRedChar#', 'SP']
+  retu '%'.mode[0].' '.mode[2].' '.'%'.mode[1].g:right_arrow.'%#OneDarkBlackArrow#'.g:right_arrow.'%#OneDarkChar# %<%F%m%r%h%w %#OneDarkGrayArrow#'.g:right_arrow.'%#OneDarkGreenChar# %{g:gitinf}%#OneDarkBlackArrow#'.g:right_arrow.'%#StatusLine# %=%#OneDarkBlackArrow#'.g:left_arrow.'%#OneDarkGreenChar# '.filetype.' %#OneDarkGrayArrow#'.g:left_arrow.'%#OneDarkChar# %p%% %l/%L %02v%#OneDarkBlackArrow#'.g:left_arrow.'%'.mode[1].g:left_arrow.'%'.mode[0].' [%{&fenc!=""?&fenc:&enc}][%{g:ff_table[&ff]}] %*'
 endf
 set stl=%!g:SetStatusLine()
 
 " tabline
 aug tabLine
-  au ColorScheme * hi UserBuflineActive ctermfg=7 ctermbg=34
-  au ColorScheme * hi UserBuflineDeactive ctermfg=7 ctermbg=8
-  au ColorScheme * hi UserBuflineModified ctermfg=7 ctermbg=4
-  au ColorScheme * hi UserTablineActive ctermfg=7 ctermbg=34
-  au ColorScheme * hi UserTablineDeactive ctermfg=7 ctermbg=8
+  au ColorScheme * hi OneDarkGreenThin ctermfg=235 ctermbg=114
+  au ColorScheme * hi OneDarkBlueThin ctermfg=235 ctermbg=39
+  au ColorScheme * hi OneDarkGreenArrowBottom ctermfg=235 ctermbg=114
+  au ColorScheme * hi TabLineFill ctermfg=235 ctermbg=238
 aug END
 fu! s:buffers_label() abort
   let b = '' | for v in split(execute('ls'), '\n')->map({ _,v -> split(v, ' ')})
     let x = copy(v)->filter({ _,v -> !empty(v) })
     if stridx(x[1], 'F') == -1 && stridx(x[1], 'R') == -1
-      let hi = stridx(x[1], '%') != -1 ? '%#UserBuflineActive#' : '%#UserBuflineDeactive#'
-      if x[2] == '+' | let hi = '%#UserBuflineModified#' | endif
-      let f = x[2] == '+' ? '✗'.x[3] : x[2] | let b = b.'%'.x[0].'T'.hi.f.' ⁍|'.'%T%#TabLineFill# '
+      let hi = stridx(x[1], '%') != -1 ? '%#OneDarkGreenThin#' : '%#OneDarkChar#'
+      let hiar = stridx(x[1], '%') != -1 ? '%#OneDarkGreenChar#' : '%#OneDarkGrayArrow#'
+      let hiarb = stridx(x[1], '%') != -1 ? '%#OneDarkGreenArrowBottom#' : '%#OneDarkBlackArrow#'
+      if x[2] == '+' | let hi = '%#OneDarkBlueThin#' | let hiar = '%#OneDarkBlueChar#' | let hiarb = '%#OneDarkBlueThin#' | endif
+      let f = x[2] == '+' ? '✗'.join(split(x[3],'"'),'') : join(split(x[2],'"'),'') | let b = b.'%'.x[0].'T'.hiarb.g:right_arrow.hi.f.hiar.g:right_arrow
     endif
   endfor | retu b
 endf
 fu! s:tabpage_label(n) abort
-  let hi = a:n is tabpagenr() ? '%#UserTablineActive#' : '%#UserTablineDeactive#'
+  let hi = a:n is tabpagenr() ? '%#OneDarkGreenThin#' : '%#OneDarkChar#'
   let bufnrs = tabpagebuflist(a:n)
   let no = len(bufnrs) | if no is 1 | let no = '' | endif
   let mod = len(filter(copy(bufnrs), 'getbufvar(v:val, "&modified")')) ? '✗' : ''
@@ -2117,6 +2130,7 @@ endif
 " {{{
 
 colorscheme torte
+hi Normal ctermbg=235
 if glob('~/.vim/colors/') != '' | colorscheme onedark | endif
 
 " }}}
