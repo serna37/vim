@@ -16,13 +16,13 @@
 "     ## SEARCH ................ | incremental search, fzf, grep, explorer.
 "     ## OTHERS ................ | fast terminal, reg engin, fold.
 "
-"   # plugins setting
+"   # Plugins setting
 "     ## PLUGIN VARIABLES ...... | setting for plugins without conflict.
 "     ## PLUGIN KEYMAP ......... | setting for plugins without conflict.
 "
-"   # functions
+"   # Functions
 "     ## FUNCTIONS ............. | adhoc functions.
-"     ## IMITATION ............. | imitate plugins as functions.
+"     ## IMITATION ............. | imitated plugins as functions.
 "     ## PLUGINS ............... | plugin manager functions.
 "     ## TRAINING .............. | training default vim functions.
 "
@@ -177,9 +177,9 @@ set autoread " re read file when changed outside vim
 set clipboard+=unnamed " copy yanked fot clipboard
 
 " reopen, go row
-augroup vimrcEx
-  au BufRead * if line("'\"") > 0 && line("'\"") <= line("$") | exe "normal g`\"" | endif
-augroup END
+aug reopenGoRow
+  au BufRead * if line("'\"") > 0 && line("'\"") <= line("$") | exe "norm g`\"" | endif
+aug END
 
 " }}}
 
@@ -188,9 +188,8 @@ augroup END
 " #############################################################
 " {{{
 
-" enable syntax highlight, set colorscheme
+" enable syntax highlight
 syntax on
-colorscheme torte
 
 " window
 set background=dark " basic color
@@ -201,93 +200,16 @@ set showcmd " show enterd command on right bottom
 set list " show invisible char
 set listchars=tab:»-,trail:-,eol:↲,extends:»,precedes:«,nbsp:% " custom invisible char
 
-" row number
+" row number + relativenumber
 set number relativenumber
-" insert mode show row number as relative from current row
-"au ModeChanged [vV\x16]*:* let &l:rnu = mode() =~# '^[vV\x16]'
-"au ModeChanged *:[vV\x16]* let &l:rnu = mode() =~# '^[vV\x16]'
-"au WinEnter,WinLeave * let &l:rnu = mode() =~# '^[vV\x16]'
 
 " cursor
 set scrolloff=5 " page top bottom offset view row
 set cursorline cursorcolumn " show cursor line/column
 set ruler " show row/col position number at right bottom
 
-" status
-set laststatus=2 " status line at bottom
-" custom status line just like
-" vim-airline/vim-airline
-let ff_table = {'dos' : 'CRLF', 'unix' : 'LF', 'mac' : 'CR'}
-fu! SetStatusLine()
-  hi User1 cterm=bold ctermfg=7 ctermbg=4
-  hi User2 cterm=bold ctermfg=7 ctermbg=28
-  hi User3 cterm=bold ctermbg=5 ctermfg=0
-  hi User4 cterm=bold ctermfg=7 ctermbg=56
-  hi User5 cterm=bold ctermfg=7 ctermbg=5
-  hi User6 ctermfg=7 ctermbg=8
-  let dict = {'i': '1* INSERT', 'n': '2* NORMAL', 'R': '3* REPLACE', 'c': '4* COMMAND', 't': '4* TERMIAL', 'v': '5* VISUAL', 'V': '5* VISUAL', "\<C-v>": '5* VISUAL'}
-  let mode = match(keys(dict), mode()) != -1 ? dict[mode()] : '5* SP'
-  retu '%' . mode . ' %*➤ %6* %<%F%m%r%h%w %0* %6* %{g:gitinf}%0* %=%' . split(mode, ' ')[0] . ' %p%% %l/%L %02v [%{&fenc!=""?&fenc:&enc}][%{ff_table[&ff]}] %*'
-endf
-set stl=%!SetStatusLine()
-
-" show git status
-let g:gitinf = 'no git '
-let g:current_dir = trim(system('pwd'))
-fu! GetGitDiffSummary()
-  try | cal system('git status') | catch | return | endtry
-  if trim(system('cd '.expand('%:h').' && git status')) =~ "^fatal:" | let g:gitinf = 'no repo ' | retu | endif
-  let cmd = "cd ".expand('%:h')." && git status --short | awk -F ' ' '{print($1)}' | grep -c "
-  let a = trim(system(cmd."'A'")) | let aa = a !='0'?'+'.a :''
-  let m = trim(system(cmd."-e 'M' -e 'D'")) | let mm = m !='0'?'!'.m :''
-  let nw = trim(system(cmd."'??'")) | let nwnw = nw !='0'?'?'.nw :''
-  let er = trim(system(cmd."'U'")) | let ee = er !='0'?'✗'.er :''
-  let g:gitinf = trim(system("git branch | awk -F '*' '{print($2)}'")).join([aa,mm,nwnw,ee],' ')
-endf
-autocmd BufWinEnter,BufWritePost * call GetGitDiffSummary()
-
-" tabline
-function! MakeTabLine()
-  if tabpagenr('$') == 1
-    return s:buffers_label()
-  endif
-  let titles = map(range(1, tabpagenr('$')), 's:tabpage_label(v:val)')
-  let sep = ' '
-  let tabpages = join(titles, sep).sep.'%#TabLineFill#%T'
-  return tabpages
-endfunction
-
-function! s:buffers_label()
-  let bufline = ''
-  for v in map(split(execute("ls"), '\n'), { i,v -> split(v, ' ')})
-    let x = filter(v, { i,v -> v != ''})
-    if stridx(x[1], 'F') == -1 && stridx(x[1], 'R') == -1
-      hi UserBuflineActive ctermfg=7 ctermbg=28
-      hi UserBuflineDeactive ctermfg=7 ctermbg=8
-      hi UserBuflineModified ctermfg=7 ctermbg=4
-      let hi = stridx(x[1], '%') != -1 ? '%#UserBuflineActive#' : '%#UserBuflineDeactive#'
-      let filename = x[2] == '+' ? '✗'.x[3] : x[2]
-      if x[2] == '+' | let hi = '%#UserBuflineModified#' | endif
-      let bufline = bufline.'%'.v[0].'T'.hi.filename.' ⁍|'.'%T%#TabLineFill# '
-    endif
-  endfor
-  return bufline
-endfunction
-
-function! s:tabpage_label(n)
-  hi UserTablineActive ctermfg=7 ctermbg=28
-  hi UserTablineDeactive ctermfg=7 ctermbg=8
-  let hi = a:n is tabpagenr() ? '%#UserTablineActive#' : '%#UserTablineDeactive#'
-  let bufnrs = tabpagebuflist(a:n)
-  let no = len(bufnrs) | if no is 1 | let no = '' | endif
-  let mod = len(filter(copy(bufnrs), 'getbufvar(v:val, "&modified")')) ? '✗' : ''
-  let fname = pathshorten(bufname(bufnrs[tabpagewinnr(a:n) - 1]))
-  let sep = ' ⁍|'
-  return '%'.a:n.'T'.hi.no.mod.fname.sep.'%T%#TabLineFill#'
-endfunction
-
-set tabline=%!MakeTabLine()
-set showtabline=2
+" show status, tabline
+set laststatus=2 showtabline=2
 
 " }}}
 
@@ -298,31 +220,26 @@ set showtabline=2
 
 " just like
 " simeji/winresizer
-
 " window forcus move
 nnoremap <C-h> <C-w>h|nnoremap <C-l> <C-w>l|nnoremap <C-k> <C-w>k|nnoremap <C-j> <C-w>j
 tnoremap <C-h> <C-w>h|tnoremap <C-l> <C-w>l|tnoremap <C-k> <C-w>k|tnoremap <C-j> <C-w>j
-
 " window resize
 nnoremap <Left> 4<C-w><|nnoremap <Right> 4<C-w>>|nnoremap <Up> 4<C-w>-|nnoremap <Down> 4<C-w>+
 
 " move buffer
-nmap <silent><C-n> :call MoveBuf('prev')<CR>
-nmap <silent><C-p> :call MoveBuf('next')<CR>
-
+nnoremap <silent><C-n> :MoveBufPrev<CR>
+nnoremap <silent><C-p> :MoveBufNext<CR>
 " close buffer
-nnoremap <silent><Leader>x :call CloseBuf()<CR>
+nnoremap <silent><Leader>x :CloseBuf<CR>
 
 " terminal
 "nnoremap <silent><Leader>t :bo terminal ++rows=10<CR>
-nnoremap <silent><Leader>t :call popup_create(term_start([&shell], #{ hidden: 1, term_finish: 'close'}), #{ border: [], minwidth: &columns/2+&columns/4, minheight: &lines/2+&lines/4 })<CR>
-
+nnoremap <silent><Leader>t :cal popup_create(term_start([&shell], #{hidden: 1, term_finish:'close'}), #{border: [], minwidth: &columns/2+&columns/4, minheight: &lines/2+&lines/4})<CR>
 " terminal read only mode (i to return terminal mode)
 tnoremap <Esc> <C-w>N
 
 " zen
-nnoremap <silent><Leader>z :call ZenModeToggle()<CR>
-
+nnoremap <silent><Leader>z :ImitatedZenModeToggle<CR>
 
 " }}}
 
@@ -333,46 +250,14 @@ nnoremap <silent><Leader>z :call ZenModeToggle()<CR>
 
 " row move
 nnoremap j gj|nnoremap k gk
-nnoremap <silent><Tab> 5gj:cal Anchor()<CR>|nnoremap <silent><S-Tab> 5gk:cal Anchor()<CR>|vnoremap <Tab> 5gj|vnoremap <S-Tab> 5gk
-sign define anch text=> texthl=Identifier
-let s:anch_tid = 0
-fu! Anchor()
-  cal timer_stop(s:anch_tid) | cal AnchorRes(0) | let u=line('.')+5 | let d=line('.')-5
-  exe "sign place 99 line=".u." name=anch" | exe "sign place 100 line=".d." name=anch" | exe "sign place 101 line=".line('.')." name=anch"
-  let s:anch_tid = timer_start(3000, function('AnchorRes'))
-endf
-fu! AnchorRes(tid)
-  exe "sign unplace 99"|exe "sign unplace 100"|exe "sign unplace 101"
-endf
+nnoremap <silent><Tab> 5gj:Anchor<CR>|nnoremap <silent><S-Tab> 5gk:Anchor<CR>|vnoremap <Tab> 5gj|vnoremap <S-Tab> 5gk
 
 " comfortable scroll
-nnoremap <silent><C-u> :cal Scroll(0, 30)<CR>|nnoremap <silent><C-d> :cal Scroll(1, 30)<CR>
-nnoremap <silent><C-b> :cal Scroll(0, 10)<CR>|nnoremap <silent><C-f> :cal Scroll(1, 10)<CR>
+nnoremap <silent><C-u> :ImitatedComfortableScroll 0 30<CR>|nnoremap <silent><C-d> :ImitatedComfortableScroll 1 30<CR>
+nnoremap <silent><C-b> :ImitatedComfortableScroll 0 10<CR>|nnoremap <silent><C-f> :ImitatedComfortableScroll 1 10<CR>
 
-" custom scroll just like
-" yuttie/comfortable-motion.vim
-fu! Scroll(vector, delta)
-  cal s:ScrollToggle(0)
-  let vec = a:vector == 0 ? "\<C-y>" : "\<C-e>"
-  let tmp = timer_start(a:delta, { -> feedkeys(vec) }, {'repeat': -1})
-  cal timer_start(600, { -> timer_stop(tmp) })
-  cal timer_start(600, { -> s:ScrollToggle(1) })
-endf
-let s:scroll_curL = '' | let s:scroll_curC = ''
-fu! s:ScrollToggle(tid)
-  if a:tid == 0
-    let s:scroll_curL = trim(execute('set cursorline?'))
-    let s:scroll_curC = trim(execute('set cursorcolumn?'))
-    set nocursorline nocursorcolumn
-    retu
-  endif
-  if s:scroll_curL !~'^no' | set cursorline | endif
-  if s:scroll_curC !~'^no' | set cursorcolumn | endif
-endf
-
-" mimic
-" unblevable/quick-scope
-nnoremap <silent><Leader>w :call FModeToggle()<CR>
+" f-scope toggle
+nnoremap <silent><Leader>w :ImitatedQuickScopeToggle<CR>
 
 " mark
 nnoremap mm :call Marking()<CR>
@@ -482,19 +367,16 @@ set ignorecase " ignore case search
 set smartcase " don't ignore case when enterd UPPER CASE"
 set shortmess-=S " show hit word's number at right bottom
 
-" no move search word
-nnoremap <silent>* *N:call HiSet()<CR>
-nnoremap <silent># *N:call HiSet()<CR>
+" no move search word with multi highlight
+nnoremap <silent>* *N:ImitatedQuickHighlight<CR>
+nnoremap <silent># *N:ImitatedQuickHighlight<CR>
+" disable highlight
+nnoremap <silent><Leader>q :ImitatedQuickHighlightClear<CR>
 
 " incremental search
 nnoremap <silent>s :call Emotion()<CR>
+" TODO wip
 nnoremap <Leader>s /
-
-" disable highlight
-nnoremap <silent><Leader>q :noh<CR>:call Delhighlight()<CR>
-function! Delhighlight()
-  let current_win = winnr() | windo cal clearmatches() | exe current_win . 'wincmd w'
-endfunction
 
 " grep result -> quickfix
 au QuickFixCmdPost *grep* cwindow
@@ -561,7 +443,7 @@ nnoremap <silent><leader>b :cal FzfG('buf')<CR>
 nnoremap <silent><Leader>g :cal Grep()<CR>
 
 " vimgrep current file
-nnoremap <silent><Leader><Leader>s :cal GrepCurrent()<CR>
+nnoremap <silent><Leader><Leader>s :GrepCurrent<CR>
 
 " }}}
 
@@ -588,7 +470,6 @@ set foldcolumn=1 " fold preview
 " #############################################################
 " {{{
 
-if glob('~/.vim/colors/') != '' | colorscheme onedark | endif
 
 " coc
 let g:coc_snippet_next = '<Tab>'
@@ -719,25 +600,20 @@ endif
 " #############################################################
 " {{{
 
-fu! MoveBuf(flg)
-  let current_id = '' | let buf_arr = []
-  for v in map(split(execute("ls"), '\n'), { i,v -> split(v, ' ')})
-    let x = filter(v, { i,v -> v != ''})
-    if stridx(x[1], 'F') == -1 && stridx(x[1], 'R') == -1
-      let buf_arr = add(buf_arr, x[0])
-      if stridx(x[1], '%') != -1 | let current_id = x[0] | endif
-    endif
-  endfor
-  let buf_idx = a:flg == 'next' ? match(buf_arr, current_id) + 1 : match(buf_arr, current_id) - 1
-  let buf_id = buf_idx == len(buf_arr) ? buf_arr[0] : buf_arr[buf_idx]
-  execute("b ".buf_id)
+" tab 5row anchor
+sign define anch text=> texthl=Identifier
+let s:anchor = #{tid: 0}
+fu! s:anchor.set() abort
+  cal timer_stop(s:anchor.tid) | cal s:anchor.rm(0) | let u=line('.')+5 | let d=line('.')-5
+  exe 'sign place 99 line='.u.' name=anch' | exe 'sign place 101 line='.line('.').' name=anch'
+  if d > 0 | exe 'sign place 100 line='.d.' name=anch' '' | endif
+  let s:anchor.tid = timer_start(2000, s:anchor.rm)
 endf
+fu! s:anchor.rm(tid) abort
+  exe 'sign unplace 99' | exe 'sign unplace 100' | exe 'sign unplace 101'
+endf
+com! Anchor cal s:anchor.set()
 
-fu! CloseBuf()
-  let l:now_b = bufnr('%')
-  execute("normal \<C-n>")
-  execute('bd ' . now_b)
-endf
 
 fu! FzfG(fz) " if git repo, ref .gitignore. || no plugin
   if glob('~/.vim/pack/plugins/start/coc.nvim') == '' | cal FzfStart(a:fz) | return | endif
@@ -748,42 +624,34 @@ fu! FzfG(fz) " if git repo, ref .gitignore. || no plugin
   execute(!v:shell_error ? 'CocCommand fzf-preview.ProjectFiles' : 'Files')
 endf
 
+" grep
 fu! Grep() abort
   " plugin mode
   if glob('~/.vim/pack/plugins/start/coc.nvim') != '' && executable('rg')
-    echohl Special
-    let w = inputdialog("start ripgrep [word] >>") | echo '<<'
+    echohl Special | let w = inputdialog("start ripgrep [word] >>") | echo '<<'
     if w == '' | echo 'cancel' | echohl None | retu | endif
     execute('CocCommand fzf-preview.ProjectGrep -w --ignore-case '.w)
-    return
+    echohl None | retu
   endif
   " no plugin
-  echo 'grep. choose '
-  echohl ErrorMsg | echon '[word]'
-  echohl Special | echon ' [ext]'
-  echohl WarningMsg | echon ' [target]'
-  let pwd = system('pwd')
-  echohl ErrorMsg | let word = inputdialog("Enter [word]>>") | echon '<<'
+  echo 'grep. choose ' | echohl ErrorMsg | echon '[word]' | echohl Special | echon ' [ext]' | echohl WarningMsg | echon ' [target]'
+  let pwd = system('pwd') | echohl ErrorMsg | let word = inputdialog("Enter [word]>>") | echon '<<'
   if word == '' | echohl None | echo 'cancel' | retu | endif
   echohl Special | let ext = inputdialog("Enter [ext]>>") | echon '<<'
-  if ext == '' | echo 'all ext' | let ext = '*' | endif
+  if ext == '' | echo 'any ext' | let ext = '*' | endif
   echohl WarningMsg | let target = inputdialog("Enter [target (like ./*) pwd:".pwd."]>>")
   if target == '' | echo 'search current directory' | let target = './*' | endif
-  echon '<<'
-  echohl None | echo 'grep [' . word . '] processing in [' . target . '] [' . ext . '] ...'
+  echon '<<' | echohl None | echo 'grep [' . word . '] processing in [' . target . '] [' . ext . '] ...'
   cgetexpr system('grep -n -r --include="*.' . ext . '" "' . word . '" ' . target) | cw
-  echohl ErrorMsg | echo 'grep end' | echohl None
-  retu
+  echohl ErrorMsg | echo 'grep end' | echohl None | retu
 endf
 
-fu! GrepCurrent() abort
-  echohl Special | echo 'grep from this file.'
-  let word = inputdialog("Enter [word]>>") | echon '<<'
-  if word == '' | echo 'cancel' | retu | endif
-  echohl WarningMsg | echo 'grep [' . word . '] processing in [' . expand('%') . '] ...'
-  cal execute('vimgrep /' . word . '/gj %') | cw
-  echohl ErrorMsg | echon 'grep end' | echohl None
+" current file grep
+fu! s:grepCurrent() abort
+  echohl Special | echo 'grep from this file.' | let word = inputdialog("Enter [word]>>") | echon '<<' | if word == '' | echo 'cancel' | retu | endif | echohl WarningMsg | echo 'grep ['.word.'] processing in ['.expand('%').'] ...' | exe 'vimgrep /'.word.'/gj %' | cw | echohl ErrorMsg | echon 'grep end' | echohl None
 endf
+com! GrepCurrent cal s:grepCurrent()
+
 
 let s:my_ide_menu_items = [
       \'[Format]         applay format for this file',
@@ -828,8 +696,8 @@ fu! IDEChoose(ctx, winid, key) abort
         cal CocActionAsync('format')
       catch
         let current_rownum = line('.')
-        normal gg=G
-        execute("normal" . current_rownum . "G")
+        norm gg=G
+        execute("norm" . current_rownum . "G")
       endtry
     elseif a:ctx.idx == 1
       cal CocActionAsync('rename')
@@ -867,6 +735,127 @@ endf
 " #############################################################
 " ##################       IMITATION        ###################
 " #############################################################
+
+" ===================================================================
+" vim-airline/vim-airline
+" ===================================================================
+" {{{
+" status line with git info
+const g:modes = {'i':'1* INSERT', 'n':'2* NORMAL', 'R':'3* REPLACE', 'c':'4* COMMAND', 't':'4* TERMIAL', 'v':'5* VISUAL', 'V':'5* VISUAL', "\<C-v>":'5* VISUAL'}
+const g:ff_table = {'dos' : 'CRLF', 'unix' : 'LF', 'mac' : 'CR'}
+let g:gitinf = 'no git '
+fu! s:gitinfo()
+  try | cal system('git status') | catch | return | endtry
+  if trim(system('cd '.expand('%:h').' && git status')) =~ "^fatal:" | let g:gitinf = 'no repo ' | retu | endif
+  let cmd = "cd ".expand('%:h')." && git status --short | awk -F ' ' '{print($1)}' | grep -c "
+  let a = trim(system(cmd."'A'")) | let aa = a !='0'?'+'.a :''
+  let m = trim(system(cmd."-e 'M' -e 'D'")) | let mm = m !='0'?'!'.m :''
+  let nw = trim(system(cmd."'??'")) | let nwnw = nw !='0'?'?'.nw :''
+  let er = trim(system(cmd."'U'")) | let ee = er !='0'?'✗'.er :''
+  let g:gitinf = trim(system("git branch | awk -F '*' '{print($2)}'")).join([aa,mm,nwnw,ee],' ')
+endf
+aug statusLine
+  au!
+  au BufWinEnter,BufWritePost * cal s:gitinfo()
+  au ColorScheme * hi User1 cterm=bold ctermfg=7 ctermbg=4
+  au ColorScheme * hi User1 cterm=bold ctermfg=7 ctermbg=4
+  au ColorScheme * hi User2 cterm=bold ctermfg=7 ctermbg=34
+  au ColorScheme * hi User3 cterm=bold ctermbg=5 ctermfg=0
+  au ColorScheme * hi User4 cterm=bold ctermfg=7 ctermbg=56
+  au ColorScheme * hi User5 cterm=bold ctermfg=7 ctermbg=5
+  au ColorScheme * hi User6 ctermfg=7 ctermbg=8
+aug END
+fu! g:SetStatusLine()
+  let mode = match(keys(g:modes), mode()) != -1 ? g:modes[mode()] : '5* SP'
+  retu '%'.mode.' %*➤ %6* %<%F%m%r%h%w %0* %6* %{g:gitinf}%0* %=%'.split(mode,' ')[0].' %p%% %l/%L %02v [%{&fenc!=""?&fenc:&enc}][%{g:ff_table[&ff]}] %*'
+endf
+set stl=%!g:SetStatusLine()
+
+" tabline
+aug tabLine
+  au ColorScheme * hi UserBuflineActive ctermfg=7 ctermbg=34
+  au ColorScheme * hi UserBuflineDeactive ctermfg=7 ctermbg=8
+  au ColorScheme * hi UserBuflineModified ctermfg=7 ctermbg=4
+  au ColorScheme * hi UserTablineActive ctermfg=7 ctermbg=34
+  au ColorScheme * hi UserTablineDeactive ctermfg=7 ctermbg=8
+aug END
+fu! s:buffers_label()
+  let b = '' | for v in split(execute('ls'), '\n')->map({ _,v -> split(v, ' ')})
+    let x = copy(v)->filter({ _,v -> !empty(v) })
+    if stridx(x[1], 'F') == -1 && stridx(x[1], 'R') == -1
+      let hi = stridx(x[1], '%') != -1 ? '%#UserBuflineActive#' : '%#UserBuflineDeactive#'
+      if x[2] == '+' | let hi = '%#UserBuflineModified#' | endif
+      let f = x[2] == '+' ? '✗'.x[3] : x[2] | let b = b.'%'.x[0].'T'.hi.f.' ⁍|'.'%T%#TabLineFill# '
+    endif
+  endfor | retu b
+endf
+fu! s:tabpage_label(n)
+  let hi = a:n is tabpagenr() ? '%#UserTablineActive#' : '%#UserTablineDeactive#'
+  let bufnrs = tabpagebuflist(a:n)
+  let no = len(bufnrs) | if no is 1 | let no = '' | endif
+  let mod = len(filter(copy(bufnrs), 'getbufvar(v:val, "&modified")')) ? '✗' : ''
+  let fname = pathshorten(bufname(bufnrs[tabpagewinnr(a:n) - 1]))
+  retu '%'.a:n.'T'.hi.no.mod.fname.' ⁍|'.'%T%#TabLineFill#'
+endf
+fu! g:SetTabLine()
+  if tabpagenr('$') == 1 | retu s:buffers_label() | endif
+  retu range(1,tabpagenr('$'))->map('s:tabpage_label(v:val)')->join(' ').' %#TabLineFill#%T'
+endf
+set tabline=%!g:SetTabLine()
+
+fu! s:moveBuf(flg)
+  let current_id = '' | let buf_arr = []
+  for v in split(execute('ls'), '\n')->map({ _,v -> split(v, ' ')})
+    let x = copy(v)->filter({ _,v -> !empty(v) })
+    if stridx(x[1], 'F') == -1 && stridx(x[1], 'R') == -1
+      cal add(buf_arr, x[0])
+      if stridx(x[1], '%') != -1 | let current_id = x[0] | endif
+    endif
+  endfor
+  let buf_idx = a:flg == 'next' ? match(buf_arr, current_id) + 1 : match(buf_arr, current_id) - 1
+  let buf_id = buf_idx == len(buf_arr) ? buf_arr[0] : buf_arr[buf_idx]
+  exe 'b '.buf_id
+endf
+
+fu! s:closeBuf()
+  let now_b = bufnr('%') | execute("norm \<C-n>") | execute('bd ' . now_b)
+endf
+
+com! MoveBufPrev cal s:moveBuf('prev')
+com! MoveBufNext cal s:moveBuf('next')
+com! CloseBuf cal s:closeBuf()
+" }}}
+
+
+" ===================================================================
+" yuttie/comfortable-motion.vim
+" ===================================================================
+" {{{
+let s:scroll = #{tid: 0, curL: '', curC: ''}
+fu! s:scroll.exe(vector, delta) abort
+  if !empty(s:scroll.tid) | retu | endif
+  cal timer_stop(s:scroll.tid) | cal s:scroll.toggle(0)
+  let vec = a:vector == 0 ? "\<C-y>" : "\<C-e>"
+  let s:scroll.tid = timer_start(a:delta, { -> feedkeys(vec) }, {'repeat': -1})
+  cal timer_start(600, s:scroll.stop) | cal timer_start(600, s:scroll.toggle)
+endf
+fu! s:scroll.stop(_) abort
+  cal timer_stop(s:scroll.tid) | let s:scroll.tid = 0
+endf
+" TODO f-mode見る
+fu! s:scroll.toggle(tid) abort
+  if empty(a:tid)
+    let s:scroll.curL = execute('set cursorline?')->trim()
+    let s:scroll.curC = execute('set cursorcolumn?')->trim()
+    set nocursorline nocursorcolumn
+    retu
+  endif
+  if s:scroll.curL !~'^no' | set cursorline | endif
+  if s:scroll.curC !~'^no' | set cursorcolumn | endif
+endf
+com! -nargs=+ ImitatedComfortableScroll cal s:scroll.exe(<f-args>)
+" }}}
+
 
 " ===================================================================
 " junegunn/fzf.vim
@@ -1133,7 +1122,7 @@ fu! MarkChoose(ctx, winid, key) abort
   elseif a:key is# 'k' && a:ctx.idx > 0
     let a:ctx.idx = a:ctx.idx-1
   elseif a:key is# "\<CR>"
-    execute('normal!`' . a:ctx.files[a:ctx.idx][1])
+    execute('norm!`' . a:ctx.files[a:ctx.idx][1])
   endif
   retu popup_filter_menu(a:winid, a:key)
 endf
@@ -1209,11 +1198,11 @@ fu! MarkHank(vector) abort " move to next/prev mark
   cal sort(rownums, a:vector == 'up' ? {x, y -> y-x} : {x, y -> x - y})
   for rownum in rownums
     if a:vector == 'down' && rownum > line('.')
-      exe "normal! `" . mark_dict[rownum]
+      exe "norm! `" . mark_dict[rownum]
       echo index(rownums, rownum) + 1 . "/" . len(rownums)
       retu
     elseif a:vector == 'up' && rownum < line('.')
-      exe "normal! `" . mark_dict[rownum]
+      exe "norm! `" . mark_dict[rownum]
       echo len(rownums) - index(rownums, rownum) . "/" . len(rownums)
       retu
     endif
@@ -1227,12 +1216,12 @@ endf
 " t9md/vim-quickhl
 " ===================================================================
 " {{{
-
-aug QuickhlManual
+let s:quickhl = #{hlidx: 0, reseted: 0}
+aug quickhl
   au!
-  au! ColorScheme * cal HlIni()
+  au! ColorScheme * cal s:quickhl.hlini()
 aug END
-let s:search_hl= [
+let s:quickhl.hl= [
     \ "cterm=bold ctermfg=16 ctermbg=153 gui=bold guifg=#ffffff guibg=#0a7383",
     \ "cterm=bold ctermfg=7  ctermbg=1   gui=bold guibg=#a07040 guifg=#ffffff",
     \ "cterm=bold ctermfg=7  ctermbg=2   gui=bold guibg=#4070a0 guifg=#ffffff",
@@ -1247,64 +1236,63 @@ let s:search_hl= [
     \ "cterm=bold ctermfg=7  ctermbg=50  gui=bold guibg=#1060a0 guifg=#ffffff",
     \ "cterm=bold ctermfg=7  ctermbg=56  gui=bold guibg=#a0b0c0 guifg=black",
     \ ]
-let s:now_hi = 0
-fu! HlIni()
-  for v in s:search_hl | exe "hi UserSearchHi" . index(s:search_hl, v) . " " . v | endfor
+fu! s:quickhl.hlini() abort
+  for v in s:quickhl.hl | exe 'hi UserSearchHi'.index(s:quickhl.hl, v).' '.v | endfor
 endf
-cal HlIni()
-
-let s:hi_reaseted = 0
-fu! HiClear(cw) abort
-  let s:hi_reaseted = 0
-  let already = filter(getmatches(), {i, v-> has_key(v, 'pattern') ? v['pattern'] == a:cw : 0})
-  if len(already) > 0 | cal matchdelete(already[0]['id']) | let s:hi_reaseted = 1 | endif
+fu! s:quickhl.reset(cw) abort
+  let s:quickhl.reseted = 0
+  let already = getmatches()->filter({ _,v -> has_key(v, 'pattern') ? v.pattern == a:cw : 0 })
+  if !empty(already) | cal matchdelete(already[0].id) | let s:quickhl.reseted = 1 | endif
 endf
-fu! HiSet() abort
+fu! s:quickhl.set() abort
+  let current_win = winnr() | let cw = expand('<cword>') | windo cal s:quickhl.reset(cw)
+  if s:quickhl.reseted | exe current_win.'wincmd w' | retu | endif
+  windo cal matchadd('UserSearchHi'.s:quickhl.hlidx, cw)
+  let s:quickhl.hlidx = s:quickhl.hlidx >= len(s:quickhl.hl)-1 ? 0 : s:quickhl.hlidx + 1
+  exe current_win.'wincmd w'
+endf
+fu! s:quickhl.clear() abort
   let current_win = winnr()
-  let cw = expand('<cword>')
-  windo cal HiClear(cw)
-  if s:hi_reaseted == 1 | exe current_win . 'wincmd w' | retu | endif
-  windo cal matchadd("UserSearchHi" . s:now_hi, cw)
-  let s:now_hi = s:now_hi >= len(s:search_hl)-1 ? 0 : s:now_hi + 1
-  exe current_win . 'wincmd w'
+  windo cal getmatches()->filter({ _,v -> v.group =~ 'UserSearchHi.*' })->map('execute("cal matchdelete(v:val.id)")')
+  exe current_win.'wincmd w'
 endf
-
+com! ImitatedQuickHighlight cal s:quickhl.set()
+com! ImitatedQuickHighlightClear noh | cal s:quickhl.clear()
 " }}}
+
 
 " ===================================================================
 " unblevable/quick-scope
 " ===================================================================
 " {{{
+aug qs_colors
+  au!
+  au ColorScheme * hi FScopePrimary ctermfg=196 cterm=underline guifg=#66D9EF guibg=#000000
+  au ColorScheme * hi FScodeSecondary ctermfg=219 cterm=underline guifg=#66D9EF guibg=#000000
+  au ColorScheme * hi FScopeBackPrimary ctermfg=51 cterm=underline guifg=#66D9EF guibg=#000000
+  au ColorScheme * hi FScopeBackSecondary ctermfg=33 cterm=underline guifg=#66D9EF guibg=#000000
+aug END
 
-augroup qs_colors
-  autocmd!
-  autocmd ColorScheme * highlight FSCopePrimary ctermfg=196 cterm=underline guifg=#66D9EF guibg=#000000
-  autocmd ColorScheme * highlight FSCodeSecondary ctermfg=219 cterm=underline guifg=#66D9EF guibg=#000000
-  autocmd ColorScheme * highlight QuickScopeBack ctermfg=51 cterm=underline guifg=#66D9EF guibg=#000000
-  autocmd ColorScheme * highlight QuickScopeBackSecond ctermfg=33 cterm=underline guifg=#66D9EF guibg=#000000
-augroup END
-
-highlight FSCopePrimary ctermfg=196 cterm=underline guifg=#66D9EF guibg=#000000
-highlight FSCodeSecondary ctermfg=219 cterm=underline guifg=#66D9EF guibg=#000000
-highlight QuickScopeBack ctermfg=51 cterm=underline guifg=#66D9EF guibg=#000000
-highlight QuickScopeBackSecond ctermfg=33 cterm=underline guifg=#66D9EF guibg=#000000
-
+" TODO depend
 let g:fmode_flg = 1
 fu! FModeToggle()
   if g:fmode_flg == 1 | let g:fmode_flg = 0 | call FModeDeactivate()
   else | let g:fmode_flg = 1 | call FModeActivate() | endif
 endf
 
+com! ImitatedQuickScopeToggle cal FModeToggle()
+
+" TODO scope
 fu! HiReset(group_name)
   let already = filter(getmatches(), {i, v -> v['group'] == a:group_name})
   if len(already) > 0 | cal matchdelete(already[0]['id']) | endif
 endf
 
 fu! HiFLine()
-  cal HiReset('FSCopePrimary')
-  cal HiReset('FSCodeSecondary')
-  cal HiReset('QuickScopeBack')
-  cal HiReset('QuickScopeBackSecond')
+  cal HiReset('FScopePrimary')
+  cal HiReset('FScodeSecondary')
+  cal HiReset('FScopeBackPrimary')
+  cal HiReset('FScopeBackSecondary')
 
   let line = line('.')
   let col = col('.')
@@ -1332,10 +1320,10 @@ fu! HiFLine()
     endif
   endwhile
 
-  if len(target_arr) != 0 | cal matchaddpos("FSCopePrimary", target_arr, 16) | endif
-  if len(target_arr_second) != 0 | cal matchaddpos("FSCodeSecondary", target_arr_second, 16) | endif
-  if len(target_arr_back) != 0 | cal matchaddpos("QuickScopeBack", target_arr_back, 16) | endif
-  if len(target_arr_back_second) != 0 | cal matchaddpos("QuickScopeBackSecond", target_arr_back_second, 16) | endif
+  if len(target_arr) != 0 | cal matchaddpos("FScopePrimary", target_arr, 16) | endif
+  if len(target_arr_second) != 0 | cal matchaddpos("FScodeSecondary", target_arr_second, 16) | endif
+  if len(target_arr_back) != 0 | cal matchaddpos("FScopeBackPrimary", target_arr_back, 16) | endif
+  if len(target_arr_back_second) != 0 | cal matchaddpos("FScopeBackSecondary", target_arr_back_second, 16) | endif
 endf
 
 fu! FModeActivate()
@@ -1351,43 +1339,41 @@ fu! FModeDeactivate()
   aug f_scope
     au!
   aug End
+  " TODO けしすぎ
   let current_win = win_getid()
-  windo cal clearmatches() " reset highlight on all window in tab
+  ""windo cal clearmatches() " reset highlight on all window in tab
   cal win_gotoid(current_win) " return current window
+  cal HiReset('FScopePrimary')
+  cal HiReset('FScodeSecondary')
+  cal HiReset('FScopeBackPrimary')
+  cal HiReset('FScopeBackSecondary')
 endf
-
 " }}}
+
 
 " ===================================================================
 " junegunn/goyo.vim
 " ===================================================================
 " {{{
-
-let g:zen_mode_flg = 0
-function! ZenModeToggle()
-  let g:zen_mode_flg = g:zen_mode_flg == 0 ? 1 : 0
-
-  if g:zen_mode_flg == 1
-    tab split | execute("normal zR")
-    set nonumber norelativenumber nocursorline nocursorcolumn laststatus=0 showtabline=0
-    vertical topleft new
-    setlocal buftype=nofile bufhidden=wipe nomodifiable nobuflisted noswapfile nonu noru winfixheight
-    vertical resize 40 | execute winnr('#') . 'wincmd w'
-    vertical botright new
-    setlocal buftype=nofile bufhidden=wipe nomodifiable nobuflisted noswapfile nonu noru winfixheight
-    vertical resize 40 | execute winnr('#') . 'wincmd w'
-    for grp in ['NonText', 'FoldColumn', 'ColorColumn', 'VertSplit', 'StatusLine', 'StatusLineNC', 'SignColumn']
-      execute('hi '.grp.' ctermfg=black') | execute('hi '.grp.' ctermbg=NONE') | execute('hi '.grp.' cterm=NONE')
-    endfor
-    setlocal number relativenumber
-  else
-    set number cursorline cursorcolumn laststatus=2 showtabline=2
-    tabclose
-    syntax enable
+let s:zen_mode_flg = 0
+fu! s:zenModeToggle()
+  if !empty(s:zen_mode_flg)
+    let sg:zen_mode_flg = 0 | set number cursorline cursorcolumn laststatus=2 showtabline=2 | tabc | syntax on | retu
   endif
-endfunction
-
+  let g:zen_mode_flg = 1 | tab split | norm zR
+  set nonumber norelativenumber nocursorline nocursorcolumn laststatus=0 showtabline=0
+  vert to new | setl buftype=nofile bufhidden=wipe nomodifiable nobuflisted noswapfile nonu noru winfixheight
+  vert res 40 | exe winnr('#').'wincmd w'
+  vert bo new | setl buftype=nofile bufhidden=wipe nomodifiable nobuflisted noswapfile nonu noru winfixheight
+  vert res 40 | exe winnr('#').'wincmd w'
+  for grp in ['NonText', 'FoldColumn', 'ColorColumn', 'VertSplit', 'StatusLine', 'StatusLineNC', 'SignColumn']
+    exe 'hi '.grp.' ctermfg=black' | exe 'hi '.grp.' ctermbg=NONE' | exe 'hi '.grp.' cterm=NONE'
+  endfor
+  setl number relativenumber
+endf
+com! ImitatedZenModeToggle cal s:zenModeToggle()
 " }}}
+
 
 " ===================================================================
 " easymotion/vim-easymotion
@@ -1401,7 +1387,7 @@ let g:emotion_keys = ['s', 'w', 'a', 'd', 'j', 'k', 'h', 'l']
 
 fu! Emotion()
   " fold all open
-  normal zR
+  norm zR
   " get target chars in current window without empty line
   " [{'row': row number, 'col': [ col number, ... ]}...]
   let s:emotion_keypos = [] | let wininfo = [] | let tarcnt = 0 | let rn = line('w0') | let crn = line('.') | let s:emotion_klen = 1
@@ -1468,9 +1454,9 @@ augroup emotion_hl
   autocmd ColorScheme * highlight EmotionWip ctermfg=166 cterm=bold
   autocmd ColorScheme * highlight EmotionFin ctermfg=196 cterm=bold
 augroup END
-highlight EmotionBase ctermfg=59
-highlight EmotionWip ctermfg=166 cterm=bold
-highlight EmotionFin ctermfg=196 cterm=bold
+""highlight EmotionBase ctermfg=59
+""highlight EmotionWip ctermfg=166 cterm=bold
+""highlight EmotionFin ctermfg=196 cterm=bold
 fu! HiResetAll(group_name)
   cal getmatches()->filter({ _,v -> v.group == a:group_name })->map('execute("cal matchdelete(v:val.id)")')
 endf
@@ -1825,7 +1811,7 @@ function! TrainingPopupCursor1(timer)
 endfunction
 
 function! TrainingPopupCursor1SampleMv(timer)
-  execute("normal gg")
+  execute("norm gg")
   call cursor(26, 6)
   call timer_start(600, function('TrainingPopupCursor1SampleMv1'))
   call timer_start(1200, function('TrainingPopupCursor1SampleMv2'))
@@ -1833,19 +1819,19 @@ function! TrainingPopupCursor1SampleMv(timer)
   call timer_start(2400, function('TrainingPopupCursor1SampleMv4'))
 endfunction
 function! TrainingPopupCursor1SampleMv1(timer)
-  execute("normal h")
+  execute("norm h")
   echo("h   cursor move")
 endfunction
 function! TrainingPopupCursor1SampleMv2(timer)
-  execute("normal j")
+  execute("norm j")
   echo("j   cursor move")
 endfunction
 function! TrainingPopupCursor1SampleMv3(timer)
-  execute("normal l")
+  execute("norm l")
   echo("l   cursor move")
 endfunction
 function! TrainingPopupCursor1SampleMv4(timer)
-  execute("normal k")
+  execute("norm k")
   echo("k   cursor move")
 endfunction
 
@@ -1874,7 +1860,7 @@ function! TrainingPopupCursor2(timer)
 endfunction
 
 function! TrainingPopupCursor2SampleMv(timer)
-  execute("normal gg")
+  execute("norm gg")
   call cursor(15, 12)
   call timer_start(200, function('TrainingPopupCursor2SampleMv1'))
   call timer_start(900, function('TrainingPopupCursor2SampleMv1'))
@@ -1884,11 +1870,11 @@ function! TrainingPopupCursor2SampleMv(timer)
   call timer_start(3700, function('TrainingPopupCursor2SampleMv5'))
 endfunction
 function! TrainingPopupCursor2SampleMv1(timer)
-  execute("normal w")
+  execute("norm w")
   echo("w   next word first char")
 endfunction
 function! TrainingPopupCursor2SampleMv2(timer)
-  execute("normal e")
+  execute("norm e")
   echo("e   next wort last char")
 endfunction
 function! TrainingPopupCursor2SampleMv3(timer)
@@ -1896,11 +1882,11 @@ function! TrainingPopupCursor2SampleMv3(timer)
   echo("and ...")
 endfunction
 function! TrainingPopupCursor2SampleMv4(timer)
-  execute("normal fe")
+  execute("norm fe")
   echo("fe   next first e")
 endfunction
 function! TrainingPopupCursor2SampleMv5(timer)
-  execute("normal tx")
+  execute("norm tx")
   echo("tx   next first x, before 1")
 endfunction
 
@@ -1933,26 +1919,26 @@ function! TrainingPopupWindow1(timer)
 endfunction
 
 function! TrainingPopupWindow1SampleMv(timer)
-  execute("normal gg")
+  execute("norm gg")
   call timer_start(200, function('TrainingPopupWindow1SampleMv1'))
   call timer_start(1200, function('TrainingPopupWindow1SampleMv2'))
   call timer_start(2200, function('TrainingPopupWindow1SampleMv3'))
   call timer_start(3200, function('TrainingPopupWindow1SampleMv4'))
 endfunction
 function! TrainingPopupWindow1SampleMv1(timer)
-  execute "normal \<C-d>"
+  execute "norm \<C-d>"
   echo("C-d   pade down")
 endfunction
 function! TrainingPopupWindow1SampleMv2(timer)
-  execute("normal gg")
+  execute("norm gg")
   echo("gg   page top")
 endfunction
 function! TrainingPopupWindow1SampleMv3(timer)
-  execute("normal G")
+  execute("norm G")
   echo("G   page last")
 endfunction
 function! TrainingPopupWindow1SampleMv4(timer)
-  execute("normal 15G")
+  execute("norm 15G")
   echo("15G   line 15")
 endfunction
 
@@ -1991,7 +1977,7 @@ function! TrainingPopupWindow2(timer)
 endfunction
 
 function! TrainingPopupWindow2SampleMv(timer)
-  execute("normal gg")
+  execute("norm gg")
   call cursor(15, 1)
   call timer_start(200, function('TrainingPopupWindow2SampleMv1'))
   call timer_start(800, function('TrainingPopupWindow2SampleMv2'))
@@ -2003,27 +1989,27 @@ function! TrainingPopupWindow2SampleMv(timer)
   call timer_start(4500, function('TrainingPopupWindow2SampleMv7'))
 endfunction
 function! TrainingPopupWindow2SampleMv1(timer)
-  execute("normal H")
+  execute("norm H")
   echo("H   window High")
 endfunction
 function! TrainingPopupWindow2SampleMv2(timer)
-  execute("normal L")
+  execute("norm L")
   echo("L   window Low")
 endfunction
 function! TrainingPopupWindow2SampleMv3(timer)
-  execute("normal M")
+  execute("norm M")
   echo("M   window Middle")
 endfunction
 function! TrainingPopupWindow2SampleMv4(timer)
-  execute("normal }")
+  execute("norm }")
   echo("}   next paragraph")
 endfunction
 function! TrainingPopupWindow2SampleMv5(timer)
-  execute "normal z\<CR>"
+  execute "norm z\<CR>"
   echo("z+Enter   stay cursor, top")
 endfunction
 function! TrainingPopupWindow2SampleMv6(timer)
-  execute("normal zz")
+  execute("norm zz")
   echo("zz   stay cursor, middle")
 endfunction
 function! TrainingPopupWindow2SampleMv7(timer)
@@ -2095,7 +2081,7 @@ function! TrainingPopupSearch(timer)
 endfunction
 
 function! TrainingPopupSearchSampleMv(timer)
-  execute("normal gg")
+  execute("norm gg")
   call cursor(15, 9)
   call timer_start(200, function('TrainingPopupSearchSampleMv1'))
   call timer_start(800, function('TrainingPopupSearchSampleMv2'))
@@ -2147,7 +2133,7 @@ endfunction
 
 function! TrainingPopupOpeObjSampleMv(timer)
   call cursor(52, 13)
-  execute("normal zz")
+  execute("norm zz")
   call timer_start(200, function('TrainingPopupOpeObjSampleMv1'))
   call timer_start(800, function('TrainingPopupOpeObjSampleMv2'))
   call timer_start(1500, function('TrainingPopupOpeObjSampleMv3'))
@@ -2159,18 +2145,18 @@ function! TrainingPopupOpeObjSampleMv1(timer)
   echo("vi<   visual inner <>")
 endfunction
 function! TrainingPopupOpeObjSampleMv2(timer)
-  execute("normal vi<")
+  execute("norm vi<")
 endfunction
 function! TrainingPopupOpeObjSampleMv3(timer)
-  execute "normal \<Esc>"
+  execute "norm \<Esc>"
   call cursor(72, 6)
-  execute("normal zz")
+  execute("norm zz")
 endfunction
 function! TrainingPopupOpeObjSampleMv4(timer)
   echo("vis   visual inner statement")
 endfunction
 function! TrainingPopupOpeObjSampleMv5(timer)
-  execute("normal vis")
+  execute("norm vis")
 endfunction
 
 " undo redo repeat
@@ -2204,7 +2190,7 @@ endfunction
 
 function! TrainingPopupTipsOpen()
   call timer_stop(s:training_popup_tips_win_tid)
-  let s:training_popup_tips_win_tid = timer_start(500, function('TrainingPopupTips'))
+  let s:training_popup_tips_win_tid = timer_start(300, function('TrainingPopupTips'))
 endfunction
 function! TrainingPopupTipsClose()
   call timer_stop(s:training_popup_tips_win_tid)
@@ -2226,11 +2212,27 @@ endfunction
 
 " open practice file (only tutorial)
 function! TrainingWheelsPracticeFileOpen(ch) abort
-  execute('e ~/practice.md')
+  " TODO 左に開きたいし、tabeにするか
+  execute('tabe ~/practice.md')
   call cursor(26, 6)
 endfunction
 
 " }}}
 
+
+" TODO あとで消す
+let s:testlambda = {-> execute("let s:aaaa=popup_create('test',#{ title: 'test', border: []})")}
+""let s:aaaa = popup_create('test', #{ title: 'test', border: []})
+function! Testtesttest()
+echo call(s:testlambda,[])
+echo(s:aaaa)
+endfunction
+
+
+
+
+
+colorscheme torte
+if glob('~/.vim/colors/') != '' | colorscheme onedark | endif
 
 
