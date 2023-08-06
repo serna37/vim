@@ -151,11 +151,11 @@ inoremap <C-h> <C-o>h|inoremap <C-l> <C-o>l|inoremap <C-k> <C-o>k|inoremap <C-j>
 nnoremap d "_d|vnoremap d "_d
 
 " x = cut(yank register)
-nnoremap x "0x|vnoremap x "0x
+nnoremap x "+x|vnoremap x "+x
 
 " p P = paste(from yank register)
-nnoremap p "0p|nnoremap P "0P
-vnoremap p "0p|vnoremap P "0P
+nnoremap p "+p|nnoremap P "+P
+vnoremap p "+p|vnoremap P "+P
 
 " block move at visual mode
 vnoremap <C-j> "zx"zp`[V`]|vnoremap <C-k> "zx<Up>"zP`[V`]
@@ -1145,20 +1145,21 @@ com! ImitatedQuickScopeToggle cal s:fmode.toggle()
 " junegunn/goyo.vim
 " ===================================================================
 " {{{
-let s:zen_mode_flg = 0
+let s:zen_mode = #{flg: 0, vert_split: []}
 fu! s:zenModeToggle() abort
-  if !empty(s:zen_mode_flg)
-    let s:zen_mode_flg = 0 | set number cursorline cursorcolumn laststatus=2 showtabline=2 | tabc | syntax on | retu
+  if s:zen_mode.flg
+    let s:zen_mode.flg = 0 | set number cursorline cursorcolumn laststatus=2 showtabline=2 | tabc
+    exe 'hi VertSplit '.join(s:zen_mode.vert_split[2:], ' ') | retu
   endif
-  let s:zen_mode_flg = 1 | tab split | norm zR
+  let s:zen_mode.flg = 1 | tab split | norm zR
   set nonumber norelativenumber nocursorline nocursorcolumn laststatus=0 showtabline=0
   vert to new | setl buftype=nofile bufhidden=wipe nomodifiable nobuflisted noswapfile nonu noru winfixheight
   vert res 40 | exe winnr('#').'wincmd w'
   vert bo new | setl buftype=nofile bufhidden=wipe nomodifiable nobuflisted noswapfile nonu noru winfixheight
   vert res 40 | exe winnr('#').'wincmd w'
-  for grp in ['NonText', 'FoldColumn', 'ColorColumn', 'VertSplit', 'StatusLine', 'StatusLineNC', 'SignColumn']
-    exe 'hi '.grp.' ctermfg=black' | exe 'hi '.grp.' ctermbg=NONE' | exe 'hi '.grp.' cterm=NONE'
-  endfor
+  "['NonText', 'FoldColumn', 'ColorColumn', 'VertSplit', 'StatusLine', 'StatusLineNC', 'SignColumn']
+  let s:zen_mode.vert_split = split(execute('hi VertSplit'),' ')->filter({ _,v -> !empty(v) })
+  exe 'hi VertSplit ctermfg=black ctermbg=NONE cterm=NONE'
   setl number relativenumber
 endf
 com! ImitatedZenModeToggle cal s:zenModeToggle()
