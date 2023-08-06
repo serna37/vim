@@ -1,170 +1,39 @@
 " vim:set foldmethod=marker:
-
 " ==============================================================================
+" alse see [https://github.com/serna37/vim/]
 "  CONTENTS
 "
-"   # CheatSheet
-"     ## CheatSheet Hover ...... | hover cheat sheet at Cursor Hold 5 sec.
-"
-"   # Basic vim setting
+"   # BASIC VIM SETTINGS
 "     ## FILE .................. | file encoding, charset, vim specific setting.
 "     ## VISUALIZATION ......... | enhanced visual information.
 "     ## WINDOW ................ | window forcus, resize, open terminal.
 "     ## MOTION ................ | row move, scroll, mark, IDE action menu.
-"     ## EDIT .................. | insert mode parenthese, cursor, block move.
+"     ## EDIT .................. | insert mode cursor, block move.
 "     ## COMPLETION ............ | indent, word completion.
-"     ## SEARCH ................ | incremental search, fzf, grep, explorer.
+"     ## SEARCH ................ | incremental search, emotion, fzf, grep, explorer.
 "     ## OTHERS ................ | fast terminal, reg engin, fold.
 "
-"   # Plugins setting
+"   # FUNCTIONS
+"     ## ORIGINALS ............. | original / adhoc functions.
+"     ## IMITATIONS ............ | imitated plugins as functions.
+"     ## PLUG MANAGE ........... | plugin manager functions.
+"     ## TRAINING .............. | training default vim functions.
+"
+"   # PLUGINS SETTING
 "     ## PLUGIN VARIABLES ...... | setting for plugins without conflict.
 "     ## PLUGIN KEYMAP ......... | setting for plugins without conflict.
 "
-"   # Functions
-"     ## FUNCTIONS ............. | adhoc functions.
-"     ## IMITATIONS ............. | imitated plugins as functions.
-"     ## PLUGINS ............... | plugin manager functions.
-"     ## TRAINING .............. | training default vim functions.
+"   # STARTING
+"     ## STARTING .............. | functions called when vim started.
 "
 " ==============================================================================
-
 let mapleader = "\<SPACE>"
 
 " #############################################################
-" ##################       CheatSheet       ###################
+" ###############      BASIC VIM SETTINGS       ###############
 " #############################################################
 " {{{
-
-" cursor hold
-" motion cheat sheet on popup
-
-augroup cheat_sheet_hover
-  au!
-  autocmd CursorHold * silent cal s:CheatSheet()
-  autocmd CursorMoved * silent cal s:CheatSheetClose()
-  autocmd CursorMovedI * silent cal s:CheatSheetClose()
-augroup END
-
-" TODO fix cheatsheet color
-let s:my_vim_cheet_sheet = [
-      \' --[window]---------------------------------------------- ',
-      \' (C-n/p)(Space x)   [buffer tab][next/prev/close] ',
-      \' (←↑↓→)(C-hjkl)     [window][resize/forcus] ',
-      \' (Space t)(Space z) [terminal][Zen Mode] ',
-      \' --[motion]---------------------------------------------- ',
-      \' (Space v)      [IDE Action Menu] ',
-      \' (Tab S-Tab)    [jump][5rows] ',
-      \' (s)(Space s)   [easymotion incremental(Tab)] ',
-      \' (Space w)      [f-scope toggle] ',
-      \' (mm/mn/mp/mc)  [mark(toggle)/next/prev/clear] ',
-      \' INSERT(C-hjkl) [cursor move] ',
-      \' VISUAL(C-jk)   [blok up/down] ',
-      \' --[search]---------------------------------------------- ',
-      \' (Space fhb)    [fzf][files/histories/buffers] ',
-      \' (Space ejclm)  [explorer/jumped/changed/line/marks] ',
-      \' (Space g)(Space*2 s)  [grep][buffer grep incremental] ',
-      \' (Space q)      [clear search highlight] ',
-      \' --[command]--------------------------------------------- ',
-      \' (:PlugUnInstall)          [plugins uninstall] ',
-      \' (:TrainingWheelsProtocol) [training default vim]',
-      \' (:RunCat :RunCatStop) [running cat]',
-      \' -------------------------------------------------------- ',
-      \' (Space*3)      [ON/OFF Cheat Sheet] ',
-      \]
-
-" no plugin version
-if glob('~/.vim/pack/plugins/start') == ''
-  let s:my_vim_cheet_sheet = [
-        \' --[window]---------------------------------------------- ',
-        \' (C-n/p)(Space x)   [buffer tab][next/prev/close] ',
-        \' (←↑↓→)(C-hjkl)  [window][resize/forcus] ',
-        \' (Space t)(Space z) [terminal][Zen Mode] ',
-        \' --[motion]---------------------------------------------- ',
-        \' (Space v)      [IDE Action Menu] some are dosabled ',
-        \' (Tab S-Tab)    [jump][5rows] ',
-        \' (Space w)      [f-scope toggle] ',
-        \' (mm/mn/mp/mc)  [mark(toggle)/next/prev/clear] ',
-        \' INSERT(C-hjkl) [cursor move] ',
-        \' VISUAL(C-jk)   [blok up/down] ',
-        \' --[search]---------------------------------------------- ',
-        \' (Space fhb)   [fzf-mimic][files/histories/buffers] ',
-        \' (Space em)  [explorer(netrw)/marks] ',
-        \' (Space g)(Space*2 s)   [grep][buffer grep] ',
-        \' (Space q)   [clear search highlight] ',
-        \' --[command]--------------------------------------------- ',
-        \' (:PlugInstall)      [plugins install] ',
-        \' (:TrainingWheelsProtocol) [training default vim]',
-        \' (:RunCat :RunCatStop) [running cat]',
-        \' -------------------------------------------------------- ',
-        \' (Space*3)      [ON/OFF Cheat Sheet] ',
-        \]
-endif
-
-let s:cheat_sheet_open_flg = 0
-let s:cheatwinid = 0
-let s:cheat_sheet_timer_id = 0
-fu! s:CheatSheetPopup(timer)
-  let s:cheatwinid = popup_create(s:my_vim_cheet_sheet, #{ title: ' Action Cheet Sheet ', border: [], zindex: 1, line: "cursor+1", col: "cursor" })
-endf
-
-fu! s:CheatSheet()
-  if s:show_cheat_sheet_flg == 0
-    cal timer_stop(s:cheat_sheet_timer_id)
-    retu
-  endif
-  if s:cheat_sheet_open_flg == 0
-    let s:cheat_sheet_open_flg = 1
-    cal timer_stop(s:cheat_sheet_timer_id)
-    let s:cheat_sheet_timer_id = timer_start(10000, function("s:CheatSheetPopup"))
-  endif
-endf
-fu! s:CheatSheetClose()
-  if s:show_cheat_sheet_flg == 0
-    cal timer_stop(s:cheat_sheet_timer_id)
-    retu
-  endif
-  let s:cheat_sheet_open_flg = 0
-  cal popup_close(s:cheatwinid)
-  cal timer_stop(s:cheat_sheet_timer_id)
-endf
-
-nnoremap <silent><Leader><Leader><Leader> :cal PopupFever()<CR>:cal ToggleCheatHover()<CR>
-let s:show_cheat_sheet_flg = 0
-fu! CheatAlert(tid)
-  execute("echohl ErrorMsg | echo '[INFO] Space * 3 to enable cheat sheet !!' | echohl None")
-endf
-if has('vim_starting')
-  cal timer_start(200, function("CheatAlert"))
-endif
-let s:recheatwinid = 0
-fu! PopupFever()
-  cal s:runcat.start()
-  let s:recheatwinid = popup_create(s:my_vim_cheet_sheet, #{ title: ' Action Cheet Sheet ', border: [], line: &columns/4 })
-  let s:logowinid = popup_create(g:btr_logo, #{ border: [] })
-endf
-fu! PopupFeverStop()
-  cal s:runcat.stop()
-  cal popup_close(s:recheatwinid )
-  cal popup_close(s:logowinid)
-endf
-fu! ToggleCheatHover()
-  let msg = 'Disable Cheat Sheet Hover'
-  if s:show_cheat_sheet_flg == 1
-    let s:show_cheat_sheet_flg = 0
-  else
-    let msg = 'Enable Cheat Sheet Hover'
-    let s:show_cheat_sheet_flg = 1
-  endif
-  let s:checkwinid = popup_notification(msg, #{ border: [], line: &columns/4-&columns/37, close: "button" })
-  cal timer_start(3000, { -> PopupFeverStop()})
-endf
-
-" }}}
-
-" #############################################################
-" ##################          FILE          ###################
-" #############################################################
-" {{{
+" ##################          FILE          ################### {{{
 
 " file
 set fileformat=unix " LF
@@ -185,10 +54,7 @@ aug END
 
 " }}}
 
-" #############################################################
-" ##################     VISUALIZATION      ###################
-" #############################################################
-" {{{
+" ##################     VISUALIZATION      ################### {{{
 
 " enable syntax highlight
 syntax on
@@ -215,10 +81,7 @@ set laststatus=2 showtabline=2
 
 " }}}
 
-" #############################################################
-" ##################         WINDOW        ###################
-" #############################################################
-" {{{
+" ##################         WINDOW        ################### {{{
 
 " just like
 " simeji/winresizer
@@ -245,10 +108,7 @@ nnoremap <silent><Leader>z :ImitatedZenModeToggle<CR>
 
 " }}}
 
-" #############################################################
-" ##################         MOTION         ###################
-" #############################################################
-" {{{
+" ##################         MOTION         ################### {{{
 
 " row move
 nnoremap j gj|nnoremap k gk
@@ -273,10 +133,7 @@ nnoremap <silent><Leader>v :IDEMenu<CR>
 
 " }}}
 
-" #############################################################
-" ##################         EDIT           ###################
-" #############################################################
-" {{{
+" ##################         EDIT           ################### {{{
 
 " basic
 set virtualedit=all " virtual cursor movement
@@ -305,10 +162,7 @@ vnoremap <C-j> "zx"zp`[V`]|vnoremap <C-k> "zx<Up>"zP`[V`]
 
 " }}}
 
-" #############################################################
-" ##################       COMPLETION       ###################
-" #############################################################
-" {{{
+" ##################       COMPLETION       ################### {{{
 
 " indent
 set autoindent " uses the indent from the previous line
@@ -357,10 +211,7 @@ inoremap <buffer><silent><BS> <C-R>=AutoPairsDelete()<CR>
 
 " }}}
 
-" #############################################################
-" ##################         SEARCH         ###################
-" #############################################################
-" {{{
+" ##################         SEARCH         ################### {{{
 
 " search
 set incsearch " incremental search
@@ -445,10 +296,7 @@ nnoremap <silent><Leader><Leader>s :GrepCurrent<CR>
 
 " }}}
 
-" #############################################################
-" ##################         OTHERS         ###################
-" #############################################################
-" {{{
+" ##################         OTHERS         ################### {{{
 
 " basic
 scriptencoding utf-8 " this file's charset
@@ -462,142 +310,13 @@ set foldlevelstart=0 " fold depth on start view
 set foldcolumn=1 " fold preview
 
 " }}}
-
-" #############################################################
-" ##################    PLUGIN VARIABLES    ###################
-" #############################################################
-" {{{
-
-
-" coc
-let g:coc_snippet_next = '<Tab>'
-let g:coc_snippet_prev = '<S-Tab>'
-
-" vimspector
-let g:vimspector_enable_mappings = 'VISUAL_STUDIO'
-
-" fzf
-set rtp+=~/.vim/pack/plugins/start/fzf
-
-" TODO delete
-" easy motion
-let g:EasyMotion_do_mapping = 0
-let g:EasyMotion_smartcase = 1
-let g:EasyMotion_keys='swadjkhlnmf'
-
-" airline
-let g:airline_theme = 'deus'
-let g:airline#extensions#tabline#enabled = 1
-let g:airline#extensions#tabline#buffer_idx_mode = 1
-let g:airline_powerline_fonts = 1
-
-" TODO delete
-" auto pair
-let g:AutoPairsMapCh = 0
-
-" TODO delete
-" zen
-let g:limelight_conceal_ctermfg = 'gray'
-autocmd! User GoyoEnter Limelight
-autocmd! User GoyoLeave Limelight!
-
-" startify
-" ぼっちざろっく{{{
-const g:btr_logo = [
-    \'                                                                                                                           dN',
-    \'                                                                                           ..                             JMF',
-    \'                                                                                      ..gMMMM%                           JMF',
-    \'                                                                                    .MM9^ .MF                           (MF',
-    \'                                                                           .(,      ("   .M#                  .g,      .MF',
-    \'                     .,  dN                                             gg,,M@          .M#                  .M#!      (M>',
-    \'                     JM} M#             .MNgg.                     .g,  ?M[ 7B         .MMg+gg,.           .MM"        ."',
-    \'             ...gNMN,.Mb MN           .gMM9!                      .(MN,  .=           .MMM9=  ?MN,         (WN,      .MM ',
-    \'jN-      ..gMMN#!     (Mp(M}       .+MMYMF                    ..kMMWM%               ,M#^       dN.          .WNJ,   JM',
-    \'MM     .MM9^  dN,                 dNB^ (M%                   ?M"!  ,M\        .,               .M#   .&MMMN,    ?"   M#',
-    \'MN            .MN#^                    dM:  ..(J-,                 ,B         .TM             .M#   ,M@  .MF',
-    \'MN.       ..MMBMN_                     dN_.MM@"!?MN.   TMm     .a,                           (M@         MM^',
-    \'MN.     .MM"  JMb....       ..        dMMM=     .Mb            ?HNgJ..,                   .MM^',
-    \'dM{          -MMM#7"T""   .dN#TMo       ?      .MM^                 ?!                 +gM#=',
-    \'(M]         .MN(N#       .M@  .MF              .MM^                                      ~',
-    \'.MN          ?"""             MM!            .MMD                        ',
-    \' ?N[                                         7"                                ',
-    \'  TMe                                                                          ',
-    \'   ?MN,                                                                      ',
-    \'     TMNg,                                                                     '
-    \]
-
-"}}}
-
-let g:startify_custom_header = g:btr_logo
-
-" }}}
-
-" #############################################################
-" ##################      PLUGIN KEYMAP     ###################
-" #############################################################
-" {{{
-
-" for no override default motion, if glob( plugin path ) is need
-
-" tabline motion
-if glob('~/.vim/pack/plugins/start/vim-airline') != ''
-  nmap <silent><C-n> <Plug>AirlineSelectPrevTab
-  nmap <silent><C-p> <Plug>AirlineSelectNextTab
-endif
-
-" coc
-if glob('~/.vim/pack/plugins/start/coc.nvim') != ''
-  " file search
-  nnoremap <silent><Leader>e :CocCommand explorer --width 30<CR>
-  nnoremap <silent><leader>h :CocCommand fzf-preview.MruFiles<CR>
-  nnoremap <silent><leader>b :CocCommand fzf-preview.AllBuffers<CR>
-
-  " cursor  highlight
-  autocmd CursorHold * silent cal CocActionAsync('highlight')
-
-  " grep
-  nnoremap <Leader><Leader>s :CocList words<CR>
-
-  " jump
-  nnoremap <silent><Leader>l :CocCommand fzf-preview.Lines<CR>
-  nnoremap <silent><Leader>j :CocCommand fzf-preview.Jumps<CR>
-  nnoremap <silent><Leader>c :CocCommand fzf-preview.Changes<CR>
-
-  " completion @ coc
-  inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
-  inoremap <silent><expr> <Tab> coc#pum#visible() ? coc#pum#next(1) : "\<Tab>"
-  inoremap <silent><expr> <S-Tab> coc#pum#visible() ? coc#pum#prev(1) : "\<S-Tab>"
-
-  " IDE
-  nnoremap <Leader>d <Plug>(coc-definition)
-  nnoremap <Leader>r :CocCommand fzf-preview.CocReferences<CR>
-  nnoremap <Leader>o :CocCommand fzf-preview.CocOutline<CR>
-  nnoremap <Leader>? :cal CocAction('doHover')<CR>
-  nnoremap <Leader>, <plug>(coc-diagnostic-next)
-  nnoremap <Leader>. <plug>(coc-diagnostic-prev)
-  nnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) :  Scroll(1, 10)
-  nnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) :  Scroll(0, 10)
-endif
-
-" TODO delete
-" easy motion
-if glob('~/.vim/pack/plugins/start/vim-easymotion') != ''
-  nnoremap s <Plug>(easymotion-bd-w)
-  nnoremap <Leader>s <Plug>(easymotion-sn)
-endif
-
-" TODO delete
-" zen mode
-if glob('~/.vim/pack/plugins/start/goyo.vim') != ''
-  nnoremap <silent><Leader>z :Goyo<CR>
-endif
-
 " }}}
 
 " #############################################################
 " ##################       FUNCTIONS        ###################
 " #############################################################
 " {{{
+" ##################       ORIGINALS        ################### {{{
 
 " tab 5row anchor {{{
 sign define anch text=> texthl=Identifier
@@ -830,11 +549,137 @@ com! RunCat cal s:runcat.start()
 com! RunCatStop cal s:runcat.stop()
 " }}}
 
+" cheat sheet {{{
+
+" cursor hold
+" motion cheat sheet on popup
+
+augroup cheat_sheet_hover
+  au!
+  autocmd CursorHold * silent cal s:CheatSheet()
+  autocmd CursorMoved * silent cal s:CheatSheetClose()
+  autocmd CursorMovedI * silent cal s:CheatSheetClose()
+augroup END
+
+" TODO fix cheatsheet color
+let s:my_vim_cheet_sheet = [
+      \' --[window]---------------------------------------------- ',
+      \' (C-n/p)(Space x)   [buffer tab][next/prev/close] ',
+      \' (←↑↓→)(C-hjkl)     [window][resize/forcus] ',
+      \' (Space t)(Space z) [terminal][Zen Mode] ',
+      \' --[motion]---------------------------------------------- ',
+      \' (Space v)      [IDE Action Menu] ',
+      \' (Tab S-Tab)    [jump][5rows] ',
+      \' (s)(Space s)   [easymotion incremental(Tab)] ',
+      \' (Space w)      [f-scope toggle] ',
+      \' (mm/mn/mp/mc)  [mark(toggle)/next/prev/clear] ',
+      \' INSERT(C-hjkl) [cursor move] ',
+      \' VISUAL(C-jk)   [blok up/down] ',
+      \' --[search]---------------------------------------------- ',
+      \' (Space fhb)    [fzf][files/histories/buffers] ',
+      \' (Space ejclm)  [explorer/jumped/changed/line/marks] ',
+      \' (Space g)(Space*2 s)  [grep][buffer grep incremental] ',
+      \' (Space q)      [clear search highlight] ',
+      \' --[command]--------------------------------------------- ',
+      \' (:PlugUnInstall)          [plugins uninstall] ',
+      \' (:TrainingWheelsProtocol) [training default vim]',
+      \' (:RunCat :RunCatStop) [running cat]',
+      \' -------------------------------------------------------- ',
+      \' (Space*3)      [ON/OFF Cheat Sheet] ',
+      \]
+
+" no plugin version
+if glob('~/.vim/pack/plugins/start') == ''
+  let s:my_vim_cheet_sheet = [
+        \' --[window]---------------------------------------------- ',
+        \' (C-n/p)(Space x)   [buffer tab][next/prev/close] ',
+        \' (←↑↓→)(C-hjkl)  [window][resize/forcus] ',
+        \' (Space t)(Space z) [terminal][Zen Mode] ',
+        \' --[motion]---------------------------------------------- ',
+        \' (Space v)      [IDE Action Menu] some are dosabled ',
+        \' (Tab S-Tab)    [jump][5rows] ',
+        \' (Space w)      [f-scope toggle] ',
+        \' (mm/mn/mp/mc)  [mark(toggle)/next/prev/clear] ',
+        \' INSERT(C-hjkl) [cursor move] ',
+        \' VISUAL(C-jk)   [blok up/down] ',
+        \' --[search]---------------------------------------------- ',
+        \' (Space fhb)   [fzf-mimic][files/histories/buffers] ',
+        \' (Space em)  [explorer(netrw)/marks] ',
+        \' (Space g)(Space*2 s)   [grep][buffer grep] ',
+        \' (Space q)   [clear search highlight] ',
+        \' --[command]--------------------------------------------- ',
+        \' (:PlugInstall)      [plugins install] ',
+        \' (:TrainingWheelsProtocol) [training default vim]',
+        \' (:RunCat :RunCatStop) [running cat]',
+        \' -------------------------------------------------------- ',
+        \' (Space*3)      [ON/OFF Cheat Sheet] ',
+        \]
+endif
+
+let s:cheat_sheet_open_flg = 0
+let s:cheatwinid = 0
+let s:cheat_sheet_timer_id = 0
+fu! s:CheatSheetPopup(timer)
+  let s:cheatwinid = popup_create(s:my_vim_cheet_sheet, #{ title: ' Action Cheet Sheet ', border: [], zindex: 1, line: "cursor+1", col: "cursor" })
+endf
+
+fu! s:CheatSheet()
+  if s:show_cheat_sheet_flg == 0
+    cal timer_stop(s:cheat_sheet_timer_id)
+    retu
+  endif
+  if s:cheat_sheet_open_flg == 0
+    let s:cheat_sheet_open_flg = 1
+    cal timer_stop(s:cheat_sheet_timer_id)
+    let s:cheat_sheet_timer_id = timer_start(10000, function("s:CheatSheetPopup"))
+  endif
+endf
+fu! s:CheatSheetClose()
+  if s:show_cheat_sheet_flg == 0
+    cal timer_stop(s:cheat_sheet_timer_id)
+    retu
+  endif
+  let s:cheat_sheet_open_flg = 0
+  cal popup_close(s:cheatwinid)
+  cal timer_stop(s:cheat_sheet_timer_id)
+endf
+
+nnoremap <silent><Leader><Leader><Leader> :cal PopupFever()<CR>:cal ToggleCheatHover()<CR>
+let s:show_cheat_sheet_flg = 0
+fu! CheatAlert(tid)
+  execute("echohl ErrorMsg | echo '[INFO] Space * 3 to enable cheat sheet !!' | echohl None")
+endf
+if has('vim_starting')
+  cal timer_start(200, function("CheatAlert"))
+endif
+let s:recheatwinid = 0
+fu! PopupFever()
+  cal s:runcat.start()
+  let s:recheatwinid = popup_create(s:my_vim_cheet_sheet, #{ title: ' Action Cheet Sheet ', border: [], line: &columns/4 })
+  let s:logowinid = popup_create(g:btr_logo, #{ border: [] })
+endf
+fu! PopupFeverStop()
+  cal s:runcat.stop()
+  cal popup_close(s:recheatwinid )
+  cal popup_close(s:logowinid)
+endf
+fu! ToggleCheatHover()
+  let msg = 'Disable Cheat Sheet Hover'
+  if s:show_cheat_sheet_flg == 1
+    let s:show_cheat_sheet_flg = 0
+  else
+    let msg = 'Enable Cheat Sheet Hover'
+    let s:show_cheat_sheet_flg = 1
+  endif
+  let s:checkwinid = popup_notification(msg, #{ border: [], line: &columns/4-&columns/37, close: "button" })
+  cal timer_start(3000, { -> PopupFeverStop()})
+endf
+
 " }}}
 
-" #############################################################
-" ##################       IMITATIONS       ###################
-" #############################################################
+" }}}
+
+" ##################       IMITATIONS       ################### {{{
 
 " ===================================================================
 " vim-airline/vim-airline
@@ -926,7 +771,6 @@ com! MoveBufNext cal s:moveBuf('next')
 com! CloseBuf cal s:closeBuf()
 " }}}
 
-
 " ===================================================================
 " yuttie/comfortable-motion.vim
 " ===================================================================
@@ -956,7 +800,6 @@ fu! s:scroll.toggle(tid) abort
 endf
 com! -nargs=+ ImitatedComfortableScroll cal s:scroll.exe(<f-args>)
 " }}}
-
 
 " ===================================================================
 " junegunn/fzf.vim
@@ -1071,7 +914,6 @@ fu! s:fzf.open(winid, op, f) abort
 endf
 
 " }}}
-
 
 " ===================================================================
 " MattesGroeger/vim-bookmarks
@@ -1221,7 +1063,6 @@ com! ImitatedQuickHighlight cal s:quickhl.set()
 com! ImitatedQuickHighlightClear noh | cal s:quickhl.clear()
 " }}}
 
-
 " ===================================================================
 " unblevable/quick-scope
 " ===================================================================
@@ -1289,7 +1130,6 @@ endf
 com! ImitatedQuickScopeToggle cal s:fmode.toggle()
 " }}}
 
-
 " ===================================================================
 " junegunn/goyo.vim
 " ===================================================================
@@ -1312,7 +1152,6 @@ fu! s:zenModeToggle() abort
 endf
 com! ImitatedZenModeToggle cal s:zenModeToggle()
 " }}}
-
 
 " ===================================================================
 " easymotion/vim-easymotion
@@ -1468,11 +1307,9 @@ com! ImitatedEasymotion cal s:emotion.exe()
 
 " }}}
 
+" }}}
 
-" #############################################################
-" ##################         PLUGINS        ###################
-" #############################################################
-" {{{
+" ##################      PLUG MANAGE       ################### {{{
 let s:plug = #{colors: [ 'onedark.vim', 'hybrid_material.vim', 'molokai.vim' ]}
 
 fu! s:plug.color_install() abort
@@ -1539,11 +1376,7 @@ com! PlugInstall cal s:plug.install()
 com! PlugUnInstall cal s:plug.uninstall()
 " }}}
 
-
-" #############################################################
-" ##################        TRAINING        ###################
-" #############################################################
-" {{{
+" ##################        TRAINING        ################### {{{
 command! Popupclear cal popup_clear()
 command! -nargs=? TrainingWheelsProtocol cal TrainingWheelsProtocol(<f-args>)
 
@@ -2135,9 +1968,145 @@ fu! TrainingWheelsPracticeFileOpen(ch) abort
 endf
 
 " }}}
+" }}}
 
+" #############################################################
+" ##################    PLUGINS SETTING     ###################
+" #############################################################
+" {{{
+" ##################    PLUGIN VARIABLES    ################### {{{
+
+" coc
+let g:coc_snippet_next = '<Tab>'
+let g:coc_snippet_prev = '<S-Tab>'
+
+" vimspector
+let g:vimspector_enable_mappings = 'VISUAL_STUDIO'
+
+" fzf
+set rtp+=~/.vim/pack/plugins/start/fzf
+
+" TODO delete
+" easy motion
+let g:EasyMotion_do_mapping = 0
+let g:EasyMotion_smartcase = 1
+let g:EasyMotion_keys='swadjkhlnmf'
+
+" airline
+let g:airline_theme = 'deus'
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#buffer_idx_mode = 1
+let g:airline_powerline_fonts = 1
+
+" TODO delete
+" auto pair
+let g:AutoPairsMapCh = 0
+
+" TODO delete
+" zen
+let g:limelight_conceal_ctermfg = 'gray'
+autocmd! User GoyoEnter Limelight
+autocmd! User GoyoLeave Limelight!
+
+" startify
+" ぼっちざろっく{{{
+const g:btr_logo = [
+    \'                                                                                                                           dN',
+    \'                                                                                           ..                             JMF',
+    \'                                                                                      ..gMMMM%                           JMF',
+    \'                                                                                    .MM9^ .MF                           (MF',
+    \'                                                                           .(,      ("   .M#                  .g,      .MF',
+    \'                     .,  dN                                             gg,,M@          .M#                  .M#!      (M>',
+    \'                     JM} M#             .MNgg.                     .g,  ?M[ 7B         .MMg+gg,.           .MM"        ."',
+    \'             ...gNMN,.Mb MN           .gMM9!                      .(MN,  .=           .MMM9=  ?MN,         (WN,      .MM ',
+    \'jN-      ..gMMN#!     (Mp(M}       .+MMYMF                    ..kMMWM%               ,M#^       dN.          .WNJ,   JM',
+    \'MM     .MM9^  dN,                 dNB^ (M%                   ?M"!  ,M\        .,               .M#   .&MMMN,    ?"   M#',
+    \'MN            .MN#^                    dM:  ..(J-,                 ,B         .TM             .M#   ,M@  .MF',
+    \'MN.       ..MMBMN_                     dN_.MM@"!?MN.   TMm     .a,                           (M@         MM^',
+    \'MN.     .MM"  JMb....       ..        dMMM=     .Mb            ?HNgJ..,                   .MM^',
+    \'dM{          -MMM#7"T""   .dN#TMo       ?      .MM^                 ?!                 +gM#=',
+    \'(M]         .MN(N#       .M@  .MF              .MM^                                      ~',
+    \'.MN          ?"""             MM!            .MMD                        ',
+    \' ?N[                                         7"                                ',
+    \'  TMe                                                                          ',
+    \'   ?MN,                                                                      ',
+    \'     TMNg,                                                                     '
+    \]
+
+"}}}
+
+let g:startify_custom_header = g:btr_logo
+
+" }}}
+
+" ##################      PLUGIN KEYMAP     ################### {{{
+
+" for no override default motion, if glob( plugin path ) is need
+
+" tabline motion
+if glob('~/.vim/pack/plugins/start/vim-airline') != ''
+  nmap <silent><C-n> <Plug>AirlineSelectPrevTab
+  nmap <silent><C-p> <Plug>AirlineSelectNextTab
+endif
+
+" coc
+if glob('~/.vim/pack/plugins/start/coc.nvim') != ''
+  " file search
+  nnoremap <silent><Leader>e :CocCommand explorer --width 30<CR>
+  nnoremap <silent><leader>h :CocCommand fzf-preview.MruFiles<CR>
+  nnoremap <silent><leader>b :CocCommand fzf-preview.AllBuffers<CR>
+
+  " cursor  highlight
+  autocmd CursorHold * silent cal CocActionAsync('highlight')
+
+  " grep
+  nnoremap <Leader><Leader>s :CocList words<CR>
+
+  " jump
+  nnoremap <silent><Leader>l :CocCommand fzf-preview.Lines<CR>
+  nnoremap <silent><Leader>j :CocCommand fzf-preview.Jumps<CR>
+  nnoremap <silent><Leader>c :CocCommand fzf-preview.Changes<CR>
+
+  " completion @ coc
+  inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
+  inoremap <silent><expr> <Tab> coc#pum#visible() ? coc#pum#next(1) : "\<Tab>"
+  inoremap <silent><expr> <S-Tab> coc#pum#visible() ? coc#pum#prev(1) : "\<S-Tab>"
+
+  " IDE
+  nnoremap <Leader>d <Plug>(coc-definition)
+  nnoremap <Leader>r :CocCommand fzf-preview.CocReferences<CR>
+  nnoremap <Leader>o :CocCommand fzf-preview.CocOutline<CR>
+  nnoremap <Leader>? :cal CocAction('doHover')<CR>
+  nnoremap <Leader>, <plug>(coc-diagnostic-next)
+  nnoremap <Leader>. <plug>(coc-diagnostic-prev)
+  nnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) :  Scroll(1, 10)
+  nnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) :  Scroll(0, 10)
+endif
+
+" TODO delete
+" easy motion
+if glob('~/.vim/pack/plugins/start/vim-easymotion') != ''
+  nnoremap s <Plug>(easymotion-bd-w)
+  nnoremap <Leader>s <Plug>(easymotion-sn)
+endif
+
+" TODO delete
+" zen mode
+if glob('~/.vim/pack/plugins/start/goyo.vim') != ''
+  nnoremap <silent><Leader>z :Goyo<CR>
+endif
+
+" }}}
+" }}}
+
+" #############################################################
+" ##################        STARTING        ###################
+" #############################################################
+" {{{
 
 colorscheme torte
 if glob('~/.vim/colors/') != '' | colorscheme onedark | endif
 
+" }}}
 
+" alse see [https://github.com/serna37/vim/]
