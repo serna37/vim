@@ -1559,15 +1559,12 @@ com! PlugUnInstall cal s:plug.uninstall()
 " }}}
 
 
-
 " #############################################################
 " ##################        TRAINING        ###################
 " #############################################################
-
+" {{{
 command! Popupclear cal popup_clear()
 command! -nargs=? TrainingWheelsProtocol cal TrainingWheelsProtocol(<f-args>)
-
-" {{{
 
 fu! TrainingWheelsProtocol(...)
   if a:0 == 0
@@ -2157,18 +2154,6 @@ fu! TrainingWheelsPracticeFileOpen(ch) abort
 endf
 
 " }}}
-
-
-" TODO あとで消す
-let s:testlambda = {-> execute("let s:aaaa=popup_create('test',#{ title: 'test', border: []})")}
-""let s:aaaa = popup_create('test', #{ title: 'test', border: []})
-fu! Testtesttest()
-echo cal(s:testlambda,[])
-echo(s:aaaa)
-endf
-
-
-
 
 
 colorscheme torte
