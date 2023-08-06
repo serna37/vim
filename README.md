@@ -86,7 +86,8 @@ also see [wiki-debug](https://github.com/serna37/vim/wiki/Debug)
 - ColorInstall / PlugInstall / PlugUnInstall
 - IDE menu
 - Tab Anchor
-- interactive grep
+- Interactive Grep
+- Running Cat
 - popup terminal
 
 

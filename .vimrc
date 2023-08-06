@@ -67,6 +67,7 @@ let s:my_vim_cheet_sheet = [
       \' --[command]--------------------------------------------- ',
       \' (:PlugUnInstall)          [plugins uninstall] ',
       \' (:TrainingWheelsProtocol) [training default vim]',
+      \' (:RunCat :RunCatStop) [running cat]',
       \' -------------------------------------------------------- ',
       \' (Space*3)      [ON/OFF Cheat Sheet] ',
       \]
@@ -93,6 +94,7 @@ if glob('~/.vim/pack/plugins/start') == ''
         \' --[command]--------------------------------------------- ',
         \' (:PlugInstall)      [plugins install] ',
         \' (:TrainingWheelsProtocol) [training default vim]',
+        \' (:RunCat :RunCatStop) [running cat]',
         \' -------------------------------------------------------- ',
         \' (Space*3)      [ON/OFF Cheat Sheet] ',
         \]
@@ -136,12 +138,12 @@ if has('vim_starting')
 endif
 let s:recheatwinid = 0
 fu! PopupFever()
-  cal RunCat()
+  cal s:runcat.start()
   let s:recheatwinid = popup_create(s:my_vim_cheet_sheet, #{ title: ' Action Cheet Sheet ', border: [], line: &columns/4 })
   let s:logowinid = popup_create(g:btr_logo, #{ border: [] })
 endf
 fu! PopupFeverStop()
-  cal RunCatStop()
+  cal s:runcat.stop()
   cal popup_close(s:recheatwinid )
   cal popup_close(s:logowinid)
 endf
@@ -616,7 +618,7 @@ com! Anchor cal s:anchor.set()
 " if plugin -> switch ProjectFiles / Files
 " no plugin -> call imitated fzf
 fu! s:smartFzf(fz) abort
-  if glob('~/.vim/pack/plugins/start/coc.nvim') == '' | cal FzfStart(a:fz) | retu | endif
+  if glob('~/.vim/pack/plugins/start/coc.nvim') == '' | cal s:fzf.exe(a:fz) | retu | endif
   let pwd = system('pwd')
   try | exe 'lcd %:h' | catch | endtry
   let gitroot = system('git rev-parse --show-superproject-working-tree --show-toplevel')
@@ -725,6 +727,107 @@ fu! s:idemenu.choose(ctx, winid, key) abort
 endf
 
 com! IDEMenu cal s:idemenu.open()
+" }}}
+
+" running cat (loading animation) {{{
+let s:runcat = #{frame: 0, winid: 0, stopflg: 0}
+fu! s:runcat.animation(_) abort
+  cal setbufline(winbufnr(s:runcat.winid), 1, s:runcat.cat[s:runcat.frame])
+  let s:runcat.frame = s:runcat.frame == 4 ? 0 : s:runcat.frame + 1
+  if s:runcat.stopflg | cal popup_close(s:runcat.winid) | retu | endif
+  cal timer_start(200, s:runcat.animation)
+endf
+fu! s:runcat.stop() abort
+  let s:runcat.stopflg = 1
+endf
+fu! s:runcat.start() abort
+  let s:runcat.stopflg = 0
+  let s:runcat.winid = popup_create(s:runcat.cat[0], #{line: 1, border: [], zindex: 1})
+  cal s:runcat.animation(0)
+endf
+
+" running cat AA {{{
+let s:runcat.cat = [
+    \[
+    \ '                                                            ',
+    \ '                               =?7I=~             ~~        ',
+    \ '                            =NMMMMMMMMMD+      :+OMO:       ',
+    \ '                          ~NMMMMMMMMMMMMMMMNNMMMMMMMM=      ',
+    \ '                        :DMMMMMMMMMMMMMMMMMMMMMMMMMMMN=     ',
+    \ '                      IMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM8:     ',
+    \ '                  :$MMMMMMMMMMMMMMMMMMMMMMMMMMMM?           ',
+    \ '             :~ZMMMMMNI :DMMMMMMMMMMMMMMMMMNN$:             ',
+    \ '       :+8NMMMMMMMO~     =NMMMMMMM?  +MMD~                  ',
+    \ '     8MMMMMMM8+:           :?OMMMM+ =NMM~                   ',
+    \ '                             :DMMZ  7MM+                    ',
+    \ '                              ?NMMMMMMD:                    ',
+    \ '                                 :?777~                     ',
+    \],
+    \[
+    \ '                                                            ',
+    \ '                                                     :O~    ',
+    \ '                                          +I777ZDNMMMMMI    ',
+    \ '                        :+Z8DDDNNNNDD88NMMMMMMMMMMMMMMMM$   ',
+    \ '                     +DMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM=  ',
+    \ '                  :$MMMMMMMMMMMMMMMMMMMMMMMMMMMMMN888DMM8:  ',
+    \ '                :OMMMMMMMMMMMMMMMMMMMMMMMMMMMMMD            ',
+    \ '              ?NMMMMMMMMMMMMMMMMMMMMMMMMD?~=DMMMI           ',
+    \ '    7MMMMMMMMMMMMZ+NMMMMMMMMMNNNNN87?~: +NDDMMN~            ',
+    \ '     ~?$OZZI=:   7MMMMMMMMMN=            =DM8:              ',
+    \ '                  8MMN888$:                                 ',
+    \ '                  :DMMD$                                    ',
+    \ '                    =7$=                                    ',
+    \],
+    \[
+    \ '                                                            ',
+    \ '                                                            ',
+    \ '                         ~~++?????IIIIIIII7$77I?+I$$77OD:   ',
+    \ '              ~7ODNNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM7   ',
+    \ '         ~ZNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM?  ',
+    \ '      :$MMMMZ=?MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM$  ',
+    \ '    =NMM8~  :OMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM8: :~77   ',
+    \ '  =NMM+  :DMMMMMMMMMMMMMN+     :=OMMMMMMMMMMD$8MMMMMD?      ',
+    \ ' OMN=  ?NMMMMMMMMMMNZ+::             ::~::      IMMMMMMM$   ',
+    \ ' ::  ZMMMMMMN?:                                =MMO:  =$~   ',
+    \ '    ~8Z~DMN=                                                ',
+    \ '                                                            ',
+    \ '                                                            ',
+    \],
+    \[
+    \ '                                                            ',
+    \ '                      :IZOZI:                               ',
+    \ '                   INMMMMMMMMMD+                     ?:     ',
+    \ '                =DMMMMMMMMMMMMMMMM8$II7$OO87:  :=ODDMM+     ',
+    \ '             :OMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM8    ',
+    \ '           =NMMD+ 8MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMI   ',
+    \ '        :8MMMZ7DDDMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM7   ',
+    \ '      +NMMM7 ~MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM7           ',
+    \ '   :7MMMM7   +MMNMMMMM$: :?8NNMMMMMMMMMMNNMMMMMN:           ',
+    \ '  =DMMN?    :8MM~  :                      :8MMMMMMMMN8?:    ',
+    \ '   =~      8MMM7                             ?8MMMD+?ZNM?   ',
+    \ '            +~                                  :$NMMN7     ',
+    \ '                                                   :IDD=    ',
+    \],
+    \[
+    \ '                                                            ',
+    \ '                            ~~:                             ',
+    \ '                        =ONMMMMMMD$~                        ',
+    \ '                     +8MMMMMMMMMMMMMNZ:           :         ',
+    \ '                  ~8MMMMMMMMMMMMMMMMMMMMDD8DDDNDDM8         ',
+    \ '               =OMMMM$DMMMMMMMMMMMMMMMMMMMMMMMMMMMM+        ',
+    \ '           :OMMMMNI:  NMMMMMMM$ZNMMMMMMMMMMMMMMMMMM8:       ',
+    \ '        ~DMMMNI:    :NMMMMMMMZ   =NMMMMMMMMMMMMMMMMM=       ',
+    \ '      =NMMN+         OMMMMMD~      :ZNMMMMMMMMO  :+:        ',
+    \ '      :?=:            +MM?            7MM8 +NMMMI:          ',
+    \ '                       :NM8=           ZM$    :ZNMMMD       ',
+    \ '                         ?$=           :DMO:       II       ',
+    \ '                                        :I+                 ',
+    \]
+\]
+" }}}
+
+com! RunCat cal s:runcat.start()
+com! RunCatStop cal s:runcat.stop()
 " }}}
 
 " }}}
@@ -859,236 +962,116 @@ com! -nargs=+ ImitatedComfortableScroll cal s:scroll.exe(<f-args>)
 " junegunn/fzf.vim
 " ===================================================================
 " {{{
+let s:fzf = #{
+  \not_path_arr: [
+     \'"*/.**/*"',
+     \'"*node_modules/*"', '"*target/*"'
+     \'"*Applications/*"', '"*AppData/*"', '"*Library/*"',
+     \'"*Music/*"', '"*Pictures/*"', '"*Movies/*"', '"*Videos/*"'
+     \'"*OneDrive/*"',
+  \],
+  \chache: [],
+  \start_fz: ''
+\}
+let s:fzf.find_cmd = 'find . -type f -name "*" -not -path '.join(s:fzf.not_path_arr, ' -not -path ')
+let s:fzf.searched = execute('pwd')[1:] " first char is ^@, so trim
 
-let s:not_path_arr = [
-      \'"*/.**/*"',
-      \'"*node_modules/*"',
-      \'"*Applications/*"',
-      \'"*Library/*"',
-      \'"*Music/*"',
-      \'"*Pictures/*"',
-      \'"*Movies/*"',
-      \'"*AppData/*"',
-      \'"*OneDrive/*"',
-      \'"*Videos/*"'
-      \]
-let s:fzf_find_cmd = 'find . -type f -name "*" -not -path ' . join(s:not_path_arr, ' -not -path ')
-let s:fzf_searched_dir = execute('pwd')[1:] " first char is ^@, so trim
-let s:fzf_find_result_tmp = []
-let s:fzf_start_fz = ''
-
-fu! FzfStart(fz) " open window
-  if stridx(execute('pwd')[1:], s:fzf_searched_dir) == -1 || len(s:fzf_find_result_tmp) == 0 | cal s:fzf_re_find() | endif
-  let s:fzf_start_fz = a:fz
-  let s:fzf_mode = s:fzf_start_fz == 'fz' ? 'fzf' : 'his'
-  let s:fzf_searching_zone = s:fzf_mode == 'his' ? '(*^-^)/ BUF & MRU' : '(*"@w@)/ FZF [' . s:fzf_searched_dir . ']'
-  let s:fzf_pwd_prefix = 'pwd:[' . execute('pwd')[1:] . ']>>'
-  let s:fzf_enter_keyword = []
-  let s:fzf_his_result = map(split(execute('ls'), '\n'), { i,v -> split(filter(split(v, ' '), { i,v -> v != '' })[2], '"')[0] }) + map(split(execute('oldfiles'), '\n'), { i,v -> split(v, ': ')[1] })
-  let s:fzf_find_result = s:fzf_mode == 'his' ? s:fzf_his_result[0:29] : s:fzf_find_result_tmp[0:29]
-  let s:fzf_enter_win = popup_create(s:fzf_pwd_prefix, #{ title: 'MRU<>FZF:<Tab>/choose:<CR>/end:<Esc>/chache refresh:<C-f>',  border: [], zindex: 99, minwidth: &columns/2, maxwidth: &columns/2, maxheight: 1, line: &columns/4-&columns/36, mapping: 0, filter: function('s:fzf_refresh_result') })
-  cal s:fzf_create_choose_win()
+fu! s:fzf.exe(fz) abort " open window
+  if stridx(execute('pwd')[1:], s:fzf.searched) == -1 || empty(s:fzf.chache) | cal s:fzf.refind() | endif
+  let s:fzf.start_fz = a:fz
+  let s:fzf.mode = s:fzf.start_fz == 'fz' ? 'fzf' : 'his'
+  let s:fzf.mode_title = s:fzf.mode == 'his' ? '(*^-^)/ BUF & MRU' : '(*"@w@)/ FZF ['.s:fzf.searched.']'
+  let s:fzf.pwd_prefix = 'pwd:['.execute('pwd')[1:].']>>'
+  let s:fzf.enter_keyword = []
+  let s:fzf.his_result = split(execute('ls'), '\n')->map({ _,v -> split(split(v, ' ')->filter({ _,x -> !empty(x) })[2], '"')[0] })
+   \+split(execute('oldfiles'), '\n')->map({ _,v -> split(v, ': ')[1] })
+  let s:fzf.filterd = s:fzf.mode == 'his' ? s:fzf.his_result[0:29] : s:fzf.chache[0:29]
+  let s:fzf.winid_enter = popup_create(s:fzf.pwd_prefix, #{title: 'MRU<>FZF:<Tab>/choose:<CR>/end:<Esc>/chache refresh:<C-f>',  border: [], zindex: 99, minwidth: &columns/2, maxwidth: &columns/2, maxheight: 1, line: &columns/4-&columns/36, mapping: 0, filter: s:fzf.refresh_result})
+  cal s:fzf.open_result_win()
 endf
-fu! s:fzf_create_choose_win()
-  let s:fzf_c_idx = 0
-  let s:fzf_choose_win = popup_menu(s:fzf_find_result, #{ title: s:fzf_searching_zone, border: [], zindex: 98, minwidth: &columns/2, maxwidth: &columns/2, minheight: 2, maxheight: &lines/2, filter: function('s:fzf_choose') })
+fu! s:fzf.open_result_win() abort
+  let s:fzf.cidx = 0
+  let s:fzf.winid_result = popup_menu(s:fzf.filterd, #{title: s:fzf.mode_title, border: [], zindex: 98, minwidth: &columns/2, maxwidth: &columns/2, minheight: 2, maxheight: &lines/2, filter: s:fzf.choose})
 endf
 
-fu! s:fzf_re_find() " async find command
-  cal RunCat()
-  let s:fzf_find_result_tmp = []
-  let s:fzf_searched_dir = execute('pwd')[1:]
-  echohl WarningMsg | echo 'find files in ['.s:fzf_searched_dir.'] and chache ...' | echohl None
-  cal job_start(s:fzf_find_cmd, {'out_cb': function('s:fzf_find_start'), 'close_cb': function('s:fzf_find_end')})
+fu! s:fzf.refind() abort " async find command
+  cal s:runcat.start() | let s:fzf.chache = [] | let s:fzf.searched = execute('pwd')[1:]
+  echohl WarningMsg | echo 'find files in ['.s:fzf.searched.'] and chache ...' | echohl None
+  cal job_start(s:fzf.find_cmd, #{out_cb: s:fzf.find_start, close_cb: s:fzf.find_end})
 endf
-fu! s:fzf_find_start(ch, msg) abort
-  cal add(s:fzf_find_result_tmp, a:msg)
+fu! s:fzf.find_start(ch, msg) abort
+  cal add(s:fzf.chache, a:msg)
 endf
-fu! s:fzf_find_end(ch) abort
-  echohl Special | echo 'find files in ['.s:fzf_searched_dir.'] and chache is complete!!' | echohl None
-  cal RunCatStop()
+fu! s:fzf.find_end(ch) abort
+  echohl Special | echo 'find files in ['.s:fzf.searched.'] and chache is complete!!' | echohl None | cal s:runcat.stop()
   " after init, see fzf if specified
-  if s:fzf_start_fz == 'fz' && s:fzf_mode == 'his'
-    cal win_execute(s:fzf_enter_win, 'cal feedkeys("\<Tab>")')
-  elseif s:fzf_start_fz == 'fz' && s:fzf_mode == 'fzf'
-    cal win_execute(s:fzf_enter_win, 'cal feedkeys("\<Tab>\<Tab>")')
+  if s:fzf.start_fz == 'fz' && s:fzf.mode == 'his'
+    cal win_execute(s:fzf.winid_enter, 'cal feedkeys("\<Tab>")')
+  elseif s:fzf.start_fz == 'fz' && s:fzf.mode == 'fzf'
+    cal win_execute(s:fzf.winid_enter, 'cal feedkeys("\<Tab>\<Tab>")')
   endif
 endf
 
-fu! s:fzf_refresh_result(winid, key) abort " event to draw search result
+fu! s:fzf.refresh_result(winid, key) abort " event to draw search result
   if a:key is# "\<Esc>"
-    cal popup_close(s:fzf_enter_win)
-    cal popup_close(s:fzf_choose_win)
-    retu 1
+    cal popup_close(s:fzf.winid_enter) | cal popup_close(s:fzf.winid_result) | retu 1
   elseif a:key is# "\<CR>"
-    cal popup_close(s:fzf_enter_win)
-    retu 1
+    cal popup_close(s:fzf.winid_enter) | retu 1
   elseif a:key is# "\<C-f>"
-    cal s:fzf_re_find()
+    cal s:fzf.refind()
   elseif a:key is# "\<C-v>"
-    for i in range(0,strlen(@")-1)
-      cal add(s:fzf_enter_keyword, strpart(@",i,1))
-    endfor
+    for i in range(0,strlen(@")-1) | cal add(s:fzf.enter_keyword, strpart(@",i,1)) | endfor
   elseif a:key is# "\<Tab>"
-    let s:fzf_mode = s:fzf_mode == 'his' ? 'fzf' : 'his'
-    let s:fzf_searching_zone = s:fzf_mode == 'his' ? '(*^-^)/ BUF & MRU' : '(*"@w@)/ FZF [' . s:fzf_searched_dir . ']'
-    cal popup_close(s:fzf_choose_win)
-    if s:fzf_mode == 'his'
-      let s:fzf_find_result = len(s:fzf_enter_keyword) != 0 ? matchfuzzy(s:fzf_his_result, join(s:fzf_enter_keyword, '')) : s:fzf_his_result
+    let s:fzf.mode = s:fzf.mode == 'his' ? 'fzf' : 'his'
+    let s:fzf.mode_title = s:fzf.mode == 'his' ? '(*^-^)/ BUF & MRU' : '(*"@w@)/ FZF [' . s:fzf.searched . ']'
+    cal popup_close(s:fzf.winid_result)
+    if s:fzf.mode == 'his'
+      let s:fzf.filterd = len(s:fzf.enter_keyword) != 0 ? matchfuzzy(s:fzf.his_result, join(s:fzf.enter_keyword, '')) : s:fzf.his_result
     else
-      let s:fzf_find_result = len(s:fzf_enter_keyword) != 0 ? matchfuzzy(s:fzf_find_result_tmp, join(s:fzf_enter_keyword, '')) : s:fzf_find_result_tmp
+      let s:fzf.filterd = len(s:fzf.enter_keyword) != 0 ? matchfuzzy(s:fzf.chache, join(s:fzf.enter_keyword, '')) : s:fzf.chache
     endif
-    let s:fzf_find_result = s:fzf_find_result[0:29]
-    cal s:fzf_create_choose_win()
+    let s:fzf.filterd = s:fzf.filterd[0:29]
+    cal s:fzf.open_result_win()
     retu 1
-  elseif a:key is# "\<BS>" && len(s:fzf_enter_keyword) > 0
-    unlet s:fzf_enter_keyword[len(s:fzf_enter_keyword)-1]
-  elseif a:key is# "\<BS>" && len(s:fzf_enter_keyword) == 0
+  elseif a:key is# "\<BS>" && len(s:fzf.enter_keyword) > 0
+    unlet s:fzf.enter_keyword[len(s:fzf.enter_keyword)-1]
+  elseif a:key is# "\<BS>" && len(s:fzf.enter_keyword) == 0
   " noop
   elseif a:key is# "\<C-w>"
-    let s:fzf_enter_keyword = []
+    let s:fzf.enter_keyword = []
   elseif strtrans(a:key) == "<80><fd>`"
     " noop (for polyglot bug adhoc)
     retu
   else
-    let s:fzf_enter_keyword = add(s:fzf_enter_keyword, a:key)
+    let s:fzf.enter_keyword = add(s:fzf.enter_keyword, a:key)
   endif
 
-  if s:fzf_mode == 'his'
-    let s:fzf_find_result = len(s:fzf_enter_keyword) != 0 ? matchfuzzy(s:fzf_his_result, join(s:fzf_enter_keyword, '')) : s:fzf_his_result
+  if s:fzf.mode == 'his'
+    let s:fzf.filterd = len(s:fzf.enter_keyword) != 0 ? matchfuzzy(s:fzf.his_result, join(s:fzf.enter_keyword, '')) : s:fzf.his_result
   else
-    let s:fzf_find_result = len(s:fzf_enter_keyword) != 0 ? matchfuzzy(s:fzf_find_result_tmp, join(s:fzf_enter_keyword, '')) : s:fzf_find_result_tmp
+    let s:fzf.filterd = len(s:fzf.enter_keyword) != 0 ? matchfuzzy(s:fzf.chache, join(s:fzf.enter_keyword, '')) : s:fzf.chache
   endif
 
-  cal setbufline(winbufnr(s:fzf_enter_win), 1, s:fzf_pwd_prefix . join(s:fzf_enter_keyword, ''))
-  cal setbufline(winbufnr(s:fzf_choose_win), 1, map(range(1,30), { i,v -> '' }))
-  cal setbufline(winbufnr(s:fzf_choose_win), 1, s:fzf_find_result[0:29]) " re view only first 30 files
+  cal setbufline(winbufnr(s:fzf.winid_enter), 1, s:fzf.pwd_prefix . join(s:fzf.enter_keyword, ''))
+  cal setbufline(winbufnr(s:fzf.winid_result), 1, map(range(1,30), { i,v -> '' }))
+  cal setbufline(winbufnr(s:fzf.winid_result), 1, s:fzf.filterd[0:29]) " re view only first 30 files
   retu a:key is# "x" || a:key is# "\<Space>" ? 1 : popup_filter_menu(a:winid, a:key)
 endf
 
-fu! s:fzf_choose(winid, key) abort
-  if a:key is# 'j'
-    let s:fzf_c_idx = s:fzf_c_idx == len(s:fzf_find_result)-1 ? len(s:fzf_find_result)-1 : s:fzf_c_idx + 1
-  elseif a:key is# 'k'
-    let s:fzf_c_idx = s:fzf_c_idx == 0 ? 0 : s:fzf_c_idx - 1
-  elseif a:key is# "\<CR>"
-    retu s:fzf_open(a:winid, 'e', s:fzf_find_result[s:fzf_c_idx])
-  elseif a:key is# "\<C-v>"
-    retu s:fzf_open(a:winid, 'vnew', s:fzf_find_result[s:fzf_c_idx])
-  elseif a:key is# "\<C-t>"
-    retu s:fzf_open(a:winid, 'tabnew', s:fzf_find_result[s:fzf_c_idx])
-  endif
-  retu popup_filter_menu(a:winid, a:key)
+fu! s:fzf.choose(winid, key) abort
+  if a:key is# 'j' | let s:fzf.cidx = s:fzf.cidx == len(s:fzf.filterd)-1 ? len(s:fzf.filterd)-1 : s:fzf.cidx + 1
+  elseif a:key is# 'k' | let s:fzf.cidx = s:fzf.cidx == 0 ? 0 : s:fzf.cidx - 1
+  elseif a:key is# "\<CR>" | retu s:fzf.open(a:winid, 'e', s:fzf.filterd[s:fzf.cidx])
+  elseif a:key is# "\<C-v>" | retu s:fzf.open(a:winid, 'vnew', s:fzf.filterd[s:fzf.cidx])
+  elseif a:key is# "\<C-t>" | retu s:fzf.open(a:winid, 'tabnew', s:fzf.filterd[s:fzf.cidx])
+  endif | retu popup_filter_menu(a:winid, a:key)
 endf
-fu! s:fzf_open(winid, op, f) abort
-  cal popup_close(a:winid)
-  cal RunCatStop()
-  exe a:op a:f
-  retu 1
+fu! s:fzf.open(winid, op, f) abort
+  cal popup_close(a:winid) | cal s:runcat.stop() | exe a:op a:f | retu 1
 endf
-
 
 " }}}
 
-" run cat (load animation)
-" {{{
-let s:cat_frame = 0
-fu! s:RunCatM() abort
-  cal setbufline(winbufnr(s:runcat), 1, s:running_cat[s:cat_frame])
-  let s:cat_frame = s:cat_frame == 4 ? 0 : s:cat_frame + 1
-  if s:cat_stop == 1 | cal popup_close(s:runcat) | retu | endif
-  cal timer_start(200, { -> s:RunCatM() })
-endf
-fu! RunCatStop()
-  let s:cat_stop = 1
-endf
-fu! RunCat()
-  let s:cat_stop = 0
-  let s:runcat = popup_create(s:running_cat[0], #{line: 1, border: [], zindex: 1})
-  cal s:RunCatM()
-endf
-
-" running cat AA {{{
-const s:running_cat = [
-    \[
-    \ '                                                            ',
-    \ '                               =?7I=~             ~~        ',
-    \ '                            =NMMMMMMMMMD+      :+OMO:       ',
-    \ '                          ~NMMMMMMMMMMMMMMMNNMMMMMMMM=      ',
-    \ '                        :DMMMMMMMMMMMMMMMMMMMMMMMMMMMN=     ',
-    \ '                      IMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM8:     ',
-    \ '                  :$MMMMMMMMMMMMMMMMMMMMMMMMMMMM?           ',
-    \ '             :~ZMMMMMNI :DMMMMMMMMMMMMMMMMMNN$:             ',
-    \ '       :+8NMMMMMMMO~     =NMMMMMMM?  +MMD~                  ',
-    \ '     8MMMMMMM8+:           :?OMMMM+ =NMM~                   ',
-    \ '                             :DMMZ  7MM+                    ',
-    \ '                              ?NMMMMMMD:                    ',
-    \ '                                 :?777~                     ',
-    \],
-    \[
-    \ '                                                            ',
-    \ '                                                     :O~    ',
-    \ '                                          +I777ZDNMMMMMI    ',
-    \ '                        :+Z8DDDNNNNDD88NMMMMMMMMMMMMMMMM$   ',
-    \ '                     +DMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM=  ',
-    \ '                  :$MMMMMMMMMMMMMMMMMMMMMMMMMMMMMN888DMM8:  ',
-    \ '                :OMMMMMMMMMMMMMMMMMMMMMMMMMMMMMD            ',
-    \ '              ?NMMMMMMMMMMMMMMMMMMMMMMMMD?~=DMMMI           ',
-    \ '    7MMMMMMMMMMMMZ+NMMMMMMMMMNNNNN87?~: +NDDMMN~            ',
-    \ '     ~?$OZZI=:   7MMMMMMMMMN=            =DM8:              ',
-    \ '                  8MMN888$:                                 ',
-    \ '                  :DMMD$                                    ',
-    \ '                    =7$=                                    ',
-    \],
-    \[
-    \ '                                                            ',
-    \ '                                                            ',
-    \ '                         ~~++?????IIIIIIII7$77I?+I$$77OD:   ',
-    \ '              ~7ODNNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM7   ',
-    \ '         ~ZNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM?  ',
-    \ '      :$MMMMZ=?MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM$  ',
-    \ '    =NMM8~  :OMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM8: :~77   ',
-    \ '  =NMM+  :DMMMMMMMMMMMMMN+     :=OMMMMMMMMMMD$8MMMMMD?      ',
-    \ ' OMN=  ?NMMMMMMMMMMNZ+::             ::~::      IMMMMMMM$   ',
-    \ ' ::  ZMMMMMMN?:                                =MMO:  =$~   ',
-    \ '    ~8Z~DMN=                                                ',
-    \ '                                                            ',
-    \ '                                                            ',
-    \],
-    \[
-    \ '                                                            ',
-    \ '                      :IZOZI:                               ',
-    \ '                   INMMMMMMMMMD+                     ?:     ',
-    \ '                =DMMMMMMMMMMMMMMMM8$II7$OO87:  :=ODDMM+     ',
-    \ '             :OMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM8    ',
-    \ '           =NMMD+ 8MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMI   ',
-    \ '        :8MMMZ7DDDMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM7   ',
-    \ '      +NMMM7 ~MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM7           ',
-    \ '   :7MMMM7   +MMNMMMMM$: :?8NNMMMMMMMMMMNNMMMMMN:           ',
-    \ '  =DMMN?    :8MM~  :                      :8MMMMMMMMN8?:    ',
-    \ '   =~      8MMM7                             ?8MMMD+?ZNM?   ',
-    \ '            +~                                  :$NMMN7     ',
-    \ '                                                   :IDD=    ',
-    \],
-    \[
-    \ '                                                            ',
-    \ '                            ~~:                             ',
-    \ '                        =ONMMMMMMD$~                        ',
-    \ '                     +8MMMMMMMMMMMMMNZ:           :         ',
-    \ '                  ~8MMMMMMMMMMMMMMMMMMMMDD8DDDNDDM8         ',
-    \ '               =OMMMM$DMMMMMMMMMMMMMMMMMMMMMMMMMMMM+        ',
-    \ '           :OMMMMNI:  NMMMMMMM$ZNMMMMMMMMMMMMMMMMMM8:       ',
-    \ '        ~DMMMNI:    :NMMMMMMMZ   =NMMMMMMMMMMMMMMMMM=       ',
-    \ '      =NMMN+         OMMMMMD~      :ZNMMMMMMMMO  :+:        ',
-    \ '      :?=:            +MM?            7MM8 +NMMMI:          ',
-    \ '                       :NM8=           ZM$    :ZNMMMD       ',
-    \ '                         ?$=           :DMO:       II       ',
-    \ '                                        :I+                 ',
-    \]
-\]
-" }}}
-
-" }}}
 
 " ===================================================================
 " MattesGroeger/vim-bookmarks
@@ -1523,15 +1506,13 @@ fu! s:plug.install() abort
   let cmd = "mkdir -p ~/.vim/pack/plugins/start&&cd ~/.vim/pack/plugins/start&&repos=('".join(s:plug.repos,"' '")."')&&for v in ${repos[@]};do git clone --depth 1 https://github.com/${v};done"
     \ ."&&git clone -b release https://github.com/neoclide/coc.nvim"
     \ ."&&fzf/install --no-key-bindings --completion --no-bash --no-zsh --no-fish"
-  cal RunCat()
-  cal job_start(["/bin/zsh","-c",color_cmd]) | cal job_start(["/bin/zsh","-c",cmd], {'close_cb': s:plug.coc_setup})
+  cal s:runcat.start() | cal job_start(["/bin/zsh","-c",color_cmd]) | cal job_start(["/bin/zsh","-c",cmd], #{close_cb: s:plug.coc_setup})
   echo 'colors, plugins installing...' | cal popup_notification('colors, plugins installing...', #{border: [], line: &columns/4-&columns/37, close: 'button'})
 endf
 
 " coc extentions
 fu! s:plug.coc_setup(ch) abort
-  cal RunCatStop()
-  echohl Special | echo 'colors, plugins installed. coc-extentions installing. PLEASE REBOOT VIM after this.' | echohl None
+  cal s:runcat.stop() | echohl Special | echo 'colors, plugins installed. coc-extentions installing. PLEASE REBOOT VIM after this.' | echohl None
   cal popup_notification('colors, plugins installed. coc-extentions installing. PLEASE REBOOT VIM after this.', #{ border: [], line: &columns/4-&columns/37, close: "button" })
   exe 'source ~/.vim/pack/plugins/start/coc.nvim/plugin/coc.vim' | exe 'CocInstall '.join(s:plug.coc_extentions,' ')
   let cocconfig = ['{',
