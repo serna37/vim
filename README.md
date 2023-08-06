@@ -79,13 +79,13 @@ also see [wiki-debug](https://github.com/serna37/vim/wiki/Debug)
 - [mhinz/vim-startify](https://github.com/mhinz/vim-startify)
 - [easymotion/vim-easymotion](https://github.com/easymotion/vim-easymotion)
 - [junegunn/goyo.vim](https://github.com/junegunn/goyo.vim)
-- [junegunn/limelight.vim](https://github.com/junegunn/limelight.vim)
 
 # Original
 - cheat sheet
 - TrainingWheelsProtocol
-- PlugInstall / PlugUnInstall
+- ColorInstall / PlugInstall / PlugUnInstall
 - IDE menu
+- Tab Anchor
 - interactive grep
 - popup terminal
 
