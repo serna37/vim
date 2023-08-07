@@ -180,9 +180,9 @@ set complete=.,w,b,u,U,k,kspell,s,i,d,t " insert mode completion resource
 set completeopt=menuone,noinsert,preview,popup " insert mode completion window
 
 " completion with Tab
-inoremap <expr> <CR> pumvisible() ? '<C-y>' : '<CR>'
-inoremap <expr> <Tab> '<C-n>'
-inoremap <expr> <S-Tab> pumvisible() ? '<C-p>' : '<S-Tab>'
+inoremap <expr><CR> pumvisible() ? '<C-o>o' : '<CR>'
+inoremap <expr><Tab> '<C-n>'
+inoremap <expr><S-Tab> pumvisible() ? '<C-p>' : '<S-Tab>'
 
 " }}}
 
@@ -271,6 +271,7 @@ fu! s:smartFzf(fz) abort
   try | exe 'lcd %:h' | catch | endtry
   let gitroot = system('git rev-parse --show-superproject-working-tree --show-toplevel')
   try | exe 'lcd ' . pwd | catch | endtry
+  " TODO Filesを
   execute(!v:shell_error ? 'CocCommand fzf-preview.ProjectFiles' : 'Files')
 endf
 com! -nargs=1 SmartFzf cal s:smartFzf(<f-args>)
@@ -609,6 +610,7 @@ endf
 " completion {{{
 
 " TODO なんか変
+" TODO ~の後ろで正規表現やりに行っちゃう。=は大丈夫
 fu! s:completion()
   let exclude_completion_chars = [" ", "(", "[", "{", "<", "'", '"', "`"]
   if col('.') == 1 || match(exclude_completion_chars, getline('.')[col('.')-2]) != -1 | retu | endif
@@ -631,7 +633,6 @@ endif
 " {{{
 inoremap ( ()<LEFT>|inoremap [ []<LEFT>|inoremap { {}<LEFT>|inoremap < <><LEFT>
 inoremap ' ''<LEFT>|inoremap " ""<LEFT>|inoremap ` ``<LEFT>
-" TODO doesn't work?'
 fu! AutoPairsDelete()
   let pairs_start = ["(", "[", "{", "<", "'", '"', "`"] | let pairs_end = [")", "]", "}", ">", "'", '"', "`"]
   let pre_cursor_char = getline('.')[col('.')-2] | let on_cursor_char = getline('.')[col('.')-1]
@@ -639,8 +640,10 @@ fu! AutoPairsDelete()
   if pre_chk != -1 && pre_chk == on_chk | retu "\<RIGHT>\<BS>\<BS>" | endif
   retu "\<BS>"
 endf
-inoremap <buffer><silent><BS> <C-R>=AutoPairsDelete()<CR>
+inoremap <silent><BS> <C-R>=AutoPairsDelete()<CR>
 " }}}
+
+
 
 " ===================================================================
 " preservim/nerdtree
@@ -815,11 +818,11 @@ fu! s:scroll.stop(_) abort
   cal timer_stop(s:scroll.tid) | let s:scroll.tid = 0
 endf
 fu! s:scroll.toggle(tid) abort
-  if empty(a:tid)
+  if !a:tid
     let s:scroll.curL = execute('set cursorline?')->trim()
     let s:scroll.curC = execute('set cursorcolumn?')->trim()
     set nocursorline nocursorcolumn
-    cal s:fmode.deactivate()
+    cal timer_start(0, { -> execute('cal s:fmode.deactivate()')}) " for coc, async
     retu
   endif
   if s:scroll.curL !~'^no' | set cursorline | endif
@@ -827,6 +830,12 @@ fu! s:scroll.toggle(tid) abort
   cal s:fmode.takeover()
 endf
 com! -nargs=+ ImitatedComfortableScroll cal s:scroll.exe(<f-args>)
+
+" for coc
+fu! Scroll(vec, del) abort
+  cal s:scroll.exe(a:vec, a:del)
+  retu "\<Ignore>"
+endf
 " }}}
 
 " ===================================================================
@@ -2114,8 +2123,9 @@ if glob('~/.vim/pack/plugins/start/coc.nvim') != ''
   nnoremap <Leader>? :cal CocAction('doHover')<CR>
   nnoremap <Leader>, <plug>(coc-diagnostic-next)
   nnoremap <Leader>. <plug>(coc-diagnostic-prev)
-  nnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) :  Scroll(1, 10)
-  nnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) :  Scroll(0, 10)
+  " TODO exprがうざい、clearmatchとかできない
+  nnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : Scroll(1, 10)
+  nnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : Scroll(0, 10)
 endif
 
 " TODO delete
