@@ -207,7 +207,6 @@ nnoremap <Leader>s /
 
 " grep result -> quickfix
 au QuickFixCmdPost *grep* cwindow
-if executable('rg') | let &grepprg = 'rg --vimgrep --hidden' | set grepformat=%f:%l:%c:%m | endif
 
 " explorer
 filetype plugin on
@@ -577,7 +576,7 @@ endf
 nnoremap <silent><Leader><Leader><Leader> :cal PopupFever()<CR>:cal ToggleCheatHover()<CR>
 let s:show_cheat_sheet_flg = 0
 fu! CheatAlert(tid)
-  execute("echohl ErrorMsg | echo '[INFO] Space * 3 to enable cheat sheet !!' | echohl None")
+  execute("echohl WarningMsg | echo '[INFO] Space * 3 to enable cheat sheet !!' | echohl None")
 endf
 if has('vim_starting')
   cal timer_start(200, function("CheatAlert"))
@@ -698,20 +697,24 @@ endf
 " {{{
 
 " status line with git info
-const g:right_arrow = '' | const g:left_arrow = ''
-const g:modes = {'i': ['#OneDarkBule#', '#OneDarkBlueChar#', 'INSERT'], 'n': ['#OneDarkGreen#', '#OneDarkGreenChar#', 'NORMAL'], 'R': ['#OneDarkRed#', '#OneDarkRedChar#', 'REPLACE'], 'c': ['#OneDarkGreen#', '#OneDarkGreenChar#', 'COMMAND'], 't': ['#OneDarkRed#', '#OneDarkRedChar#', 'TERMIAL'], 'v': ['#OneDarkPink#', '#OneDarkPinkChar#', 'VISUAL'], 'V': ['#OneDarkPink#', '#OneDarkPinkChar#', 'VISUAL'], "\<C-v>": ['#OneDarkPink#', '#OneDarkPinkChar#', 'VISUAL']}
+let g:right_arrow = '' | let g:left_arrow = ''
+let powerline_chk_mac = trim(system('fc-list | grep powerline | wc -l'))
+let powerline_chk_win = trim(system('cd /C/Windows/Fonts&&ls | grep powerline | wc -l'))
+if !powerline_chk_mac+0 && !powerline_chk_win+0 | let g:right_arrow = '▶︎' | let g:left_arrow = '◀︎' | endif
+let g:modes = {'i': ['#OneDarkBule#', '#OneDarkBlueChar#', 'INSERT'], 'n': ['#OneDarkGreen#', '#OneDarkGreenChar#', 'NORMAL'], 'R': ['#OneDarkRed#', '#OneDarkRedChar#', 'REPLACE'], 'c': ['#OneDarkGreen#', '#OneDarkGreenChar#', 'COMMAND'], 't': ['#OneDarkRed#', '#OneDarkRedChar#', 'TERMIAL'], 'v': ['#OneDarkPink#', '#OneDarkPinkChar#', 'VISUAL'], 'V': ['#OneDarkPink#', '#OneDarkPinkChar#', 'VISUAL'], "\<C-v>": ['#OneDarkPink#', '#OneDarkPinkChar#', 'VISUAL']}
 
-const g:ff_table = {'dos' : 'CRLF', 'unix' : 'LF', 'mac' : 'CR'}
+let g:ff_table = {'dos' : 'CRLF', 'unix' : 'LF', 'mac' : 'CR'}
 let g:gitinf = 'no git '
 fu! s:gitinfo() abort
   try | cal system('git status') | catch | retu | endtry
   if trim(system('cd '.expand('%:h').' && git status')) =~ "^fatal:" | let g:gitinf = 'no repo ' | retu | endif
+  " TODO gitstatus結果を使いまわした方が早い？
   let cmd = "cd ".expand('%:h')." && git status --short | awk -F ' ' '{print($1)}' | grep -c "
   let a = trim(system(cmd."'A'")) | let aa = a !='0'?'+'.a :''
   let m = trim(system(cmd."-e 'M' -e 'D'")) | let mm = m !='0'?'!'.m :''
   let nw = trim(system(cmd."'??'")) | let nwnw = nw !='0'?'?'.nw :''
   let er = trim(system(cmd."'U'")) | let ee = er !='0'?'✗'.er :''
-  let g:gitinf = trim(system("git branch | awk -F '*' '{print($2)}'")).join([aa,mm,nwnw,ee],' ')
+  let g:gitinf = trim(system("cd ".expand('%:h')."&&git branch | awk -F '*' '{print($2)}'")).join([aa,mm,nwnw,ee],' ')
 endf
 
 aug statusLine
@@ -735,7 +738,7 @@ fu! g:SetStatusLine() abort
   let filetype_tmp = split(execute('set filetype?'), '=')
   let filetype = len(filetype_tmp) >= 2 ? filetype_tmp[1] : ''
   let mode = match(keys(g:modes), mode()) != -1 ? g:modes[mode()] : ['#OneDarkRed#', '#OneDarkRedChar#', 'SP']
-  retu '%'.mode[0].' '.mode[2].' '.'%'.mode[1].g:right_arrow.'%#OneDarkBlackArrow#'.g:right_arrow.'%#OneDarkChar# %<%F%m%r%h%w %#OneDarkGrayArrow#'.g:right_arrow.'%#OneDarkGreenChar# %{g:gitinf}%#OneDarkBlackArrow#'.g:right_arrow.'%#StatusLine# %=%#OneDarkBlackArrow#'.g:left_arrow.'%#OneDarkGreenChar# '.filetype.' %#OneDarkGrayArrow#'.g:left_arrow.'%#OneDarkChar# %p%% %l/%L %02v%#OneDarkBlackArrow#'.g:left_arrow.'%'.mode[1].g:left_arrow.'%'.mode[0].' [%{&fenc!=""?&fenc:&enc}][%{g:ff_table[&ff]}] %*'
+  retu '%'.mode[0].' '.mode[2].' '.'%'.mode[1].g:right_arrow.'%#OneDarkBlackArrow#'.g:right_arrow.'%#OneDarkChar# %<%f%m%r%h%w %#OneDarkGrayArrow#'.g:right_arrow.'%#OneDarkGreenChar# %{g:gitinf}%#OneDarkBlackArrow#'.g:right_arrow.'%#StatusLine# %=%#OneDarkBlackArrow#'.g:left_arrow.'%#OneDarkGreenChar# '.filetype.' %#OneDarkGrayArrow#'.g:left_arrow.'%#OneDarkChar# %p%% %l/%L %02v%#OneDarkBlackArrow#'.g:left_arrow.'%'.mode[1].g:left_arrow.'%'.mode[0].' [%{&fenc!=""?&fenc:&enc}][%{g:ff_table[&ff]}] %*'
 endf
 set stl=%!g:SetStatusLine()
 
@@ -754,7 +757,8 @@ fu! s:buffers_label() abort
       let hiar = stridx(x[1], '%') != -1 ? '%#OneDarkGreenChar#' : '%#OneDarkGrayArrow#'
       let hiarb = stridx(x[1], '%') != -1 ? '%#OneDarkGreenArrowBottom#' : '%#OneDarkBlackArrow#'
       if x[2] == '+' | let hi = '%#OneDarkBlueThin#' | let hiar = '%#OneDarkBlueChar#' | let hiarb = '%#OneDarkBlueThin#' | endif
-      let f = x[2] == '+' ? '✗'.join(split(x[3],'"'),'') : join(split(x[2],'"'),'') | let b = b.'%'.x[0].'T'.hiarb.g:right_arrow.hi.f.hiar.g:right_arrow
+"[^/]*$
+      let f = x[2] == '+' ? '✗'.matchstr(join(split(x[3],'"'),''),'[^/]*$') : matchstr(join(split(x[2],'"'),''),'[^/]*$') | let b = b.'%'.x[0].'T'.hiarb.g:right_arrow.hi.f.hiar.g:right_arrow
     endif
   endfor | retu b
 endf
@@ -843,14 +847,16 @@ let s:fzf = #{
 let s:fzf.find_cmd = 'find . -type f -name "*" -not -path '.join(s:fzf.not_path_arr, ' -not -path ')
 let s:fzf.searched = execute('pwd')[1:] " first char is ^@, so trim
 
+" TODO modeの管理下手なので直そうな
 fu! s:fzf.exe(fz) abort " open window
   if stridx(execute('pwd')[1:], s:fzf.searched) == -1 || empty(s:fzf.chache) | cal s:fzf.refind() | endif
   let s:fzf.start_fz = a:fz
   let s:fzf.mode = s:fzf.start_fz == 'fz' ? 'fzf' : 'his'
-  let s:fzf.mode_title = s:fzf.mode == 'his' ? '(*^-^)/ BUF & MRU' : '(*"@w@)/ FZF ['.s:fzf.searched.']'
-  let s:fzf.pwd_prefix = 'pwd:['.execute('pwd')[1:].']>>'
+  let s:fzf.mode_title = s:fzf.mode == 'his' ? '(*^-^)/ BUF & MRU' : '(*"@w@)/ FZF ['.(empty(matchstr(s:fzf.searched, '[^'.$HOME.'].*$')) ? s:fzf.searched : '~/'.matchstr(s:fzf.searched, '[^'.$HOME.'].*$')).']'
+  let pwd = execute('pwd')[1:]
+  let s:fzf.pwd_prefix = 'pwd:['.(empty(matchstr(pwd, '[^'.$HOME.'].*$')) ? pwd : '~/'.matchstr(pwd, '[^'.$HOME.'].*$')).']>>'
   let s:fzf.enter_keyword = []
-  let s:fzf.his_result = split(execute('ls'), '\n')->map({ _,v -> split(split(v, ' ')->filter({ _,x -> !empty(x) })[2], '"')[0] })
+  let s:fzf.his_result = split(execute('ls'), '\n')->map({ _,v -> split(v, '"')[1] })->filter({ _,v -> v != '[No Name]' && v != '[無名]' })
    \+split(execute('oldfiles'), '\n')->map({ _,v -> split(v, ': ')[1] })
   let s:fzf.filterd = s:fzf.mode == 'his' ? s:fzf.his_result[0:29] : s:fzf.chache[0:29]
   let s:fzf.winid_enter = popup_create(s:fzf.pwd_prefix, #{title: 'MRU<>FZF:<Tab>/choose:<CR>/end:<Esc>/chache refresh:<C-f>',  border: [], zindex: 99, minwidth: &columns/2, maxwidth: &columns/2, maxheight: 1, line: &columns/4-&columns/36, mapping: 0, filter: s:fzf.refresh_result})
@@ -890,7 +896,7 @@ fu! s:fzf.refresh_result(winid, key) abort " event to draw search result
     for i in range(0,strlen(@")-1) | cal add(s:fzf.enter_keyword, strpart(@",i,1)) | endfor
   elseif a:key is# "\<Tab>"
     let s:fzf.mode = s:fzf.mode == 'his' ? 'fzf' : 'his'
-    let s:fzf.mode_title = s:fzf.mode == 'his' ? '(*^-^)/ BUF & MRU' : '(*"@w@)/ FZF [' . s:fzf.searched . ']'
+  let s:fzf.mode_title = s:fzf.mode == 'his' ? '(*^-^)/ BUF & MRU' : '(*"@w@)/ FZF ['.(empty(matchstr(s:fzf.searched, '[^'.$HOME.'].*$')) ? s:fzf.searched : '~/'.matchstr(s:fzf.searched, '[^'.$HOME.'].*$')).']'
     cal popup_close(s:fzf.winid_result)
     if s:fzf.mode == 'his'
       let s:fzf.filterd = len(s:fzf.enter_keyword) != 0 ? matchfuzzy(s:fzf.his_result, join(s:fzf.enter_keyword, '')) : s:fzf.his_result
@@ -1368,7 +1374,10 @@ fu! s:plug.install() abort
   let cmd = "mkdir -p ~/.vim/pack/plugins/start&&cd ~/.vim/pack/plugins/start&&repos=('".join(s:plug.repos,"' '")."')&&for v in ${repos[@]};do git clone --depth 1 https://github.com/${v};done"
     \ ."&&git clone -b release https://github.com/neoclide/coc.nvim"
     \ ."&&fzf/install --no-key-bindings --completion --no-bash --no-zsh --no-fish"
-  cal s:runcat.start() | cal job_start(["/bin/zsh","-c",color_cmd]) | cal job_start(["/bin/zsh","-c",cmd], #{close_cb: s:plug.coc_setup})
+let cmd = "mkdir -p ~/.vim/pack/plugins/start&&cd ~/.vim/pack/plugins/start"
+    \ ."&&git clone -b release https://github.com/neoclide/coc.nvim"
+  ""cal s:runcat.start() | cal job_start(["/bin/zsh","-c",color_cmd]) | cal job_start(["/bin/zsh","-c",cmd], #{close_cb: s:plug.coc_setup})
+  cal s:runcat.start() | cal job_start(["/bin/zsh","-c",cmd], #{close_cb: s:plug.coc_setup})
   echo 'colors, plugins installing...' | cal popup_notification('colors, plugins installing...', #{border: [], line: &columns/4-&columns/37, close: 'button'})
 endf
 
@@ -2008,8 +2017,9 @@ let g:coc_snippet_prev = '<S-Tab>'
 " vimspector
 let g:vimspector_enable_mappings = 'VISUAL_STUDIO'
 
-" fzf
+" fzf run time path(git, homebrew)
 set rtp+=~/.vim/pack/plugins/start/fzf
+set rtp+=/opt/homebrew/opt/fzf
 
 " TODO delete
 " easy motion
@@ -2035,7 +2045,7 @@ autocmd! User GoyoLeave Limelight!
 
 " startify
 " ぼっちざろっく{{{
-const g:btr_logo = [
+let g:btr_logo = [
     \'                                                                                                                           dN',
     \'                                                                                           ..                             JMF',
     \'                                                                                      ..gMMMM%                           JMF',
