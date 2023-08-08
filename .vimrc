@@ -29,6 +29,23 @@
 " ==============================================================================
 let mapleader = "\<SPACE>"
 
+
+
+
+" TODO
+" signがjump機能とかもあるのでマークを変えられる
+" yes/no はconfirm
+" スペルチェックできる
+" jumplist, changelistも出せる
+" centerコマンドで、文字を中央よせできる
+
+
+
+
+
+
+
+
 " #############################################################
 " ###############      BASIC VIM SETTINGS       ###############
 " #############################################################
@@ -180,7 +197,7 @@ set complete=.,w,b,u,U,k,kspell,s,i,d,t " insert mode completion resource
 set completeopt=menuone,noinsert,preview,popup " insert mode completion window
 
 " completion with Tab
-inoremap <expr><CR> pumvisible() ? '<C-o>o' : '<CR>'
+inoremap <expr><CR> pumvisible() ? '<C-y>' : '<CR>'
 inoremap <expr><Tab> '<C-n>'
 inoremap <expr><S-Tab> pumvisible() ? '<C-p>' : '<S-Tab>'
 
@@ -609,16 +626,26 @@ endf
 
 " completion {{{
 
-" TODO なんか変
 " TODO ~の後ろで正規表現やりに行っちゃう。=は大丈夫
-fu! s:completion()
-  let exclude_completion_chars = [" ", "(", "[", "{", "<", "'", '"', "`"]
-  if col('.') == 1 || match(exclude_completion_chars, getline('.')[col('.')-2]) != -1 | retu | endif
-  if !pumvisible() | cal feedkeys("\<Tab>") | endif
+""let s:completion = #{exclude: [" ()[]{}<>'`".'"'], confirmed: 0, done: {-> execute('let s:completion.confirmed = 1')}}
+let s:completion = #{exclude: [" ~()[]{}<>'`".'"'], confirmed: 0, done: {-> execute('let s:completion.confirmed = 1')}}
+fu! s:completion.exe() dict abort
+  if self.confirmed | let self.confirmed = 0 | retu | endif
+  if col('.') == 1 || match(self.exclude, getline('.')[col('.')-2]) != -1 | retu | endif
+  if !pumvisible() | cal feedkeys("\<C-n>") | endif
 endf
 if glob('~/.vim/pack/plugins/start/coc.nvim')  == ''
-  autocmd TextChangedI,TextChangedP * silent cal s:completion()
+  au TextChangedI,TextChangedP * silent cal s:completion.exe()
+  au CompleteDone * silent cal s:completion.done()
 endif
+
+
+" TODO lambdaで遊ぶ
+let Ftest_function = {v -> 'sdasd'}
+call call(Ftest_function, ['aaa'])
+
+
+
 
 
 " }}}
@@ -640,8 +667,15 @@ fu! AutoPairsDelete()
   if pre_chk != -1 && pre_chk == on_chk | retu "\<RIGHT>\<BS>\<BS>" | endif
   retu "\<BS>"
 endf
-inoremap <silent><BS> <C-R>=AutoPairsDelete()<CR>
+" TODO ~の後ろで正規表現やりに行っちゃう。=は大丈夫
+inoremap <silent><expr><BS> AutoPairsDelete()
+""inoremap <silent><BS> <C-r>=AutoPairsDelete()
 " }}}
+
+
+
+
+
 
 
 
