@@ -1,5 +1,6 @@
 " vim:set foldmethod=marker:
-" ==============================================================================
+" =====================         CONTENTS         ===============================
+" ============================================================================== {{{
 " alse see [https://github.com/serna37/vim/]
 "  CONTENTS
 "
@@ -28,30 +29,13 @@
 "
 " ==============================================================================
 let mapleader = "\<SPACE>"
-
-
-
-
-" TODO
-" signがjump機能とかもあるのでマークを変えられる
-" yes/no はconfirm
-" スペルチェックできる
-" jumplist, changelistも出せる
-" centerコマンドで、文字を中央よせできる
-
-
-
-
-
-
-
+" }}}
 
 " #############################################################
 " ###############      BASIC VIM SETTINGS       ###############
 " #############################################################
 " {{{
 " ##################          FILE          ################### {{{
-
 " file
 set fileformat=unix " LF
 set fileencoding=utf8 " charset
@@ -68,11 +52,9 @@ set clipboard+=unnamed " copy yanked fot clipboard
 aug reopenGoRow
   au BufRead * if line("'\"") > 0 && line("'\"") <= line("$") | exe "norm g`\"" | endif
 aug END
-
 " }}}
 
 " ##################     VISUALIZATION      ################### {{{
-
 " enable syntax highlight
 syntax on
 
@@ -95,63 +77,74 @@ set ruler " show row/col position number at right bottom
 
 " show status, tabline
 set laststatus=2 showtabline=2
-
 " }}}
 
 " ##################         WINDOW        ################### {{{
-
-" just like
 " simeji/winresizer
 " window forcus move
-nnoremap <C-h> <C-w>h|nnoremap <C-l> <C-w>l|nnoremap <C-k> <C-w>k|nnoremap <C-j> <C-w>j
-tnoremap <C-h> <C-w>h|tnoremap <C-l> <C-w>l|tnoremap <C-k> <C-w>k|tnoremap <C-j> <C-w>j
+nnoremap <C-h> <C-w>h
+nnoremap <C-l> <C-w>l
+nnoremap <C-k> <C-w>k
+nnoremap <C-j> <C-w>j
+tnoremap <C-h> <C-w>h
+tnoremap <C-l> <C-w>l
+tnoremap <C-k> <C-w>k
+tnoremap <C-j> <C-w>j
 " window resize
-nnoremap <Left> 4<C-w><|nnoremap <Right> 4<C-w>>|nnoremap <Up> 4<C-w>-|nnoremap <Down> 4<C-w>+
+nnoremap <Left> 4<C-w><
+nnoremap <Right> 4<C-w>>
+nnoremap <Up> 4<C-w>-
+nnoremap <Down> 4<C-w>+
 
 " move buffer
-nnoremap <silent><C-n> :MoveBufPrev<CR>
-nnoremap <silent><C-p> :MoveBufNext<CR>
+nnoremap <silent><C-n> <Plug>(buf-prev)
+nnoremap <silent><C-p> <Plug>(buf-next)
 " close buffer
-nnoremap <silent><Leader>x :CloseBuf<CR>
+nnoremap <silent><Leader>x <Plug>(buf-close)
 
 " terminal
 "nnoremap <silent><Leader>t :bo terminal ++rows=10<CR>
-nnoremap <silent><Leader>t :cal popup_create(term_start([&shell], #{hidden: 1, term_finish:'close'}), #{border: [], minwidth: &columns/2+&columns/4, minheight: &lines/2+&lines/4})<CR>
+nnoremap <silent><Leader>t :cal popup_create(term_start([&shell],#{hidden:1,term_finish:'close'}),#{border:[],minwidth:&columns*3/4,minheight:&lines*3/4})<CR>
 " terminal read only mode (i to return terminal mode)
 tnoremap <Esc> <C-w>N
 
 " zen
-nnoremap <silent><Leader>z :ImitatedZenModeToggle<CR>
-
+nnoremap <silent><Leader>z <Plug>(zen-mode)
 " }}}
 
 " ##################         MOTION         ################### {{{
-
 " row move
-nnoremap j gj|nnoremap k gk
-nnoremap <silent><Tab> 5gj:Anchor<CR>|nnoremap <silent><S-Tab> 5gk:Anchor<CR>|vnoremap <Tab> 5gj|vnoremap <S-Tab> 5gk
+nnoremap j gj
+nnoremap k gk
+vnoremap <Tab> 5gj
+vnoremap <S-Tab> 5gk
+nnoremap <silent><Tab> 5j<Plug>(anchor)
+nnoremap <silent><S-Tab> 5k<Plug>(anchor)
 
 " comfortable scroll
-nnoremap <silent><C-u> :ImitatedComfortableScroll 0 30<CR>|nnoremap <silent><C-d> :ImitatedComfortableScroll 1 30<CR>
-nnoremap <silent><C-b> :ImitatedComfortableScroll 0 10<CR>|nnoremap <silent><C-f> :ImitatedComfortableScroll 1 10<CR>
+nnoremap <silent><C-u> <Plug>(scroll-u)
+nnoremap <silent><C-d> <Plug>(scroll-d)
+nnoremap <silent><C-b> <Plug>(scroll-b)
+nnoremap <silent><C-f> <Plug>(scroll-f)
 
 " f-scope toggle
-nnoremap <silent><Leader>w :ImitatedQuickScopeToggle<CR>
+nnoremap <silent><Leader>w <Plug>(f-scope)
 
 " mark
-nnoremap <silent>mm :ImitatedBookmarksMarkToggle<CR>
-nnoremap <silent>mn :ImitatedBookmarksHankDown<CR>
-nnoremap <silent>mp :ImitatedBookmarksHankUp<CR>
-nnoremap <silent>mc :ImitatedBookmarksClear<CR>
-nnoremap <silent><Leader>m :ImitatedBookmarksList<CR>
+nnoremap <silent>mm <Plug>(mk-toggle)
+nnoremap <silent>mp <Plug>(mk-prev)
+nnoremap <silent>mn <Plug>(mk-next)
+nnoremap <silent>mc <Plug>(mk-clthis)
+nnoremap <silent>mx <Plug>(mk-clall)
+nnoremap <silent><Leader>m <Plug>(mk-list)
+" TODO mark全体リスト
+" TODO mi で annotation
 
 " IDE action menu
-nnoremap <silent><Leader>v :IDEMenu<CR>
-
+nnoremap <silent><Leader>v <Plug>(ide-menu)
 " }}}
 
 " ##################         EDIT           ################### {{{
-
 " basic
 set virtualedit=all " virtual cursor movement
 set whichwrap=b,s,h,l,<,>,[,],~ " motion over row
@@ -162,25 +155,31 @@ set showmatch " jump pair of parentheses when write
 set matchtime=3 " jump term sec
 
 " move cursor at insert mode
-inoremap <C-h> <C-o>h|inoremap <C-l> <C-o>l|inoremap <C-k> <C-o>k|inoremap <C-j> <C-o>j
+inoremap <C-h> <C-o>h
+inoremap <C-l> <C-o>l
+inoremap <C-k> <C-o>k
+inoremap <C-j> <C-o>j
 
 " d = delete(no clipboard)
-nnoremap d "_d|vnoremap d "_d
+nnoremap d "_d
+vnoremap d "_d
 
 " x = cut(yank register)
-nnoremap x "+x|vnoremap x "+x
+nnoremap x "+x
+vnoremap x "+x
 
 " p P = paste(from yank register)
-nnoremap p "+p|nnoremap P "+P
-vnoremap p "+p|vnoremap P "+P
+nnoremap p "+p
+nnoremap P "+P
+vnoremap p "+p
+vnoremap P "+P
 
 " block move at visual mode
-vnoremap <C-j> "zx"zp`[V`]|vnoremap <C-k> "zx<Up>"zP`[V`]
-
+vnoremap <C-j> "zx"zp`[V`]
+vnoremap <C-k> "zx<Up>"zP`[V`]
 " }}}
 
 " ##################       COMPLETION       ################### {{{
-
 " indent
 set autoindent " uses the indent from the previous line
 set smartindent " more smart indent than autoindent
@@ -200,11 +199,9 @@ set completeopt=menuone,noinsert,preview,popup " insert mode completion window
 inoremap <expr><CR> pumvisible() ? '<C-y>' : '<CR>'
 inoremap <expr><Tab> '<C-n>'
 inoremap <expr><S-Tab> pumvisible() ? '<C-p>' : '<S-Tab>'
-
 " }}}
 
 " ##################         SEARCH         ################### {{{
-
 " search
 set incsearch " incremental search
 set hlsearch " highlight match words
@@ -213,37 +210,37 @@ set smartcase " don't ignore case when enterd UPPER CASE"
 set shortmess-=S " show hit word's number at right bottom
 
 " no move search word with multi highlight
-nnoremap <silent>* *N:ImitatedQuickHighlight<CR>
-nnoremap <silent># *N:ImitatedQuickHighlight<CR>
-nnoremap <silent><Leader>q :ImitatedQuickHighlightClear<CR>
+nnoremap <silent>* *N<Plug>(qikhl-toggle)
+nnoremap <silent># *N<Plug>(qikhl-toggle)
+nnoremap <silent><Leader>q <Plug>(qikhl-clear):noh<CR>
 
 " incremental search
-nnoremap <silent>s :ImitatedEasymotion<CR>
+nnoremap <silent>s <Plug>(emotion)
 nnoremap <Leader>s /
-" TODO wip
+" TODO wip easymotion incremental search
 
 " grep result -> quickfix
 au QuickFixCmdPost *grep* cwindow
 
 " explorer
 filetype plugin on
-let g:netrw_liststyle = 3 | let g:netrw_altv = 1 | let g:netrw_winsize = 70
-nnoremap <silent><Leader>e :cal NetrwToggle()<CR>
+let g:netrw_liststyle = 3
+let g:netrw_altv = 1
+let g:netrw_winsize = 70
+nnoremap <silent><Leader>e <Plug>(explorer-toggle)
 
 " fzf || fzf-imitation
-nnoremap <silent><leader>f :SmartFzf fz<CR>
-nnoremap <silent><leader>h :SmartFzf his<CR>
-nnoremap <silent><leader>b :SmartFzf buf<CR>
+nnoremap <silent><leader>f <Plug>(smartfzf-fzf)
+nnoremap <silent><leader>h <Plug>(smartfzf-his)
+nnoremap <silent><leader>b <Plug>(smartfzf-buf)
 
 " ripgrep || grep
-nnoremap <silent><Leader>g :Grep<CR>
+nnoremap <silent><Leader>g <Plug>(grep)
 " vimgrep current file
-nnoremap <silent><Leader><Leader>s :GrepCurrent<CR>
-
+nnoremap <silent><Leader><Leader>s <Plug>(grep-current)
 " }}}
 
 " ##################         OTHERS         ################### {{{
-
 " basic
 scriptencoding utf-8 " this file's charset
 set ttyfast " fast terminal connection
@@ -252,9 +249,8 @@ set regexpengine=0 " chose regexp engin
 " fold
 set foldmethod=marker " fold marker
 set foldlevel=0 " fold max depth
-set foldlevelstart=0 " fold depth on start view
+set foldlevelstart=1 " fold depth on start view
 set foldcolumn=1 " fold preview
-
 " }}}
 " }}}
 
@@ -264,152 +260,323 @@ set foldcolumn=1 " fold preview
 " {{{
 " ##################       ORIGINALS        ################### {{{
 
+" TODO リファクタ順番 dict functions aug Plug その他にしよう
+
+" TODO echo色をこれ使うように統一
+" color echo/echon, input {{{
+au ColorScheme * hi DarkRed ctermfg=204
+au ColorScheme * hi DarkOrange ctermfg=180
+au ColorScheme * hi DarkBlue ctermfg=39
+
+fu! EchoE(msg, ...) abort
+    echohl DarkRed | exe printf('echo%s "%s"', a:0 ? 'n' : '', a:msg) | echohl None
+endf
+
+fu! EchoW(msg, ...) abort
+    echohl DarkOrange | exe printf('echo%s "%s"', a:0 ? 'n' : '', a:msg) | echohl None
+endf
+
+fu! EchoI(msg, ...) abort
+    echohl DarkBlue | exe printf('echo%s "%s"', a:0 ? 'n' : '', a:msg) | echohl None
+endf
+
+fu! InputE(msg, ...) abort
+    echohl DarkRed
+    if !a:0
+        let w = input(a:msg)
+    elseif a:0 == 1
+        let w = input(a:msg, a:1)
+    elseif a:0 == 2
+        let w = input(a:msg, a:1, a:2)
+    endif
+    echohl None
+    retu w
+endf
+fu! InputW(msg, ...) abort
+    echohl DarkOrange
+    if !a:0
+        let w = input(a:msg)
+    elseif a:0 == 1
+        let w = input(a:msg, a:1)
+    elseif a:0 == 2
+        let w = input(a:msg, a:1, a:2)
+    endif
+    echohl None
+    retu w
+endf
+fu! InputI(msg, ...) abort
+    echohl DarkBlue
+    if !a:0
+        let w = input(a:msg)
+    elseif a:0 == 1
+        let w = input(a:msg, a:1)
+    elseif a:0 == 2
+        let w = input(a:msg, a:1, a:2)
+    endif
+    echohl None
+    retu w
+endf
+" }}}
+
 " tab 5row anchor {{{
-sign define anch text=> texthl=Identifier
-let s:anchor = #{tid: 0}
+sign define anch text=> texthl=DarkRed
+let s:anchor = #{tid: 0,
+    \ getlines: { l -> l-5 > 0 ? [l-5, l, l+5] : [l, l+5] },
+    \ put: { f, l -> sign_place(0, 'anchor', 'anch', f, #{lnum: l}) },
+    \ rm: { tid -> sign_unplace('anchor') },
+    \ }
+
 fu! s:anchor.set() abort
-  cal timer_stop(s:anchor.tid) | cal s:anchor.rm(0) | let u=line('.')+5 | let d=line('.')-5
-  exe 'sign place 99 line='.u.' name=anch' | exe 'sign place 101 line='.line('.').' name=anch'
-  if d > 0 | exe 'sign place 100 line='.d.' name=anch' '' | endif
-  let s:anchor.tid = timer_start(2000, s:anchor.rm)
+    cal timer_stop(self.tid) | cal self.rm(0)
+    cal self.getlines(line('.'))->map({ _,v -> self.put(bufname('%'), v) })
+    let self.tid = timer_start(2000, self.rm)
 endf
-fu! s:anchor.rm(tid) abort
-  exe 'sign unplace 99' | exe 'sign unplace 100' | exe 'sign unplace 101'
-endf
-com! Anchor cal s:anchor.set()
+
+let s:anchor = s:anchor.set
+noremap <Plug>(anchor) :<C-u>cal <SID>anchor()<CR>
 " }}}
 
 " switch fzf {{{
-" if plugin -> switch ProjectFiles / Files
 " no plugin -> call imitated fzf
-fu! s:smartFzf(fz) abort
-  if glob('~/.vim/pack/plugins/start/coc.nvim') == '' | cal s:fzf.exe(a:fz) | retu | endif
-  let pwd = system('pwd')
-  try | exe 'lcd %:h' | catch | endtry
-  let gitroot = system('git rev-parse --show-superproject-working-tree --show-toplevel')
-  try | exe 'lcd ' . pwd | catch | endtry
-  " TODO Filesを
-  execute(!v:shell_error ? 'CocCommand fzf-preview.ProjectFiles' : 'Files')
+" plugin coc.nvim enable -> switch ProjectFiles / Files
+" plugin coc.nvim enable -> switch ProjectFiles / imitated fzf
+" TODO Filesをimitationに置き換えたいね！
+" TODO fzf mode フラグ管理変えるfz->fzf
+fu! s:smartFzf(mode) abort
+    if !exists(':Coc') | retu s:fzf.exe(a:mode) | endif
+    let pwd = getcwd() | cal expand('%:h')->chdir()
+    let gitroot = system('git rev-parse --show-superproject-working-tree --show-toplevel')
+    cal chdir(pwd) | execute(!v:shell_error ? 'CocCommand fzf-preview.ProjectFiles' : 'Files')
 endf
-com! -nargs=1 SmartFzf cal s:smartFzf(<f-args>)
+
+" TODO fzfの検索候補はもう1ページのみにして、hisからls除いたやつ + ls + fzf にするか
+" それとも、検索前から選択肢が少ない方が精神的に良いか？
+" 上の方にls結果が出てるなら、lsのみの代用になるのでは？
+" キーをわざわざfhb選ぶより、脳死でfってできるほうがいいんか？
+noremap <Plug>(smartfzf-fzf) :<C-u>cal <SID>smartFzf('fz')<CR>
+noremap <Plug>(smartfzf-his) :<C-u>cal <SID>smartFzf('his')<CR>
+noremap <Plug>(smartfzf-buf) :<C-u>cal <SID>smartFzf('buf')<CR>
 " }}}
 
 " grep {{{
 fu! s:grep() abort
-  " plugin mode
-  if glob('~/.vim/pack/plugins/start/coc.nvim') != '' && executable('rg')
-    echohl Special | let w = inputdialog("start ripgrep [word] >>") | echo '<<'
-    if w == '' | echo 'cancel' | echohl None | retu | endif
-    execute('CocCommand fzf-preview.ProjectGrep -w --ignore-case '.w)
-    echohl None | retu
-  endif
-  " no plugin
-  echo 'grep. choose ' | echohl ErrorMsg | echon '[word]' | echohl Special | echon ' [ext]' | echohl WarningMsg | echon ' [target]'
-  let pwd = system('pwd') | echohl ErrorMsg | let word = inputdialog("Enter [word]>>") | echon '<<'
-  if word == '' | echohl None | echo 'cancel' | retu | endif
-  echohl Special | let ext = inputdialog("Enter [ext]>>") | echon '<<'
-  if ext == '' | echo 'any ext' | let ext = '*' | endif
-  echohl WarningMsg | let target = inputdialog("Enter [target (like ./*) pwd:".pwd."]>>")
-  if target == '' | echo 'search current directory' | let target = './*' | endif
-  echon '<<' | echohl None | echo 'grep [' . word . '] processing in [' . target . '] [' . ext . '] ...'
-  cgetexpr system('grep -n -r --include="*.' . ext . '" "' . word . '" ' . target) | cw
-  echohl ErrorMsg | echo 'grep end' | echohl None | retu
+    " plugin mode
+    " TODO いらんかも... 通常grepつよいぜ
+"    if exists(':Coc') && executable('rg')
+"        let w = InputI('ripgrep [word] >>', expand('<cword>'))
+"        cal EchoI('<<', 0)
+"        if empty(w)
+"            cal EchoE('cancel')
+"            retu
+"        endif
+"        execute('CocCommand fzf-preview.ProjectGrep -w --ignore-case '.w)
+"        retu
+"    endif
+    " no plugin
+    echo 'grep by'
+    cal EchoE(' [word]', 0)
+    cal EchoI(' [ext]', 0)
+    cal EchoW(' [target]', 0)
+    echo '=========== empty to cancel ==================='
+    echo 'pwd:'.substitute(getcwd(), $HOME, '~', 'g')
+    let word = InputE('[word]>>', expand('<cword>'))
+    cal EchoE('<<', 0)
+    if empty(word)
+        echo 'cancel'
+        retu
+    endif
+
+    let ext = InputI('[ext]>>', '*')
+    cal EchoI('<<', 0)
+    if empty(ext)
+        echo 'cancel'
+        retu
+    endif
+
+    let target = InputW('[target] TabCompletion>>', './*', 'file')
+    cal EchoW('<<', 0)
+    if empty(target)
+        echo 'cancel'
+        retu
+    endif
+
+    echo '==============================================='
+    echo 'grep'
+    cal EchoE(' word['.word.']', 0)
+    cal EchoI(' ext['.ext.']', 0)
+    echon ' processing in'
+    cal EchoW(' target['.target.']')
+    echon ' ...'
+    echo ''
+    cgetexpr system('grep -rin --include="*.'.ext.'" "'.word.'" '.target) | cw
+    cal EchoI('grep complete!')
 endf
-com! Grep cal s:grep()
+
+" TODO 結果ないとき無言、なんか知らせたいね
+noremap <Plug>(grep) :<C-u>cal <SID>grep()<CR>
 " }}}
 
-" current file grep {{{
+" grep from current file {{{
 fu! s:grepCurrent() abort
-  echohl Special | echo 'grep from this file.' | let word = inputdialog("Enter [word]>>") | echon '<<' | if word == '' | echo 'cancel' | retu | endif | echohl WarningMsg | echo 'grep ['.word.'] processing in ['.expand('%').'] ...' | exe 'vimgrep /'.word.'/gj %' | cw | echohl ErrorMsg | echon 'grep end' | echohl None
+" TODO 結果ないときエラー
+    cal EchoI('grep from this file. (empty to cancel)')
+    let word = InputI('[word]>>', expand('<cword>'))
+    cal EchoI('<<', 0)
+    if empty(word)
+        cal EchoE('cancel')
+        retu
+    endif
+    cal EchoW(printf('grep word[%s] processing in [%s] ...', word, expand('%:t')))
+    exe 'vimgrep /'.word.'/gj %' | cw
+    cal EchoI('grep complete!')
 endf
-com! GrepCurrent cal s:grepCurrent()
+
+noremap <Plug>(grep-current) :<C-u>cal <SID>grepCurrent()<CR>
 " }}}
 
 " IDE menu {{{
 let s:idemenu = #{
-  \menu: [
-    \'[Format]         applay format for this file',
-    \'[ReName*]        rename current word recursively',
-    \'[ALL PUSH]       commit & push all changes',
-    \'[QuickFix-Grep*] Open Preview Popup from quickfix - from fzfpreview Ctrl+Q',
-    \'[Snippet*]       edit snippets',
-    \'[Run*]           run current program',
-    \'[Debug*]         debug current program',
-    \'[Run as Shell]   run current row as shell command',
-    \'[Color random]   change colorscheme at random',
-  \],
-  \cheat: [
-    \' (Space d) [Definition]     Go to Definition ',
-    \' (Space r) [Reference]      Reference ',
-    \' (Space o) [Outline]        view outline on popup ',
-    \' (Space ?) [Document]       show document on popup scroll C-f/b ',
-    \' (Space ,) [Next Diagnosis] jump next diagnosis ',
-    \' (Space .) [Prev Diagnosis] jump prev diagnosis ',
-  \],
-  \colors: ['torte', 'elflord', 'pablo'],
-  \colors_plug: ['onedark', 'hybrid_material', 'molokai']
-\}
+    \ menuid: 0, menutitle: ' IDE MENU (j / k) Enter choose | * require plugin ',
+    \ menu: [
+        \ '[Format]         applay format for this file',
+        \ '[ReName*]        rename current word recursively',
+        \ '[ALL PUSH]       commit & push all changes',
+        \ '[QuickFix-Grep*] Open Preview Popup from quickfix - from fzfpreview Ctrl+Q',
+        \ '[Snippet*]       edit snippets',
+        \ '[Run*]           run current program',
+        \ '[Debug*]         debug current program',
+        \ '[Run as Shell]   run current row as shell command',
+        \ '[Color random]   change colorscheme at random',
+    \ ],
+    \ menupos_red1: [[1,1,17],[2,1,17],[3,1,17],[4,1,17],[5,1,17],[6,1,17]],
+    \ menupos_red2: [[7,1,17],[8,1,17],[9,1,17]],
+    \ cheatid: 0, cheattitle: ' LSP KeyMaps ',
+    \ cheat: [
+        \ ' (Space d) [Definition]     Go to Definition ',
+        \ ' (Space r) [Reference]      Reference ',
+        \ ' (Space o) [Outline]        view outline on popup ',
+        \ ' (Space ?) [Document]       show document on popup scroll C-f/b ',
+        \ ' (Space ,) [Next Diagnosis] jump next diagnosis ',
+        \ ' (Space .) [Prev Diagnosis] jump prev diagnosis ',
+    \ ],
+    \ cheatpos_red: [[1,1,28],[2,1,28],[3,1,28],[4,1,28],[5,1,28],[6,1,28]],
+    \ cheatpos_blue: [[1,1,10],[2,1,10],[3,1,10],[4,1,10],[5,1,10],[6,1,10]],
+    \ colors: ['torte', 'elflord', 'pablo'],
+    \ colors_plug: ['onedark', 'hybrid_material', 'molokai']
+    \ }
 
+" TODO OneDark statuslineでの緑をidemenuで使ってる
 fu! s:idemenu.open() abort
-  let s:idemenu.popid = popup_create(s:idemenu.cheat, #{title: ' Other Plugin KeyMaps ', border: [], line: &columns/4})
-  cal popup_menu(s:idemenu.menu, #{title: ' IDE MENU (j / k) Enter choose | * require plugin ', border: [], filter: function(s:idemenu.choose, [{'idx': 0, 'files': s:idemenu.menu }])})
+    let self.menuid = popup_menu(self.menu, #{title: self.menutitle,
+        \ border: [], borderchars: ['─','│','─','│','╭','╮','╯','╰'],
+        \ filter: function(self.choose, [{'idx': 0, 'files': self.menu }])})
+    cal setwinvar(self.menuid, '&wincolor', 'OneDarkGreenChar')
+    cal matchaddpos('DarkRed', self.menupos_red1, 16, -1, #{window: self.menuid})
+    cal matchaddpos('DarkRed', self.menupos_red2, 16, -1, #{window: self.menuid})
+    let self.cheatid = popup_create(self.cheat, #{title: self.cheattitle, line: &columns/4})
+    cal setwinvar(self.cheatid, '&wincolor', 'OneDarkGreenChar')
+    cal matchaddpos('DarkRed', self.cheatpos_red, 16, -1, #{window: self.cheatid})
+    cal matchaddpos('DarkBlue', self.cheatpos_blue, 16, -1, #{window: self.cheatid})
 endf
 
+" TODO callbackを使えばindex管理をしなくて良い
+" TODO ここから下、パイプなくすとこから
 fu! s:idemenu.choose(ctx, winid, key) abort
-  if a:key is# 'j' && a:ctx.idx < len(a:ctx.files)-1
-    let a:ctx.idx = a:ctx.idx+1
-  elseif a:key is# 'k' && a:ctx.idx > 0
-    let a:ctx.idx = a:ctx.idx-1
-  elseif a:key is# "\<Esc>" || a:key is# "\<Space>"
-    cal popup_close(s:idemenu.popid)
-  elseif a:key is# "\<CR>"
-    if a:ctx.idx == 0
-      try | cal CocActionAsync('format')
-      catch | let current_rn = line('.') | norm gg=G | exe 'norm'.current_rn.'G'
-      endtry
-    elseif a:ctx.idx == 1
-      cal CocActionAsync('rename')
-    elseif a:ctx.idx == 2
-      echohl Special | let w = inputdialog("commit message>>") | if w == '' | echohl None | echo 'cancel' | retu | endif
-      exe 'top terminal ++rows=10 ++shell git add .&&git commit -m "'.w.'"&&git push') | echohl None
-    elseif a:ctx.idx == 3
-      exe 'CocCommand fzf-preview.QuickFix'
-    elseif a:ctx.idx == 4
-      exe 'CocCommand snippets.editSnippets'
-    elseif a:ctx.idx == 5
-      exe 'QuickRun -hook/time/enable 1'
-    elseif a:ctx.idx == 6
-      cal vimspector#Launch()
-    elseif a:ctx.idx == 7
-      exe 'top terminal ++rows=10 ++shell eval '.getline('.')
-    elseif a:ctx.idx == 8
-      let s:idemenu.tobecolor = glob('~/.vim/colors') != '' ? s:idemenu.colors_plug[localtime() % len(s:idemenu.colors_plug)] : s:idemenu.colors[localtime() % len(s:idemenu.colors)]
-      exe 'echo "change [".execute("colorscheme")[1:]."] -> [".s:idemenu.tobecolor."]"'
-      cal timer_start(500, { -> execute('colorscheme '.s:idemenu.tobecolor) })
+    if a:key is# 'j' && a:ctx.idx < len(a:ctx.files)-1
+        let a:ctx.idx += 1
+    elseif a:key is# 'k' && a:ctx.idx > 0
+        let a:ctx.idx -= 1
+    elseif a:key is# "\<Esc>" || a:key is# "\<Space>"
+        cal popup_close(self.cheatid)
+    elseif a:key is# "\<CR>"
+        if !self.exe(a:ctx.idx) | cal popup_close(self.cheatid) | else | retu 1 | endif
     endif
-    cal popup_close(s:idemenu.popid)
-  endif
-  retu popup_filter_menu(a:winid, a:key)
+    retu popup_filter_menu(a:winid, a:key)
 endf
 
-com! IDEMenu cal s:idemenu.open()
+" return err flg
+fu! s:idemenu.exe(idx) abort
+    if a:idx == 0
+        if exists(':Coc')
+            cal CocActionAsync('format')
+        else
+            execute('norm gg=G'.line('.').'G')
+        endif
+    elseif a:idx == 1
+        if exists(':Coc')
+            cal CocActionAsync('rename')
+        else
+            echohl DarkRed | echo 'Sorry, [ReName*] needs coc.nvim.' | echohl None | retu 1
+        endif
+    elseif a:idx == 2
+        echohl DarkBlue | let w = inputdialog("commit message>>")
+        echohl None
+        if empty(w) | echo 'cancel' | retu 1 | endif
+        exe 'top terminal ++rows=10 ++shell git add .&&git commit -m "'.w.'"&&git push'
+    elseif a:idx == 3
+        if exists(':CocCommand')
+            exe 'CocCommand fzf-preview.QuickFix'
+        else
+            echohl DarkRed | echo 'Sorry, [QuickFix-Grep*] needs coc.nvim.' | echohl None | retu 1
+        endif
+    elseif a:idx == 4
+        if exists(':CocCommand')
+            exe 'CocCommand snippets.editSnippets'
+        else
+            echohl DarkRed | echo 'Sorry, [Snippet*] needs coc.nvim.' | echohl None | retu 1
+        endif
+    elseif a:idx == 5
+        " TODO quickrun 再現予定
+        if exists(':QuickRun')
+            exe 'QuickRun -hook/time/enable 1'
+        else
+            echohl DarkRed | echo 'Sorry, [Run*] needs vim-quickrun.' | echohl None | retu 1
+        endif
+    elseif a:idx == 6
+        if exists(':Vimspector')
+            cal vimspector#Launch()
+        else
+            echohl DarkRed | echo 'Sorry, [Debug*] needs vimspector.' | echohl None | retu 1
+        endif
+    elseif a:idx == 7
+        exe 'top terminal ++rows=10 ++shell eval '.getline('.')
+    elseif a:idx == 8
+        let self.tobecolor = glob('~/.vim/colors') != '' ? self.colors_plug[localtime() % len(self.colors_plug)] : self.colors[localtime() % len(self.colors)]
+        exe 'echo "change [".execute("colorscheme")[1:]."] -> [".self.tobecolor."]"'
+        cal timer_start(500, { -> execute('colorscheme '.self.tobecolor) })
+     " TODO runcatいれる？
+    endif
+    retu 0
+endf
+
+let s:idemenuopen = s:idemenu.open
+noremap <Plug>(ide-menu) :<C-u>cal <SID>idemenuopen()<CR>
 " }}}
 
 " running cat (loading animation) {{{
-let s:runcat = #{frame: 0, winid: 0, stopflg: 0}
+let s:runcat = #{frame: 0, winid: 0, tid: 0, delay: 300}
 fu! s:runcat.animation(_) abort
-  cal setbufline(winbufnr(s:runcat.winid), 1, s:runcat.cat[s:runcat.frame])
-  let s:runcat.frame = s:runcat.frame == 4 ? 0 : s:runcat.frame + 1
-  if s:runcat.stopflg | cal popup_close(s:runcat.winid) | retu | endif
-  cal timer_start(200, s:runcat.animation)
+    cal setbufline(winbufnr(self.winid), 1, self.cat[self.frame])
+    let self.frame = self.frame == 4 ? 0 : self.frame + 1
+    let self.tid = timer_start(self.delay, self.animation)
 endf
 fu! s:runcat.stop() abort
-  let s:runcat.stopflg = 1
+    cal popup_close(self.winid)
+    cal timer_stop(self.tid)
 endf
-fu! s:runcat.start() abort
-  let s:runcat.stopflg = 0
-  let s:runcat.winid = popup_create(s:runcat.cat[0], #{line: 1, border: [], zindex: 1})
-  cal s:runcat.animation(0)
+fu! s:runcat.start(...) abort
+    cal self.stop()
+    " TODO run cat animation maskいじくりたい
+    " TODO OneDarkGreenChar statuslineでの color
+    let self.winid = popup_create(self.cat[0], #{line: 1, border: [0,0,0,0], mask: [[1,-1,1,1]], zindex: 1})
+    cal setwinvar(self.winid, '&wincolor', 'OneDarkGreenChar')
+    ""cal matchaddpos('DarkRed', self.cheatpos_red, 16, -1, #{window: self.cheatid})
+    ""cal matchaddpos('DarkBlue', self.cheatpos_blue, 16, -1, #{window: self.cheatid})
+    if a:0 >= 1 | let self.delay = 500-(a:1-1)*100 | endif
+    cal self.animation(0)
+endf
+fu! s:runcat_gear_list(A, L, P) abort
+    retu ['1', '2', '3', '4', '5']
 endf
 
 " running cat AA {{{
@@ -492,12 +659,34 @@ let s:runcat.cat = [
 \]
 " }}}
 
-com! RunCat cal s:runcat.start()
-com! RunCatStop cal s:runcat.stop()
+com! -bar -nargs=? -complete=customlist,s:runcat_gear_list RunCat cal s:runcat.start(<f-args>)
+com! -bar RunCatStop cal s:runcat.stop()
 " }}}
 
-" cheat sheet {{{
+" TODO cheat sheet startifyのあとでリファクタ
+" IDE menuにある程度キーマップ入れても良いかもね
+" PlugInstallとか、使わんものはコマンド
+" 通常vim操作は書かない
+" その他の割り当ててる関数とかをまとめる
+" ただのキーマップで住んでるものは書かない
+" INSERT C-h とかはかかんで良い
+" Tabもいらん
+" ページ切り替えとかもいらん、その辺はstartifyに書く
+" window系もいらん
+"
+" IDE menuで書くもの -> いや多いな,,, 整理しよう
+" emotion
+" emotion search
+" current grep
+" full grep
+" fzf his buffer
+" explorer line jumped changed
+" mark
+" ハイライト消す
+" visualでのブロック移動
+"
 
+" cheat sheet {{{
 " cursor hold
 " motion cheat sheet on popup
 
@@ -591,26 +780,27 @@ fu! s:CheatSheetClose()
   cal timer_stop(s:cheat_sheet_timer_id)
 endf
 
-nnoremap <silent><Leader><Leader><Leader> :cal PopupFever()<CR>:cal ToggleCheatHover()<CR>
+" TODO startifyとかにあわせ、いろいろ変える
+nnoremap <silent><Leader><Leader><Leader> :cal <SID>PopupFever()<CR>:cal <SID>ToggleCheatHover()<CR>
 let s:show_cheat_sheet_flg = 0
-fu! CheatAlert(tid)
+fu! s:CheatAlert(tid)
   execute("echohl WarningMsg | echo '[INFO] Space * 3 to enable cheat sheet !!' | echohl None")
 endf
 if has('vim_starting')
-  cal timer_start(200, function("CheatAlert"))
+  cal timer_start(200, function("s:CheatAlert"))
 endif
 let s:recheatwinid = 0
-fu! PopupFever()
+fu! s:PopupFever()
   cal s:runcat.start()
   let s:recheatwinid = popup_create(s:my_vim_cheet_sheet, #{ title: ' Action Cheet Sheet ', border: [], line: &columns/4 })
   let s:logowinid = popup_create(g:btr_logo, #{ border: [] })
 endf
-fu! PopupFeverStop()
+fu! s:PopupFeverStop()
   cal s:runcat.stop()
   cal popup_close(s:recheatwinid )
   cal popup_close(s:logowinid)
 endf
-fu! ToggleCheatHover()
+fu! s:ToggleCheatHover()
   let msg = 'Disable Cheat Sheet Hover'
   if s:show_cheat_sheet_flg == 1
     let s:show_cheat_sheet_flg = 0
@@ -619,35 +809,47 @@ fu! ToggleCheatHover()
     let s:show_cheat_sheet_flg = 1
   endif
   let s:checkwinid = popup_notification(msg, #{ border: [], line: &columns/4-&columns/37, close: "button" })
-  cal timer_start(3000, { -> PopupFeverStop()})
+  cal timer_start(3000, { -> s:PopupFeverStop()})
 endf
 
 " }}}
 
+" TODO リファクタ
 " completion {{{
 
 " TODO ~の後ろで正規表現やりに行っちゃう。=は大丈夫
 ""let s:completion = #{exclude: [" ()[]{}<>'`".'"'], confirmed: 0, done: {-> execute('let s:completion.confirmed = 1')}}
-let s:completion = #{exclude: [" ~()[]{}<>'`".'"'], confirmed: 0, done: {-> execute('let s:completion.confirmed = 1')}}
-fu! s:completion.exe() dict abort
-  if self.confirmed | let self.confirmed = 0 | retu | endif
-  if col('.') == 1 || match(self.exclude, getline('.')[col('.')-2]) != -1 | retu | endif
-  if !pumvisible() | cal feedkeys("\<C-n>") | endif
+let s:completion = #{exclude: [" ~()[]{}<>'`".'"'], opened: 0, confirmed: 0}
+
+fu! s:completion.exe() abort
+    if self.confirmed
+        let self.confirmed = 0
+        let self.opend = 0
+        retu
+    endif
+    if col('.') == 1 || match(self.exclude, getline('.')[col('.')-2]) != -1
+        retu
+    endif
+    if !pumvisible()
+        " 開いてたはずだが、確定されずに閉じてるなら何もしない
+        if self.opened
+            retu
+        endif
+        let self.opened = 1
+        cal feedkeys("\<C-n>")
+    endif
 endf
+
+fu! s:completion.done() abort
+    let self.confirmed = 1
+    let self.opened = 0
+endf
+
+" TODO <BS>のあとに補完だしたくない
 if glob('~/.vim/pack/plugins/start/coc.nvim')  == ''
-  au TextChangedI,TextChangedP * silent cal s:completion.exe()
-  au CompleteDone * silent cal s:completion.done()
+    au TextChangedI,TextChangedP * cal s:completion.exe()
+    au CompleteDone * cal s:completion.done()
 endif
-
-
-" TODO lambdaで遊ぶ
-let Ftest_function = {v -> 'sdasd'}
-call call(Ftest_function, ['aaa'])
-
-
-
-
-
 " }}}
 
 " }}}
@@ -655,11 +857,121 @@ call call(Ftest_function, ['aaa'])
 " ##################       IMITATIONS       ################### {{{
 
 " ===================================================================
-" jiangmiao/auto-pairs
+" junegunn/fzf.vim
 " ===================================================================
 " {{{
-inoremap ( ()<LEFT>|inoremap [ []<LEFT>|inoremap { {}<LEFT>|inoremap < <><LEFT>
-inoremap ' ''<LEFT>|inoremap " ""<LEFT>|inoremap ` ``<LEFT>
+" usage
+" let arguments_def = #{
+"     \ list: search targets as List,
+"     \ title: choose popup title as String,
+"     \ enter_prefix: enter zone prefix text as String,
+"     \ enter_title: enter zone title as String,
+"     \ func_confirm: confirm function name as String,
+"     TODO fzsearch tab mode change
+"     \ func_tab: { -> execute('echom "Tab"') },
+"     \ }
+" and call like this.
+" cal s:fzsearch.popup(arguments_def)
+"
+" callback function sample
+" fu! s:simple_echo(wid, idx)
+"     if a:idx == -1 || empty(s:fzsearch.res)
+"         retu
+"     endif
+"     echom s:fzsearch.res[a:idx-1]
+" endf
+
+let s:fzsearch = #{ewid: 0, rwid: 0, res: []}
+
+fu! s:fzsearch.popup(v) abort
+    let self.max = &lines/2-1
+    let self.pr = a:v.enter_prefix
+    let self.res = a:v.list[0:self.max]
+
+    " TODO fzsearch util popup color ...
+    let self.rwid = popup_menu(self.res, #{title: a:v.title,
+        \ zindex: 99, mapping: 0, scrollbar:1,
+        \ border: [], borderchars: ['─','│','─','│','╭','╮','╯','╰'],
+        \ minwidth: &columns/2, maxwidth: &columns/2,
+        \ minheight: &lines/2, maxheight: &lines/2,
+        \ callback: a:v.func_confirm,
+        \ filter: function(self.jk, [0])
+        \ })
+
+    let self.ewid = popup_create(a:v.enter_prefix, #{title: a:v.enter_title,
+        \ zindex: 100, mapping: 0,
+        \ border: [], borderchars: ['─','│','─','│','╭','╮','╯','╰'],
+        \ minwidth: &columns/2, maxwidth: &columns/2,
+        \ minheight: 1, maxheight: 1, line: &lines*3/4+2,
+        \ filter: function(self.fil, [#{lst: a:v.list, wd: [], ft: a:v.func_tab}]),
+        \ })
+endf
+
+fu! s:fzsearch.jk(_, wid, key) abort
+    if a:key is# "\<Esc>"
+        cal feedkeys("\<C-c>")
+        cal feedkeys("\<C-c>")
+    elseif a:key is# "\<C-n>" || a:key is# "\<C-p>"
+        retu popup_filter_menu(a:wid, a:key)
+    elseif a:key is# "\<CR>"
+        cal popup_close(self.ewid)
+        retu popup_filter_menu(a:wid, a:key)
+    else
+        cal popup_setoptions(a:wid, #{zindex: 99})
+        cal popup_setoptions(self.ewid, #{zindex: 100})
+        cal feedkeys(a:key)
+    endif
+    retu 1
+endf
+
+fu! s:fzsearch.fil(ctx, wid, key) abort
+    if a:key is# "\<Esc>"
+        cal feedkeys("\<C-c>")
+        cal feedkeys("\<C-c>")
+        retu 1
+    elseif a:key is# "\<C-n>" || a:key is# "\<C-p>" || a:key is# "\<CR>"
+        cal popup_setoptions(a:wid, #{zindex: 99})
+        cal popup_setoptions(self.rwid, #{zindex: 100})
+        cal feedkeys(a:key)
+        retu 1
+    elseif a:key is# "\<Tab>"
+        " TODO うけつけねぇ
+        cal a:ctx.ft()
+        echom 'asdasdasdas'
+        retu 1
+    elseif a:key is# "\<C-v>" || a:key is# "\<D-v>"
+        for i in range(0, strlen(@+)-1)
+            cal add(a:ctx.wd, strpart(@+, i, 1))
+        endfor
+    elseif a:key is# "\<BS>" && !empty(a:ctx.wd)
+        unlet a:ctx.wd[len(a:ctx.wd)-1]
+    elseif a:key is# "\<BS>" && len(a:ctx.wd) == 0
+        " noop
+        retu 1
+    elseif a:key is# "\<C-w>"
+        let a:ctx.wd = []
+    elseif strtrans(a:key) == "<80><fd>`"
+        " noop (for polyglot bug adhoc)
+        retu 1
+    else
+        cal add(a:ctx.wd, a:key)
+    endif
+
+    let wd = join(a:ctx.wd, '')
+    let filterd = empty(wd) ? a:ctx.lst : matchfuzzy(a:ctx.lst, wd)
+    let self.res = filterd[0:self.max]
+    cal setbufline(winbufnr(a:wid), 1, self.pr.wd)
+    cal deletebufline(winbufnr(self.rwid), 1, self.max)
+    cal setbufline(winbufnr(self.rwid), 1, self.res)
+    retu a:key is# "x" || a:key is# "\<Space>" ? 1 : popup_filter_menu(a:wid, a:key)
+endf
+" }}}
+
+" ===================================================================
+" jiangmiao/auto-pairs
+" ===================================================================
+" TODO リファクタ
+" {{{
 fu! AutoPairsDelete()
   let pairs_start = ["(", "[", "{", "<", "'", '"', "`"] | let pairs_end = [")", "]", "}", ">", "'", '"', "`"]
   let pre_cursor_char = getline('.')[col('.')-2] | let on_cursor_char = getline('.')[col('.')-1]
@@ -667,30 +979,34 @@ fu! AutoPairsDelete()
   if pre_chk != -1 && pre_chk == on_chk | retu "\<RIGHT>\<BS>\<BS>" | endif
   retu "\<BS>"
 endf
+
+inoremap ( ()<LEFT>
+inoremap [ []<LEFT>
+inoremap { {}<LEFT>
+inoremap < <><LEFT>
+inoremap ' ''<LEFT>
+inoremap " ""<LEFT>
+inoremap ` ``<LEFT>
 " TODO ~の後ろで正規表現やりに行っちゃう。=は大丈夫
 inoremap <silent><expr><BS> AutoPairsDelete()
 ""inoremap <silent><BS> <C-r>=AutoPairsDelete()
+
+" TODO 直前に押したキーが(なら、()と入力しても良いってしたい
 " }}}
-
-
-
-
-
-
-
 
 " ===================================================================
 " preservim/nerdtree
 " ===================================================================
+" TODO リファクタ
 " {{{
 
-" TODO
+" TODO nerdtree
 augroup netrw_motion
   autocmd!
-  autocmd fileType netrw cal NetrwMotion()
+  autocmd fileType netrw cal s:netrwMotion()
 augroup END
 
-fu! NetrwMotion()
+fu! s:netrwMotion()
   nnoremap <buffer><C-l> <C-w>l
   ""autocmd CursorMoved * cal NetrwOpenJudge()
 endf
@@ -704,6 +1020,7 @@ fu! NetrwOpenJudge()
   endif
 endf
 
+" TODO mapじゃなくしたいね
 fu! NetrwOpen()
   cal feedkeys("\<C-l>:q\<CR>\<Space>e")
 endf
@@ -718,12 +1035,13 @@ fu! s:winid2bufnr(wid) abort
   retu s:create_winid2bufnr_dict()[a:wid]
 endf
 
-fu! NetrwToggle()
+fu! s:NetrwToggle()
   for win_no in range(1, winnr('$'))
     let win_id = win_getid(win_no)
     if bufname(s:winid2bufnr(win_id)) == 'NetrwTreeListing' | cal win_execute(win_id, 'close') | retu | endif
   endfor | execute('Vex 15')
 endf
+noremap <Plug>(explorer-toggle) :<C-u>cal <SID>NetrwToggle()<CR>
 
 
 " }}}
@@ -731,6 +1049,7 @@ endf
 " ===================================================================
 " vim-airline/vim-airline
 " ===================================================================
+" TODO リファクタ
 " {{{
 
 " status line with git info
@@ -746,6 +1065,8 @@ fu! s:gitinfo() abort
   try | cal system('git status') | catch | retu | endtry
   if trim(system('cd '.expand('%:h').' && git status')) =~ "^fatal:" | let g:gitinf = 'no repo ' | retu | endif
   " TODO gitstatus結果を使いまわした方が早い？
+  " TODO
+  " いまどのwindow みてるか分かりにくい、forcus window のstatus colorを抑えたい
   let cmd = "cd ".expand('%:h')." && git status --short | awk -F ' ' '{print($1)}' | grep -c "
   let a = trim(system(cmd."'A'")) | let aa = a !='0'?'+'.a :''
   let m = trim(system(cmd."-e 'M' -e 'D'")) | let mm = m !='0'?'!'.m :''
@@ -754,6 +1075,9 @@ fu! s:gitinfo() abort
   let g:gitinf = trim(system("cd ".expand('%:h')."&&git branch | awk -F '*' '{print($2)}'")).join([aa,mm,nwnw,ee],' ')
 endf
 
+" TODO onedark系ハイライトを1箇所にまとめたいね -> どこで使う予定かリストアップ
+" TODO airline, popup
+" TODO onedarkカラースキームimitationとは別のはず。
 aug statusLine
   au!
   au BufWinEnter,BufWritePost * cal s:gitinfo()
@@ -831,50 +1155,58 @@ fu! s:closeBuf() abort
   let now_b = bufnr('%') | execute("norm \<C-n>") | execute('bd ' . now_b)
 endf
 
-com! MoveBufPrev cal s:moveBuf('prev')
-com! MoveBufNext cal s:moveBuf('next')
-com! CloseBuf cal s:closeBuf()
+noremap <Plug>(buf-prev) :<C-u>cal <SID>moveBuf('prev')<CR>
+noremap <Plug>(buf-next) :<C-u>cal <SID>moveBuf('next')<CR>
+noremap <Plug>(buf-close) :<C-u>cal <SID>closeBuf()<CR>
 " }}}
 
 " ===================================================================
 " yuttie/comfortable-motion.vim
 " ===================================================================
 " {{{
-let s:scroll = #{tid: 0, curL: '', curC: ''}
-fu! s:scroll.exe(vector, delta) abort
-  if !empty(s:scroll.tid) | retu | endif
-  cal timer_stop(s:scroll.tid) | cal s:scroll.toggle(0)
-  let vec = a:vector == 0 ? "\<C-y>" : "\<C-e>"
-  let s:scroll.tid = timer_start(a:delta, { -> feedkeys(vec) }, {'repeat': -1})
-  cal timer_start(600, s:scroll.stop) | cal timer_start(600, s:scroll.toggle)
-endf
-fu! s:scroll.stop(_) abort
-  cal timer_stop(s:scroll.tid) | let s:scroll.tid = 0
-endf
-fu! s:scroll.toggle(tid) abort
-  if !a:tid
-    let s:scroll.curL = execute('set cursorline?')->trim()
-    let s:scroll.curC = execute('set cursorcolumn?')->trim()
-    set nocursorline nocursorcolumn
-    cal timer_start(0, { -> execute('cal s:fmode.deactivate()')}) " for coc, async
-    retu
-  endif
-  if s:scroll.curL !~'^no' | set cursorline | endif
-  if s:scroll.curC !~'^no' | set cursorcolumn | endif
-  cal s:fmode.takeover()
-endf
-com! -nargs=+ ImitatedComfortableScroll cal s:scroll.exe(<f-args>)
+" while scroll, deactivate f-scope
+let s:scroll = #{tid: 0, curL: '', curC: '', till: 600}
 
-" for coc
-fu! Scroll(vec, del) abort
-  cal s:scroll.exe(a:vec, a:del)
-  retu "\<Ignore>"
+fu! s:scroll.exe(vector, delta) dict abort
+    if self.tid | retu | endif
+    cal timer_stop(self.tid) | cal self.toggle(0)
+    let vec = a:vector ? "\<C-e>" : "\<C-y>"
+    let self.tid = timer_start(a:delta, { -> feedkeys(vec) }, #{repeat: -1})
+    cal timer_start(self.till, self.stop) | cal timer_start(self.till, self.toggle)
+endf
+
+fu! s:scroll.stop(_) abort
+    cal timer_stop(self.tid) | let self.tid = 0
+endf
+
+fu! s:scroll.toggle(tid) abort
+    if !a:tid
+        let self.curL = execute('set cursorline?')->trim()
+        let self.curC = execute('set cursorcolumn?')->trim()
+        set nocursorline nocursorcolumn
+        cal timer_start(0, { -> s:fmode.deactivate() }) " for coc, async
+        retu
+    endif
+    if self.curL !~'^no' | set cursorline | endif
+    if self.curC !~'^no' | set cursorcolumn | endif
+    cal s:fmode.takeover()
+endf
+
+let s:scroll = s:scroll.exe
+noremap <Plug>(scroll-d) :<C-u>cal <SID>scroll(1, 30)<CR>
+noremap <Plug>(scroll-u) :<C-u>cal <SID>scroll(0, 30)<CR>
+noremap <Plug>(scroll-f) :<C-u>cal <SID>scroll(1, 10)<CR>
+noremap <Plug>(scroll-b) :<C-u>cal <SID>scroll(0, 10)<CR>
+
+fu! Scroll(vec, del) abort " for coc
+  cal s:scroll(a:vec, a:del) | retu "\<Ignore>"
 endf
 " }}}
 
 " ===================================================================
-" junegunn/fzf.vim
+" junegunn/fzf
 " ===================================================================
+" TODO リファクタ
 " {{{
 let s:fzf = #{
   \not_path_arr: [
@@ -895,6 +1227,7 @@ fu! s:fzf.exe(fz) abort " open window
   if stridx(execute('pwd')[1:], s:fzf.searched) == -1 || empty(s:fzf.chache) | cal s:fzf.refind() | endif
   let s:fzf.start_fz = a:fz
   let s:fzf.mode = s:fzf.start_fz == 'fz' ? 'fzf' : 'his'
+  let aaaaaaaaaaaaaaaaaa = substitute(getcwd(), $HOME, '~', 'g')
   let s:fzf.mode_title = s:fzf.mode == 'his' ? '(*^-^)/ BUF & MRU' : '(*"@w@)/ FZF ['.(empty(matchstr(s:fzf.searched, '[^'.$HOME.'].*$')) ? s:fzf.searched : '~/'.matchstr(s:fzf.searched, '[^'.$HOME.'].*$')).']'
   let pwd = execute('pwd')[1:]
   let s:fzf.pwd_prefix = 'pwd:['.(empty(matchstr(pwd, '[^'.$HOME.'].*$')) ? pwd : '~/'.matchstr(pwd, '[^'.$HOME.'].*$')).']>>'
@@ -991,112 +1324,149 @@ endf
 " ===================================================================
 " MattesGroeger/vim-bookmarks
 " ===================================================================
+" TODO リファクタ
 " {{{
-let s:mark = #{words: 'abcdefghijklmnopqrstuvwxyz'}
-fu! s:mark.get(tar) abort
-  try | retu execute('marks '.a:tar) | catch | retu '' | endtry
+sign define mk text=⚑ texthl=DarkBlue
+
+let s:mk = #{winid: 0, tle:  'marks', allwinid: 0, atle: 'marks-allfiles',
+    \ path: $HOME.'/.vim/.mk',
+    \ list: { -> sign_getplaced(bufname('%'), #{group: 'mkg'})[0].signs },
+    \ next: { _,v -> v.lnum > line('.') }, prev: { _,v -> v.lnum < line('.') },
+    \ }
+
+fu! s:mk.read() abort
+    retu glob(self.path)->empty() ? {} : readfile(self.path)->join('')->js_decode() ?? {}
 endf
 
-fu! s:mark.list() abort
-  let get_marks = s:mark.get(s:mark.words) | if empty(get_marks) | echo 'no marks' | retu | endif | let markdicarr = []
-  for v in split(get_marks , '\n')[1:]
-    cal add(markdicarr, #{linenum: str2nr(split(v, ' ')->filter({ _,v -> !empty(v) })[1]), val: v})
-  endfor
-  let marks_this = markdicarr->sort({ x, y -> x.linenum - y.linenum })->map({ _,v -> v.val })
-  cal popup_menu(marks_this, #{title: 'choose marks', border: [], zindex: 100, minwidth: &columns/2, maxwidth: &columns/2, minheight: 2, maxheight: &lines/2, filter: function(s:mark.choose, [{'idx': 0, 'files': marks_this}])})
+fu! s:mk.save() abort
+    let alldata = self.read()
+    let alldata[expand('%:p')] = self.list()
+    cal writefile([js_encode(alldata)], self.path)
 endf
 
-fu! s:mark.choose(ctx, winid, key) abort
-  if a:key is# 'j' && a:ctx.idx < len(a:ctx.files)-1 | let a:ctx.idx = a:ctx.idx+1
-  elseif a:key is# 'k' && a:ctx.idx > 0 | let a:ctx.idx = a:ctx.idx-1
-  elseif a:key is# "\<CR>" | exe 'norm!`'.a:ctx.files[a:ctx.idx][1]
-  endif | retu popup_filter_menu(a:winid, a:key)
-endf
-
-fu! s:mark.toggle() abort
-  let get_marks = s:mark.get(s:mark.words)
-  if empty(get_marks) | execute('mark a') | cal s:mark.sign() | echo 'marked' | retu | endif
-  let now_marks = [] | let warr = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
-  for row in split(get_marks , '\n')[1:]
-    let r = split(row, ' ')->filter({ _,v -> !empty(v) })
-    if stridx(s:mark.words, r[0]) != -1 && r[1] == line('.')
-      cal s:mark.clear_sign() | exe 'delmarks '.r[0] | cal s:mark.sign() | echo 'delete mark '.r[0] | retu
+fu! s:mk.load() abort
+    let alldata = self.read()
+    if !has_key(alldata, expand('%:p'))
+        retu
     endif
-    cal add(now_marks, r[0])
-  endfor
-  let can_use = warr->filter({ _,v -> stridx(join(now_marks, ''), v) == -1 })
-  if !empty(can_use) | cal s:mark.clear_sign() | exe 'mark '.can_use[0] | cal s:mark.sign() | echo 'marked '.can_use[0]
-  else | echo 'over limit markable char' | endif
+    for v in alldata[expand('%:p')]
+        cal sign_place(v.id, v.group, v.name, bufname('%'), #{lnum: v.lnum})
+    endfor
 endf
 
-fu! s:mark.clear_sign()
-  let get_marks = s:mark.get(s:mark.words) | if empty(get_marks) | retu | endif
-  let mark_dict = {}
-  for row in split(get_marks, '\n')[1:]
-    let r = split(row, ' ')->filter({ _,v -> !empty(v) }) | let mark_dict[r[0]] = r[1]
-  endfor
-  for mchar in keys(mark_dict)
-    let id = stridx(s:mark.words, mchar) + 1
-    exe 'sign unplace '.id.' file='.expand('%:p') | exe 'sign undefine '.mchar
-  endfor
+fu! s:mk.toggle() abort
+    let lmk = sign_getplaced(bufname('%'), #{group: 'mkg', lnum: line('.')})[0].signs
+    if empty(lmk)
+        cal EchoI('mark')
+        cal sign_place(0, 'mkg', 'mk', bufname('%'), #{lnum: line('.')})
+    else
+        cal EchoI('remove mark')
+        cal sign_unplace('mkg', #{buffer: bufname('%'), id: lmk[0].id})
+    endif
+    cal self.save()
 endf
 
-fu! s:mark.sign() abort
-  let get_marks = s:mark.get(s:mark.words) | if empty(get_marks) | retu | endif
-  let mark_dict = {}
-  for row in split(get_marks, '\n')[1:]
-    let r = split(row, ' ')->filter({ _,v -> !empty(v) }) | let mark_dict[r[0]] = r[1]
-  endfor
-  for mchar in keys(mark_dict)
-    let id = stridx(s:mark.words, mchar) + 1
-    exe 'sign define '.mchar.' text='.mchar.' texthl=CursorLineNr'
-    exe 'sign place '.id.' line='.mark_dict[mchar].' name='.mchar.' file='. expand('%:p')
-  endfor
+" echo async because jump with scroll need time
+fu! s:mk.jump(next) abort
+    let list = self.list()
+    if empty(list)
+        cal EchoE('no marks')
+        retu
+    endif
+    let cnt = len(list)
+    let Vector = a:next ? self.next : self.prev
+    let can = deepcopy(list)->filter(Vector)->sort({ x, y -> x.lnum - y.lnum })
+    if empty(can)
+        cal EchoW('no next marks')
+        retu
+    endif
+    cal sign_jump((a:next ? can[0] : can[-1]).id, 'mkg', bufname('%'))
+    cal timer_start(100, { -> EchoI(printf('mark jump [%s/%s]', a:next ? cnt - len(can) + 1 : len(can), cnt)) })
 endf
-aug sig_aus
-  au!
-  au BufEnter,CmdwinEnter * cal s:mark.sign()
+
+fu! s:mk.clthis() abort
+    cal sign_unplace('mkg', #{buffer: bufname('%')})
+    cal self.save()
+    cal EchoI('clear mark in this file')
+endf
+
+fu! s:mk.clall() abort
+    if confirm('clear mark in all files ?', "&Yes\n&No\n&Cancel") != 1
+        cal EchoW('cancel', 0)
+        retu
+    endif
+    cal sign_unplace('mkg')
+    cal writefile([], self.path)
+    cal EchoI('clear ALL marks', 0)
+endf
+
+fu! s:mk.listcb() abort
+    let list = self.list()
+    if empty(list)
+        cal EchoE('no marks')
+        retu
+    endif
+    let resources = deepcopy(list)->sort({ x,y -> x.lnum - y.lnum })
+        \ ->map({ _,v -> v.lnum.' '.getline(v.lnum) })
+    cal s:fzsearch.popup(#{list: resources,
+        \ title: 'Marks in Current Buffer',
+        \ enter_prefix: '>>',
+        \ enter_title: 'Choose: <C-n/p> <CR> | ClearText: <C-w>',
+        \ func_confirm: 's:mkchoose',
+        \ func_tab: { -> execute('echom "Tab"') },
+        \ })
+endf
+
+" TODO 全体検索
+" TODO signを全て取得
+" sign_getplaced()
+" これをgroupでfilterして表示
+" ファイルから検索か?
+" TODO signを現在のバッファから取得 → タブで切り替える？
+
+fu! s:mk.listall() abort
+endf
+
+" choose callback
+fu! s:mkchoose(wid, idx)
+    if a:idx == -1 || empty(s:fzsearch.res)
+        cal EchoE('cancel')
+        retu
+    endif
+    let row = s:fzsearch.res[a:idx-1]
+    let line = split(row, ' ')[0]
+    cal cursor(line, 1)
+    cal EchoI('jump to mark')
+endf
+
+aug mk_st
+    au!
+    au BufEnter * cal s:mk.load()
+    au BufWritePost * cal s:mk.save()
 aug END
 
-fu! s:mark.hank(vector) abort " move to next/prev mark
-  let get_marks = s:mark.get(s:mark.words) | if empty(get_marks) | echo 'no marks' | retu | endif
-  let mark_dict = {} " [linenum: mark char]
-  let rownums = []
-  for row in split(get_marks, '\n')[1:]
-    let r = split(row, ' ')->filter({ _,v -> !empty(v) }) | let mark_dict[r[1]] = r[0]
-    cal add(rownums, r[1])
-  endfor
-  cal sort(rownums, a:vector == 'up' ? {x, y -> y-x} : {x, y -> x - y})
-  for rownum in rownums
-    if a:vector == 'down' && rownum > line('.')
-      exe 'norm! `' . mark_dict[rownum] | echo index(rownums, rownum) + 1 . '/' . len(rownums) | retu
-    elseif a:vector == 'up' && rownum < line('.')
-      exe 'norm! `' . mark_dict[rownum] | echo len(rownums) - index(rownums, rownum) . '/' . len(rownums) | retu
-    endif
-  endfor
-  echo 'last mark'
-endf
+let s:mktoggle = s:mk.toggle
+let s:mknext = function(s:mk.jump, [1])
+let s:mkprev = function(s:mk.jump, [0])
+let s:mkclthis = s:mk.clthis
+let s:mkclall = s:mk.clall
+let s:mklist = s:mk.listcb
 
-fu! s:mark.clear() abort
-  cal s:mark.clear_sign() | delmarks!
-endf
-
-com! ImitatedBookmarksMarkToggle cal s:mark.toggle()
-com! ImitatedBookmarksHankDown cal s:mark.hank('down')
-com! ImitatedBookmarksHankUp cal s:mark.hank('up')
-com! ImitatedBookmarksClear cal s:mark.clear()
-com! ImitatedBookmarksList cal s:mark.list()
+noremap <Plug>(mk-toggle) :<C-u>cal <SID>mktoggle()<CR>
+noremap <Plug>(mk-next) :<C-u>cal <SID>mknext()<CR>
+noremap <Plug>(mk-prev) :<C-u>cal <SID>mkprev()<CR>
+noremap <Plug>(mk-clthis) :<C-u>cal <SID>mkclthis()<CR>
+noremap <Plug>(mk-clall) :<C-u>cal <SID>mkclall()<CR>
+noremap <Plug>(mk-list) :<C-u>cal <SID>mklist()<CR>
 " }}}
 
 " ===================================================================
 " t9md/vim-quickhl
 " ===================================================================
+" TODO リファクタ
 " {{{
+" TODO 整理
 let s:quickhl = #{hlidx: 0, reseted: 0}
-aug quickhl
-  au!
-  au! ColorScheme * cal s:quickhl.hlini()
-aug END
 let s:quickhl.hl= [
     \ "cterm=bold ctermfg=16 ctermbg=153 gui=bold guifg=#ffffff guibg=#0a7383",
     \ "cterm=bold ctermfg=7  ctermbg=1   gui=bold guibg=#a07040 guifg=#ffffff",
@@ -1112,14 +1482,17 @@ let s:quickhl.hl= [
     \ "cterm=bold ctermfg=7  ctermbg=50  gui=bold guibg=#1060a0 guifg=#ffffff",
     \ "cterm=bold ctermfg=7  ctermbg=56  gui=bold guibg=#a0b0c0 guifg=black",
     \ ]
+
 fu! s:quickhl.hlini() abort
   for v in s:quickhl.hl | exe 'hi UserSearchHi'.index(s:quickhl.hl, v).' '.v | endfor
 endf
+
 fu! s:quickhl.reset(cw) abort
   let s:quickhl.reseted = 0
   let already = getmatches()->filter({ _,v -> has_key(v, 'pattern') ? v.pattern == a:cw : 0 })
   if !empty(already) | cal matchdelete(already[0].id) | let s:quickhl.reseted = 1 | endif
 endf
+
 fu! s:quickhl.set() abort
   let current_win = winnr() | let cw = expand('<cword>') | windo cal s:quickhl.reset(cw)
   if s:quickhl.reseted | exe current_win.'wincmd w' | retu | endif
@@ -1127,27 +1500,30 @@ fu! s:quickhl.set() abort
   let s:quickhl.hlidx = s:quickhl.hlidx >= len(s:quickhl.hl)-1 ? 0 : s:quickhl.hlidx + 1
   exe current_win.'wincmd w'
 endf
+
 fu! s:quickhl.clear() abort
   let current_win = winnr()
   windo cal getmatches()->filter({ _,v -> v.group =~ 'UserSearchHi.*' })->map('execute("cal matchdelete(v:val.id)")')
   exe current_win.'wincmd w'
 endf
-com! ImitatedQuickHighlight cal s:quickhl.set()
-com! ImitatedQuickHighlightClear noh | cal s:quickhl.clear()
+
+aug quickhl
+  au!
+  au! ColorScheme * cal s:quickhl.hlini()
+aug END
+
+let s:quickhlset = s:quickhl.set
+let s:quickhlclear = s:quickhl.clear
+noremap <Plug>(qikhl-toggle) :<C-u>cal <SID>quickhlset()<CR>
+noremap <Plug>(qikhl-clear) :<C-u>cal <SID>quickhlclear()<CR>
 " }}}
 
 " ===================================================================
 " unblevable/quick-scope
 " ===================================================================
+" TODO リファクタ
 " {{{
 let s:fmode = #{flg: 1}
-aug fmode_colors
-  au!
-  au ColorScheme * hi FScopePrimary ctermfg=196 cterm=underline guifg=#66D9EF guibg=#000000
-  au ColorScheme * hi FScopeSecondary ctermfg=219 cterm=underline guifg=#66D9EF guibg=#000000
-  au ColorScheme * hi FScopeBackPrimary ctermfg=51 cterm=underline guifg=#66D9EF guibg=#000000
-  au ColorScheme * hi FScopeBackSecondary ctermfg=33 cterm=underline guifg=#66D9EF guibg=#000000
-aug END
 
 fu! s:fmode.set() abort
   cal getmatches()->filter({ _,v -> v.group =~ 'FScope.*' })->map('execute("cal matchdelete(v:val.id)")')
@@ -1182,7 +1558,6 @@ fu! s:fmode.activate() abort
   aug End
   cal s:fmode.set()
 endf
-cal s:fmode.activate()
 
 fu! s:fmode.deactivate() abort
   aug f_scope
@@ -1196,16 +1571,27 @@ endf
 fu! s:fmode.toggle() abort
   if s:fmode.flg | let s:fmode.flg = 0 | cal s:fmode.deactivate() | else | let s:fmode.flg = 1 | cal s:fmode.activate() | endif
 endf
+
 fu! s:fmode.takeover() abort
   if s:fmode.flg | cal s:fmode.activate() | else | cal s:fmode.deactivate() | endif
 endf
 
-com! ImitatedQuickScopeToggle cal s:fmode.toggle()
+aug fmode_colors
+  au!
+  au ColorScheme * hi FScopePrimary ctermfg=196 cterm=underline guifg=#66D9EF guibg=#000000
+  au ColorScheme * hi FScopeSecondary ctermfg=219 cterm=underline guifg=#66D9EF guibg=#000000
+  au ColorScheme * hi FScopeBackPrimary ctermfg=51 cterm=underline guifg=#66D9EF guibg=#000000
+  au ColorScheme * hi FScopeBackSecondary ctermfg=33 cterm=underline guifg=#66D9EF guibg=#000000
+aug END
+
+let s:fmodetoggle = s:fmode.toggle
+noremap <Plug>(f-scope) :<C-u>cal <SID>fmodetoggle()<CR>
 " }}}
 
 " ===================================================================
 " junegunn/goyo.vim
 " ===================================================================
+" TODO リファクタ
 " {{{
 let s:zen_mode = #{flg: 0, vert_split: []}
 fu! s:zenModeToggle() abort
@@ -1224,152 +1610,160 @@ fu! s:zenModeToggle() abort
   exe 'hi VertSplit ctermfg=black ctermbg=NONE cterm=NONE'
   setl number relativenumber
 endf
-com! ImitatedZenModeToggle cal s:zenModeToggle()
+""com! ImitatedZenModeToggle cal s:zenModeToggle()
+noremap <Plug>(zen-mode) :<C-u>cal <SID>zenModeToggle()<CR>
 " }}}
 
 " ===================================================================
 " easymotion/vim-easymotion
 " ===================================================================
+" TODO リファクタ
 " {{{
-" m, g read some function? doesn't work just as I want
+" m, g read some function doesn't work just as I want
 let s:emotion = #{keypos: [], klen: 1, keys: ['s', 'w', 'a', 'd', 'j', 'k', 'h', 'l'], popid: 0}
 
 fu! s:emotion.exe() abort
-  " fold all open
-  norm zR
-  " get target chars in current window without empty line
-  " [{'row': row number, 'col': [ col number, ... ]}...]
-  let s:emotion.keypos = [] | let s:emotion.klen = 1 | let wininfo = [] | let tarcnt = 0 | let rn = line('w0') | let crn = line('.')
-  for l in getline('w0', 'w$')
-    " loop row without 'including MultiByte' and 'empty', get head chars
-    " 日本語は1文字でマルチバイト3文字分だが、カーソル幅は2なのでめんどい、日本語を含む行は弾く
-    if l !~ '^[ -~]\+$' | let rn+=1 | continue | endif
-    let chars = [] | let ofst = 0
-    while ofst != -1
-      let st = matchstrpos(l, '\<.', ofst) | let ofst = matchstrpos(l, '.\>', ofst)[2]
-      if st[0] != '' | cal add(chars, st[2]) | endif
-    endwhile
-    if !empty(chars) | cal add(wininfo, #{row: rn, col: chars}) | endif
-    let tarcnt = tarcnt+len(chars) | let rn+=1
-  endfor
-  if tarcnt==0 | retu | endif
-  " calc key stroke length, keyOrder is 'ssw' = [0,0,1]
-  while tarcnt > pow(len(s:emotion.keys), s:emotion.klen) | let s:emotion.klen+=1 | endwhile
-  let keyOrder = range(1, s:emotion.klen)->map({->0})
-  " sort near current line, create 's:emotion_keypos' map like this
-  " [{'row': 1000, 'col': [{'key': 'ssw', 'pos': 7}, ... ]}, ... ]
-  for r in sort(deepcopy(wininfo), { x,y -> abs(x.row-crn) - abs(y.row-crn) })
-    let tmp = []
-    for col in r.col
-      cal add(tmp, #{key: copy(keyOrder)->map({i,v->s:emotion.keys[v]})->join(''), pos: col})
-      let keyOrder = s:emotion.incrementNOrder(len(s:emotion.keys)-1, keyOrder)
+    " fold all open
+    norm zR
+    " get target chars in current window without empty line
+    " [{'row': row number, 'col': [ col number, ... ]}...]
+    let self.keypos = [] | let self.klen = 1 | let wininfo = [] | let tarcnt = 0 | let rn = line('w0') | let crn = line('.')
+    for l in getline('w0', 'w$')
+        " loop row without 'including MultiByte' and 'empty', get head chars
+        " 日本語は1文字でマルチバイト3文字分だが、カーソル幅は2なのでめんどい、日本語を含む行は弾く
+        if l !~ '^[ -~|\t]\+$' | let rn+=1 | continue | endif
+        let chars = [] | let ofst = 0
+        while ofst != -1
+            let st = matchstrpos(l, '\<.', ofst) | let ofst = matchstrpos(l, '.\>', ofst)[2]
+            if st[0] != '' | cal add(chars, st[2]) | endif
+        endwhile
+        if !empty(chars) | cal add(wininfo, #{row: rn, col: chars}) | endif
+        let tarcnt = tarcnt+len(chars) | let rn+=1
     endfor
-    cal add(s:emotion.keypos, #{row: r.row, col: tmp})
-  endfor
-  " draw , disable f-scope(with clear matches)
-  cal s:fmode.deactivate()
-  for rn in range(line('w0'), line('w$')) | cal matchaddpos('EmotionBase', [rn], 98) | endfor
-  cal s:emotion.draw(s:emotion.keypos) | cal popup_close(s:emotion.popid)
-  let s:emotion.popid = popup_create('e-motion', #{line: &lines, col: &columns*-1, mapping: 0, filter: s:emotion.char_enter})
-  echo ''
+    if tarcnt==0 | retu | endif
+    " calc key stroke length, keyOrder is 'ssw' = [0,0,1]
+    while tarcnt > pow(len(self.keys), self.klen) | let self.klen+=1 | endwhile
+    let keyOrder = range(1, self.klen)->map({->0})
+    " sort near current line, create 'self_keypos' map like this
+    " [{'row': 1000, 'col': [{'key': 'ssw', 'pos': 7}, ... ]}, ... ]
+    for r in sort(deepcopy(wininfo), { x,y -> abs(x.row-crn) - abs(y.row-crn) })
+        let tmp = []
+        for col in r.col
+            cal add(tmp, #{key: copy(keyOrder)->map({i,v->self.keys[v]})->join(''), pos: col})
+            let keyOrder = self.incrementNOrder(len(self.keys)-1, keyOrder)
+        endfor
+        cal add(self.keypos, #{row: r.row, col: tmp})
+    endfor
+    " draw , disable syntax diagnostic if exists
+    if exists('*CocAction') | cal CocAction('diagnosticToggle') | endif
+    cal range(line('w0'), line('w$'))->map({ _,v -> matchaddpos('EmotionBase', [v], 98) })
+    cal self.draw(self.keypos) | cal popup_close(self.popid)
+    let self.popid = popup_create('e-motion', #{line: &lines, col: &columns*-1, mapping: 0, filter: self.char_enter})
+    echo ''
 endf
 
 " function: increment N order
 " 配列をN進法とみなし、1増やす. 使うキーがssf → sws と繰り上がる仕組み
 fu! s:emotion.incrementNOrder(nOrder, keyOrder) abort
-  if len(a:keyOrder) == 1 | retu [a:keyOrder[0]+1] | endif
-  let tmp = [] | let overflow = 0
-  for idx in reverse(range(0, len(a:keyOrder)-1))
-    " 1. increment last digit
-    if idx == len(a:keyOrder)-1
-      cal insert(tmp, a:keyOrder[idx] == a:nOrder ? 0 : a:keyOrder[idx]+1)
-      if tmp[0] == 0 | let overflow = 1 | endif | continue
-    endif
-    " 2. check next digit
-    if overflow
-      cal insert(tmp, a:keyOrder[idx] == a:nOrder ? 0 : a:keyOrder[idx]+1)
-      let overflow = a:keyOrder[idx] == a:nOrder ? 1 : 0
-    else
-      cal insert(tmp, a:keyOrder[idx])
-    endif
-  endfor
-  retu tmp
+    if len(a:keyOrder) == 1 | retu [a:keyOrder[0]+1] | endif
+    let tmp = [] | let overflow = 0
+    for idx in reverse(range(0, len(a:keyOrder)-1))
+        " 1. increment last digit
+        if idx == len(a:keyOrder)-1
+            cal insert(tmp, a:keyOrder[idx] == a:nOrder ? 0 : a:keyOrder[idx]+1)
+            if tmp[0] == 0 | let overflow = 1 | endif | continue
+        endif
+        " 2. check next digit
+        if overflow
+            cal insert(tmp, a:keyOrder[idx] == a:nOrder ? 0 : a:keyOrder[idx]+1)
+            let overflow = a:keyOrder[idx] == a:nOrder ? 1 : 0
+        else
+            cal insert(tmp, a:keyOrder[idx])
+        endif
+    endfor
+    retu tmp
 endf
 
 " about highlight setting
 aug emotion_hl
-  au!
-  au ColorScheme * hi EmotionBase ctermfg=59
-  au ColorScheme * hi EmotionWip ctermfg=166 cterm=bold
-  au ColorScheme * hi EmotionFin ctermfg=196 cterm=bold
+    au!
+    au ColorScheme * hi EmotionBase ctermfg=59
+    au ColorScheme * hi EmotionWip ctermfg=166 cterm=bold
+    au ColorScheme * hi EmotionFin ctermfg=196 cterm=bold
 aug END
-fu! s:emotion.hl_del(group_name) abort
-  cal getmatches()->filter({ _,v -> v.group == a:group_name })->map('execute("cal matchdelete(v:val.id)")')
+fu! s:emotion.hl_del(group_name_list) abort
+    cal getmatches()->filter({ _,v -> match(a:group_name_list, v.group) != -1 })->map({ _,v -> matchdelete(v.id) })
 endf
 
 " draw keystroke
 " 日本語は1文字でマルチバイト3文字分だが、カーソル幅は2なのでめんどいから弾いてある
 " posの次文字がマルチバイトだと、strokeが2回以上残ってる時、変に文字を書き換えてカラム数変わる
 fu! s:emotion.draw(keypos) abort
-  cal s:emotion.hl_del('EmotionFin') | cal s:emotion.hl_del('EmotionWip')
-  let hlpos_wip = [] | let hlpos_fin = []
-  for r in a:keypos | let line = getline(r.row)
-    for c in r.col
-      let colidx = c.pos-1 | let view_keystroke = c.key[:0] | let offset = colidx-1
-      cal add(hlpos_fin, [r.row, c.pos])
-      if len(c.key)>=2
-        let view_keystroke = c.key[:1]
-        cal add(hlpos_wip, [r.row, c.pos, 2])
-      endif
-      let line = colidx == 0
-       \ ? view_keystroke.line[len(view_keystroke):]
-       \ : line[0:offset].view_keystroke.line[colidx+len(view_keystroke):]
+    cal self.hl_del(['EmotionFin', 'EmotionWip'])
+    let hlpos_wip = [] | let hlpos_fin = []
+    for r in a:keypos | let line = getline(r.row)
+        for c in r.col
+            let colidx = c.pos-1 | let view_keystroke = c.key[:0] | let offset = colidx-1
+            cal add(hlpos_fin, [r.row, c.pos])
+            if len(c.key)>=2
+                let view_keystroke = c.key[:1]
+                cal add(hlpos_wip, [r.row, c.pos, 2])
+            endif
+            let line = colidx == 0
+                \ ? view_keystroke.line[len(view_keystroke):]
+                \ : line[0:offset].view_keystroke.line[colidx+len(view_keystroke):]
+        endfor
+        cal setline(r.row, line)
     endfor
-    cal setline(r.row, line)
-  endfor
-  for t in hlpos_fin | cal matchaddpos('EmotionFin', [t], 99) | endfor
-  for t in hlpos_wip | cal matchaddpos('EmotionWip', [t], 100) | endfor
+    for t in hlpos_fin | cal matchaddpos('EmotionFin', [t], 99) | endfor
+    for t in hlpos_wip | cal matchaddpos('EmotionWip', [t], 100) | endfor
 endf
 
 fu! s:emotion.char_enter(winid, key) abort
-  " noop (for polyglot bug adhoc)
-  if strtrans(a:key) == "<80><fd>`" | retu 1 | endif
-  " only accept defined emotion key
-  if s:emotion.keys->index(a:key) == -1
-    " go out e-motion
-    cal popup_close(s:emotion.popid)
-    let p = getpos('.') | u | cal cursor(p[1],p[2])
-    cal s:emotion.hl_del('EmotionFin') | cal s:emotion.hl_del('EmotionWip') | cal s:emotion.hl_del('EmotionBase')
-    " restore f-scope
-    cal s:fmode.takeover()
-    echohl Special | echo 'e-motion: go out' | echohl None | retu 1
-  endif
-  " upd emotion.keypos
-  let tmp = s:emotion.keypos->deepcopy()->map({ _,r -> #{row: r.row,
-   \col: r.col->filter({_,v->v.key[0]==a:key})->map({_,v->#{key: v.key[1:], pos: v.pos}})} })
-   \->filter({_,v->!empty(v.col)})
-  " nomatch -> noop
-  if empty(tmp) | retu 1 | else | let s:emotion.keypos = tmp | endif
-  " if last match -> end e-motion
-  if len(s:emotion.keypos) == 1 && len(s:emotion.keypos[0].col) == 1
-    cal popup_close(s:emotion.popid)
-    u | cal cursor(s:emotion.keypos[0].row, s:emotion.keypos[0].col[0].pos)
-    cal s:emotion.hl_del('EmotionFin') | cal s:emotion.hl_del('EmotionWip') | cal s:emotion.hl_del('EmotionBase')
-    " restore f-scope
-    cal s:fmode.takeover()
-    echohl Special | echo 'e-motion: finish' | echohl None | retu 1
-  endif
-  " redraw
-  let p = getpos('.') | u | cal cursor(p[1],p[2]) | echo '' | cal s:emotion.draw(s:emotion.keypos)
-  retu 1
+    " noop (for polyglot bug adhoc)
+    if strtrans(a:key) == "<80><fd>`" | retu 1 | endif
+    " only accept defined emotion key
+    if self.keys->index(a:key) == -1
+        " go out e-motion
+        cal popup_close(self.popid)
+        let p = getpos('.') | u | cal cursor(p[1],p[2])
+        cal self.hl_del(['EmotionFin', 'EmotionWip', 'EmotionBase'])
+        " TODO ハイライトの優先度でよくね？
+        " restore f-scope
+        if exists('*CocAction') | cal CocAction('diagnosticToggle') | endif
+        ""cal s:fmode.takeover()
+        echohl Special | echo 'e-motion: go out' | echohl None | retu 1
+    endif
+    " upd emotion.keypos
+    let tmp = self.keypos->deepcopy()->map({ _,r -> #{row: r.row,
+        \ col: r.col->filter({_,v->v.key[0]==a:key})->map({_,v->#{key: v.key[1:], pos: v.pos}})} })
+        \ ->filter({_,v->!empty(v.col)})
+    " nomatch -> noop
+    if empty(tmp) | retu 1 | else | let self.keypos = tmp | endif
+    " if last match -> end e-motion
+    if len(self.keypos) == 1 && len(self.keypos[0].col) == 1
+        cal popup_close(self.popid)
+        u | cal cursor(self.keypos[0].row, self.keypos[0].col[0].pos)
+        cal self.hl_del(['EmotionFin', 'EmotionWip', 'EmotionBase'])
+        " restore f-scope
+        " TODO ハイライトの優先度でよくね？
+        if exists('*CocAction') | cal CocAction('diagnosticToggle') | endif
+        ""cal s:fmode.takeover()
+        echohl Special | echo 'e-motion: finish' | echohl None | retu 1
+    endif
+    " redraw
+    let p = getpos('.') | u | cal cursor(p[1],p[2]) | echo '' | cal self.draw(self.keypos)
+    retu 1
 endf
 
-com! ImitatedEasymotion cal s:emotion.exe()
+let s:emotion = s:emotion.exe
+noremap <Plug>(emotion) :<C-u>cal <SID>emotion()<CR>
 " }}}
 
 " ===================================================================
 " mhinz/vim-startify
 " ===================================================================
+" TODO 作成
 " {{{
 
 " TODO startify
@@ -1383,11 +1777,12 @@ com! ImitatedEasymotion cal s:emotion.exe()
 
 " }}}
 
+" TODO リファクタ
 " ##################      PLUG MANAGE       ################### {{{
 let s:plug = #{colors: [ 'onedark.vim', 'hybrid_material.vim', 'molokai.vim' ]}
 
 fu! s:plug.color_install() abort
-  exe "bo terminal ++shell echo 'start'&&mkdir -p ~/.vim/colors&&cd ~/.vim/colors&&colors=('".join(s:plug.colors,"' '")."')&&for v in ${colors[@]};do curl https://raw.githubusercontent.com/serna37/vim-color/master/${v}>${v};done&&echo 'end'"
+    exe "bo terminal ++shell echo 'start'&&mkdir -p ~/.vim/colors&&cd ~/.vim/colors&&colors=('".join(s:plug.colors,"' '")."')&&for v in ${colors[@]};do curl https://raw.githubusercontent.com/serna37/vim-color/master/${v}>${v};done&&echo 'end'"
 endf
 
 " repo
@@ -1402,6 +1797,10 @@ let s:plug.repos = [
     \ 'sheerun/vim-polyglot', 'uiiaoo/java-syntax.vim',
     \ 'vim-airline/vim-airline', 'vim-airline/vim-airline-themes',
     \ ]
+let s:plug.repos = [
+    \ 'mhinz/vim-startify',
+    \ 'github/copilot.vim', 'puremourning/vimspector',
+    \ ]
 
 " coc extentions
 let s:plug.coc_extentions = [
@@ -1411,22 +1810,25 @@ let s:plug.coc_extentions = [
     \ ]
 
 fu! s:plug.install() abort
-  " colors
-  let color_cmd = "mkdir -p ~/.vim/colors&&cd ~/.vim/colors&&colors=('".join(s:plug.colors,"' '")."')&&for v in ${colors[@]};do curl https://raw.githubusercontent.com/serna37/vim-color/master/${v}>${v};done"
-  " plugins
-  let cmd = "mkdir -p ~/.vim/pack/plugins/start&&cd ~/.vim/pack/plugins/start&&repos=('".join(s:plug.repos,"' '")."')&&for v in ${repos[@]};do git clone --depth 1 https://github.com/${v};done"
-    \ ."&&git clone -b release https://github.com/neoclide/coc.nvim"
-    \ ."&&fzf/install --no-key-bindings --completion --no-bash --no-zsh --no-fish"
-let cmd = "mkdir -p ~/.vim/pack/plugins/start&&cd ~/.vim/pack/plugins/start"
-    \ ."&&git clone -b release https://github.com/neoclide/coc.nvim"
+    " colors
+    let color_cmd = "mkdir -p ~/.vim/colors&&cd ~/.vim/colors&&colors=('".join(s:plug.colors,"' '")."')&&for v in ${colors[@]};do curl https://raw.githubusercontent.com/serna37/vim-color/master/${v}>${v};done"
+    " plugins
+    let cmd = "mkdir -p ~/.vim/pack/plugins/start&&cd ~/.vim/pack/plugins/start&&repos=('".join(s:plug.repos,"' '")."')&&for v in ${repos[@]};do git clone --depth 1 https://github.com/${v};done"
+      \ ."&&git clone -b release https://github.com/neoclide/coc.nvim"
+      \ ."&&fzf/install --no-key-bindings --completion --no-bash --no-zsh --no-fish"
+
+    let cmd = "mkdir -p ~/.vim/pack/plugins/start&&cd ~/.vim/pack/plugins/start"
+        \ ."&&git clone -b release https://github.com/neoclide/coc.nvim"
   ""cal s:runcat.start() | cal job_start(["/bin/zsh","-c",color_cmd]) | cal job_start(["/bin/zsh","-c",cmd], #{close_cb: s:plug.coc_setup})
   cal s:runcat.start() | cal job_start(["/bin/zsh","-c",cmd], #{close_cb: s:plug.coc_setup})
   echo 'colors, plugins installing...' | cal popup_notification('colors, plugins installing...', #{border: [], line: &columns/4-&columns/37, close: 'button'})
 endf
 
+" TODO onedark use
 " coc extentions
 fu! s:plug.coc_setup(ch) abort
-  cal s:runcat.stop() | echohl Special | echo 'colors, plugins installed. coc-extentions installing. PLEASE REBOOT VIM after this.' | echohl None
+  cal s:runcat.stop() | echohl DarkRed | echo 'colors, plugins installed. coc-extentions installing. PLEASE REBOOT VIM after this.' | echohl None
+  " TODO 色とか綺麗に zindex9999
   cal popup_notification('colors, plugins installed. coc-extentions installing. PLEASE REBOOT VIM after this.', #{ border: [], line: &columns/4-&columns/37, close: "button" })
   exe 'source ~/.vim/pack/plugins/start/coc.nvim/plugin/coc.vim' | exe 'CocInstall '.join(s:plug.coc_extentions,' ')
   let cocconfig = ['{',
@@ -1443,8 +1845,9 @@ endf
 
 " uninstall
 fu! s:plug.uninstall() abort
-  echohl ErrorMsg | echo 'delete ~/.vim' | echo 'are you sure to delete these folder ?'
-  echohl Special | let w = inputdialog("YES (Y) / NO (N)") | if w != 'Y' || w != 'y' | echohl None | echo 'cancel' | retu | endif
+  echohl DarkRed | echo 'delete ~/.vim' | echo 'are you sure to delete these folder ?'
+  " TODO modify colors, text
+  echohl DarkBlue | let w = confirm("Save changes?", "&Yes\n&No\n&Cancel") | if w != 1 | echohl None | echo 'cancel' | retu | endif
   echohl None | exe "bo terminal ++shell echo 'start'&&rm -rf ~/.vim&&echo 'end. PLEASE REBOOT VIM'"
 endf
 
@@ -1453,6 +1856,7 @@ com! PlugInstall cal s:plug.install()
 com! PlugUnInstall cal s:plug.uninstall()
 " }}}
 
+" TODO リファクタ
 " ##################        TRAINING        ################### {{{
 command! Popupclear cal popup_clear()
 command! -nargs=? TrainingWheelsProtocol cal TrainingWheelsProtocol(<f-args>)
@@ -2063,6 +2467,8 @@ let g:vimspector_enable_mappings = 'VISUAL_STUDIO'
 " fzf run time path(git, homebrew)
 set rtp+=~/.vim/pack/plugins/start/fzf
 set rtp+=/opt/homebrew/opt/fzf
+" TODO batいるっけ？
+set rtp+=/opt/homebrew/opt/bat
 
 " TODO delete
 " easy motion
@@ -2070,6 +2476,7 @@ let g:EasyMotion_do_mapping = 0
 let g:EasyMotion_smartcase = 1
 let g:EasyMotion_keys='swadjkhlnmf'
 
+" TODO delete
 " airline
 let g:airline_theme = 'deus'
 let g:airline#extensions#tabline#enabled = 1
@@ -2113,6 +2520,7 @@ let g:btr_logo = [
 
 "}}}
 
+" TODO delete
 let g:startify_custom_header = g:btr_logo
 
 " }}}
@@ -2120,7 +2528,9 @@ let g:startify_custom_header = g:btr_logo
 " ##################      PLUGIN KEYMAP     ################### {{{
 
 " for no override default motion, if glob( plugin path ) is need
+" TODO existsになおす？
 
+" TODO delete
 " tabline motion
 if glob('~/.vim/pack/plugins/start/vim-airline') != ''
   nmap <silent><C-n> <Plug>AirlineSelectPrevTab
@@ -2157,7 +2567,7 @@ if glob('~/.vim/pack/plugins/start/coc.nvim') != ''
   nnoremap <Leader>? :cal CocAction('doHover')<CR>
   nnoremap <Leader>, <plug>(coc-diagnostic-next)
   nnoremap <Leader>. <plug>(coc-diagnostic-prev)
-  " TODO exprがうざい、clearmatchとかできない
+  " TODO comfortable scrollと競合
   nnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : Scroll(1, 10)
   nnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : Scroll(0, 10)
 endif
@@ -2181,11 +2591,19 @@ endif
 " #############################################################
 " ##################        STARTING        ###################
 " #############################################################
+" TODO つくったりなおしたり
 " {{{
+
+
 
 colorscheme torte
 hi Normal ctermbg=235
 if glob('~/.vim/colors/') != '' | colorscheme onedark | endif
+
+cal s:fmode.activate()
+
+
+
 
 " }}}
 
