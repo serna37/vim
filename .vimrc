@@ -50,6 +50,7 @@ set clipboard+=unnamed " copy yanked fot clipboard
 
 " reopen, go row
 aug reopenGoRow
+    au!
     au BufRead * if line("'\"") > 0 && line("'\"") <= line("$") | exe "norm g`\"" | endif
 aug END
 " }}}
@@ -286,10 +287,6 @@ set foldcolumn=1 " fold preview
 
 " TODO echo色をこれ使うように統一
 " color echo/echon, input {{{
-au ColorScheme * hi DarkRed ctermfg=204
-au ColorScheme * hi DarkOrange ctermfg=180
-au ColorScheme * hi DarkBlue ctermfg=39
-
 fu! EchoE(msg, ...) abort
     echohl DarkRed
     exe printf('echo%s "%s"', a:0 ? 'n' : '', a:msg)
@@ -344,6 +341,13 @@ fu! InputI(msg, ...) abort
     echohl None
     retu w
 endf
+
+aug logging_char_color
+    au!
+    au ColorScheme * hi DarkRed ctermfg=204
+    au ColorScheme * hi DarkOrange ctermfg=180
+    au ColorScheme * hi DarkBlue ctermfg=39
+aug END
 " }}}
 
 " tab 5row anchor {{{
@@ -1208,22 +1212,6 @@ endf
 " TODO onedark系ハイライトを1箇所にまとめたいね -> どこで使う予定かリストアップ
 " TODO airline, popup
 " TODO onedarkカラースキームimitationとは別のはず。
-aug statusLine
-    au!
-    au BufWinEnter,BufWritePost * cal s:gitinfo()
-    au ColorScheme * hi OneDarkGreen cterm=bold ctermfg=235 ctermbg=114
-    au ColorScheme * hi OneDarkGreenChar ctermfg=114 ctermbg=235
-    au ColorScheme * hi OneDarkBule cterm=bold ctermfg=235 ctermbg=39
-    au ColorScheme * hi OneDarkBlueChar ctermfg=39 ctermbg=235
-    au ColorScheme * hi OneDarkPink cterm=bold ctermfg=235 ctermbg=170
-    au ColorScheme * hi OneDarkPinkChar ctermfg=170 ctermbg=235
-    au ColorScheme * hi OneDarkRed cterm=bold ctermfg=235 ctermbg=204
-    au ColorScheme * hi OneDarkRedChar ctermfg=204 ctermbg=235
-    au ColorScheme * hi OneDarkBlackArrow ctermfg=235 ctermbg=238
-    au ColorScheme * hi OneDarkChar ctermfg=114 ctermbg=238
-    au ColorScheme * hi OneDarkGrayArrow ctermfg=238 ctermbg=235
-    au ColorScheme * hi StatusLine ctermfg=114 ctermbg=238
-aug END
 
 fu! g:SetStatusLine() abort
     let filetype_tmp = split(execute('set filetype?'), '=')
@@ -1234,12 +1222,6 @@ endf
 set stl=%!g:SetStatusLine()
 
 " tabline
-aug tabLine
-    au ColorScheme * hi OneDarkGreenThin ctermfg=235 ctermbg=114
-    au ColorScheme * hi OneDarkBlueThin ctermfg=235 ctermbg=39
-    au ColorScheme * hi OneDarkGreenArrowBottom ctermfg=235 ctermbg=114
-    au ColorScheme * hi TabLineFill ctermfg=235 ctermbg=238
-aug END
 fu! s:buffers_label() abort
     let b = ''
     for v in split(execute('ls'), '\n')->map({ _,v -> split(v, ' ')})
@@ -1302,6 +1284,31 @@ fu! s:closeBuf() abort
     execute("norm \<C-n>")
     execute('bd ' . now_b)
 endf
+
+aug statusLine
+    au!
+    au BufWinEnter,BufWritePost * cal s:gitinfo()
+    au ColorScheme * hi OneDarkGreen cterm=bold ctermfg=234 ctermbg=114
+    au ColorScheme * hi OneDarkGreenChar ctermfg=113 ctermbg=235
+    au ColorScheme * hi OneDarkBule cterm=bold ctermfg=234 ctermbg=39
+    au ColorScheme * hi OneDarkBlueChar ctermfg=38 ctermbg=235
+    au ColorScheme * hi OneDarkPink cterm=bold ctermfg=234 ctermbg=170
+    au ColorScheme * hi OneDarkPinkChar ctermfg=169 ctermbg=235
+    au ColorScheme * hi OneDarkRed cterm=bold ctermfg=234 ctermbg=204
+    au ColorScheme * hi OneDarkRedChar ctermfg=203 ctermbg=235
+    au ColorScheme * hi OneDarkBlackArrow ctermfg=234 ctermbg=238
+    au ColorScheme * hi OneDarkChar ctermfg=113 ctermbg=238
+    au ColorScheme * hi OneDarkGrayArrow ctermfg=237 ctermbg=235
+    au ColorScheme * hi StatusLine ctermfg=113 ctermbg=238
+aug END
+
+aug tabLine
+    au!
+    au ColorScheme * hi OneDarkGreenThin ctermfg=235 ctermbg=114
+    au ColorScheme * hi OneDarkBlueThin ctermfg=235 ctermbg=39
+    au ColorScheme * hi OneDarkGreenArrowBottom ctermfg=235 ctermbg=114
+    au ColorScheme * hi TabLineFill ctermfg=235 ctermbg=238
+aug END
 
 noremap <Plug>(buf-prev) :<C-u>cal <SID>moveBuf('prev')<CR>
 noremap <Plug>(buf-next) :<C-u>cal <SID>moveBuf('next')<CR>
@@ -1697,7 +1704,7 @@ endf
 
 aug quickhl
     au!
-    au! ColorScheme * cal s:quickhl.hlini()
+    au ColorScheme * cal s:quickhl.hlini()
 aug END
 
 let s:quickhlset = s:quickhl.set
@@ -1933,17 +1940,6 @@ fu! s:emotion.incrementNOrder(nOrder, keyOrder) abort
     retu tmp
 endf
 
-" about highlight setting
-aug emotion_hl
-    au!
-    au ColorScheme * hi EmotionBase ctermfg=59
-    au ColorScheme * hi EmotionWip ctermfg=166 cterm=bold
-    au ColorScheme * hi EmotionFin ctermfg=196 cterm=bold
-aug END
-fu! s:emotion.hl_del(group_name_list) abort
-    cal getmatches()->filter({ _,v -> match(a:group_name_list, v.group) != -1 })->map({ _,v -> matchdelete(v.id) })
-endf
-
 " draw keystroke
 " 日本語は1文字でマルチバイト3文字分だが、カーソル幅は2なのでめんどいから弾いてある
 " posの次文字がマルチバイトだと、strokeが2回以上残ってる時、変に文字を書き換えてカラム数変わる
@@ -2031,6 +2027,18 @@ fu! s:emotion.char_enter(winid, key) abort
     cal self.draw(self.keypos)
     retu 1
 endf
+
+" about highlight setting
+fu! s:emotion.hl_del(group_name_list) abort
+    cal getmatches()->filter({ _,v -> match(a:group_name_list, v.group) != -1 })->map({ _,v -> matchdelete(v.id) })
+endf
+
+aug emotion_hl
+    au!
+    au ColorScheme * hi EmotionBase ctermfg=59
+    au ColorScheme * hi EmotionWip ctermfg=166 cterm=bold
+    au ColorScheme * hi EmotionFin ctermfg=196 cterm=bold
+aug END
 
 let s:emotion = s:emotion.exe
 noremap <Plug>(emotion) :<C-u>cal <SID>emotion()<CR>
@@ -2881,9 +2889,11 @@ endif
 " {{{
 
 
-
+aug base_color
+    au!
+    au ColorScheme * hi Normal ctermbg=235
+aug END
 colorscheme torte
-hi Normal ctermbg=235
 if glob('~/.vim/colors/') != ''
     colorscheme onedark
 endif
