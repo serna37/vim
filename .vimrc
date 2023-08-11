@@ -225,10 +225,12 @@ nnoremap <Leader>s /
 " TODO fzf current file test
 " TODO 割と良かった
 fu! TestFzf()
-    cal s:fzsearch.popup(#{list: getline(1, line('$')),
+    cal s:fzsearch.popup(#{
         \ title: 'Current Buffer',
-        \ enter_prefix: '>>',
-        \ enter_title: 'Choose: <C-n/p> <CR> | ClearText: <C-w>',
+        \ list: getline(1, line('$'))->map({ i,v -> i+1.': '.v }),
+        \ list_filetype: &filetype,
+        \ preview: 1,
+        \ enter_prefix: 0,
         \ func_confirm: 'XXXXcallbak',
         \ func_tab: { -> execute('echom "Tab"') },
         \ })
@@ -237,7 +239,7 @@ fu! XXXXcallbak(wid, idx)
      if a:idx == -1 || empty(s:fzsearch.res)
          retu
      endif
-     echom s:fzsearch.res[a:idx-1]
+     exe split(s:fzsearch.res[a:idx-1], ':')[0]
 endf
 " =====================
 
@@ -916,10 +918,11 @@ endif
 " {{{
 " usage
 " let arguments_def = #{
+"     \ title: popup title as String,
 "     \ list: search targets as List,
-"     \ title: choose popup title as String,
-"     \ enter_prefix: enter zone prefix text as String,
-"     \ enter_title: enter zone title as String,
+"     \ list_filetype: syntax highlight filetype as String (0 ignore),
+"     \ preview: 0 ignore, 1 show preview file (list elem = file path),
+"     \ enter_prefix: enter zone prefix text as String (0 to default value),
 "     \ func_confirm: confirm function name as String,
 "     TODO fzsearch tab mode change
 "     \ func_tab: { -> execute('echom "Tab"') },
@@ -935,36 +938,20 @@ endif
 "     echom s:fzsearch.res[a:idx-1]
 " endf
 
-let s:fzsearch = #{ewid: 0, rwid: 0, res: [], tid: 0}
+let s:fzsearch = #{bwid: 0, ewid: 0, rwid: 0, pwid: 0, tid: 0, res: []}
 
 fu! s:fzsearch.popup(v) abort
     ""let self.max = &lines/2-1
     let self.max = 100
-    let self.pr = a:v.enter_prefix
+    let self.pr = a:v.enter_prefix ?? '>>'
     let self.res = a:v.list[0:self.max]
 
-    " TODO fzf fzsearch util popup border font color ...
-    " TODO fzf preview window catで作る、syntax highlightも
-    let fff = system('cat README.md')->split('\n') " 本当はファイルフルパス
-    " TODO fzf preview いけそうww
-    " TODO キーに応じてzindex変えながらスクロールで複数行下に。
-    let aa = popup_menu(fff, #{title: a:v.title,
-        \ zindex: 98, mapping: 0, scrollbar: 1,
+    let self.bwid = popup_create([], #{title: ' '.a:v.title.' ',
+        \ zindex: 50, mapping: 0, scrollbar: 0,
         \ border: [], borderchars: ['─','│','─','│','╭','╮','╯','╰'],
-        \ minwidth: &columns/3, maxwidth: &columns/3,
-        \ minheight: &lines/2, maxheight: &lines/2,
-        \ filter: function(self.pv, [0])
-        \ })
-    call setbufvar(winbufnr(aa), '&filetype', 'markdown')
-
-
-    let self.rwid = popup_menu(self.res, #{title: a:v.title,
-        \ zindex: 99, mapping: 0, scrollbar: 1,
-        \ border: [], borderchars: ['─','│','─','│','╭','╮','╯','╰'],
-        \ minwidth: &columns/2, maxwidth: &columns/2,
-        \ minheight: &lines/2, maxheight: &lines/2,
-        \ callback: a:v.func_confirm,
-        \ filter: function(self.jk, [0])
+        \ minwidth: &columns*9/12, maxwidth: &columns*9/12,
+        \ minheight: &lines/2+6, maxheight: &lines/2+6,
+        \ line: &lines/4-2, col: &columns/8+1,
         \ })
 
     " TODO fzf tabだと選択、C-qでquickfixlistに、だけど モード切り替えどうするか
@@ -972,27 +959,81 @@ fu! s:fzsearch.popup(v) abort
     " TODO fzf 選択解除めんどいなぁ
     " TODO fzf 全量いっきにquickfixじゃだめか
     " TODO fzf tab選択機能つけるならC-a欲しい
-    let self.ewid = popup_create(a:v.enter_prefix, #{title: a:v.enter_title,
+    let self.ewid = popup_create(self.pr, #{title: ' Fuzzy Search | ClearText: <C-w> ',
         \ zindex: 100, mapping: 0,
         \ border: [], borderchars: ['─','│','─','│','╭','╮','╯','╰'],
-        \ minwidth: &columns/2, maxwidth: &columns/2,
-        \ minheight: 1, maxheight: 1, line: &lines*3/4+2,
+        \ minwidth: &columns/3, maxwidth: &columns/3,
+        \ minheight: 1, maxheight: 1,
+        \ line: &lines*3/4+2, col: &columns/7+1,
         \ filter: function(self.fil, [#{lst: a:v.list, wd: [], ft: a:v.func_tab}]),
         \ })
+
+    let self.rwid = popup_menu(self.res, #{title: ' Choose: <C-n/p> <C-d/u> <CR> ',
+        \ zindex: 99, mapping: 0, scrollbar: 1,
+        \ border: [], borderchars: ['─','│','─','│','╭','╮','╯','╰'],
+        \ minwidth: &columns/3, maxwidth: &columns/3,
+        \ minheight: &lines/2, maxheight: &lines/2,
+        \ pos: 'topleft', line: &lines/4, col: &columns/7,
+        \ callback: a:v.func_confirm,
+        \ filter: function(self.jk, [0]),
+        \ })
+    " TODO row number intercept to syntax highlight ...
+    if !a:v.list_filetype
+        cal setbufvar(winbufnr(self.rwid), '&filetype', a:v.list_filetype)
+    endif
+
+    " TODO fzf fzsearch util popup border font color ...
+
+    " TODO キーに応じてzindex変えながらスクロールで複数行下に。
+
+    " TODO firstlineでpreview 位置かえられる
+    " preview typeにして、行指定かパス指定かにして
+    " 行指定->firstlineを動的に
+    " パス指定-> catで描画を動的に
+    " TODO cat error ハンドリング
+    let cat = system('cat '.self.res[0])->split('\n')
+    let self.pwid = popup_menu(cat, #{title: ' File Preview | Scroll: <C-f/b> ',
+        \ zindex: 98, mapping: 0, scrollbar: 1,
+        \ border: [], borderchars: ['─','│','─','│','╭','╮','╯','╰'],
+        \ minwidth: &columns/3, maxwidth: &columns/3,
+        \ minheight: &lines/2+3, maxheight: &lines/2+3,
+        \ pos: 'topleft', line: &lines/4, col: &columns/2+1,
+        \ filter: function(self.pv, [0]),
+        \ })
+        "\ firstline: 1,
+    cal setbufvar(winbufnr(self.pwid), '&filetype', 'markdown')
+
+    "cal popup_setoptions(self.ewid, #{})
+    ""cal popup_move(self.ewid, #{col: &columns/8})
+    ""cal popup_move(self.rwid, #{col: &columns/8})
+    "cal popup_setoptions(self.rwid, #{})
 endf
 
 fu! s:fzsearch.pv(_, wid, key) abort
     if a:key is# "\<Esc>"
-        ""cal feedkeys("\<C-c>")
-        ""cal feedkeys("\<C-c>")
-    elseif a:key is# "\<C-d>"
+        cal popup_close(self.bwid)
+        cal popup_close(self.pwid)
+        cal popup_close(self.ewid)
+        cal feedkeys("\<C-c>")
+    elseif a:key is# "\<C-f>"
+        " TODO ここには来てるが、resultwinにいっちゃう
+        " ここでfeedkeysするとenter winにいく
         cal self.scroll(1)
-        retu 1
-    elseif a:key is# "\<C-u>"
+        ""cal feedkeys('jj')
+    elseif a:key is# "\<C-b>"
         cal self.scroll(0)
-        retu 1
+    elseif a:key is# "\<C-n>" || a:key is# "\<C-p>" || a:key is# "\<C-d>" || a:key is# "\<C-u>" || a:key is# "\<CR>"
+        cal popup_setoptions(self.rwid, #{zindex: 100})
+        cal popup_setoptions(self.ewid, #{zindex: 99})
+        cal popup_setoptions(self.pwid, #{zindex: 98})
+        cal feedkeys(a:key)
+    else
+        cal popup_setoptions(self.ewid, #{zindex: 100})
+        cal popup_setoptions(self.rwid, #{zindex: 99})
+        cal popup_setoptions(self.pwid, #{zindex: 98})
+        cal feedkeys(a:key)
     endif
-    retu popup_filter_menu(a:wid, a:key)
+    retu 1
 endf
 
 fu! s:fzsearch.scroll(vector) abort
@@ -1002,7 +1043,7 @@ fu! s:fzsearch.scroll(vector) abort
     cal timer_stop(self.tid)
     let vec = a:vector ? "\<C-n>" : "\<C-p>"
     let self.tid = timer_start(10, { -> feedkeys(vec) }, #{repeat: -1})
-    cal timer_start(600, self.scstop)
+    cal timer_start(400, self.scstop)
 endf
 
 fu! s:fzsearch.scstop(_) abort
@@ -1010,19 +1051,35 @@ fu! s:fzsearch.scstop(_) abort
     let self.tid = 0
 endf
 
-
 fu! s:fzsearch.jk(_, wid, key) abort
     if a:key is# "\<Esc>"
-        cal feedkeys("\<C-c>")
+        cal popup_close(self.bwid)
+        cal popup_close(self.pwid)
+        cal popup_close(self.ewid)
         cal feedkeys("\<C-c>")
     elseif a:key is# "\<C-n>" || a:key is# "\<C-p>"
         retu popup_filter_menu(a:wid, a:key)
+    elseif a:key is# "\<C-d>"
+        cal self.scroll(1)
+        retu 1
+    elseif a:key is# "\<C-u>"
+        cal self.scroll(0)
+        retu 1
     elseif a:key is# "\<CR>"
         cal popup_close(self.ewid)
+        cal popup_close(self.pwid)
+        cal popup_close(self.bwid)
         retu popup_filter_menu(a:wid, a:key)
+    elseif a:key is# "\<C-f>" || a:key is# "\<C-b>"
+        cal popup_setoptions(self.pwid, #{zindex: 100})
+        cal popup_setoptions(self.ewid, #{zindex: 99})
+        cal popup_setoptions(self.rwid, #{zindex: 98})
+        cal feedkeys(a:key)
+        retu 1
     else
-        cal popup_setoptions(a:wid, #{zindex: 99})
         cal popup_setoptions(self.ewid, #{zindex: 100})
+        cal popup_setoptions(self.rwid, #{zindex: 99})
+        cal popup_setoptions(self.pwid, #{zindex: 98})
         cal feedkeys(a:key)
     endif
     retu 1
@@ -1030,12 +1087,21 @@ endf
 
 fu! s:fzsearch.fil(ctx, wid, key) abort
     if a:key is# "\<Esc>"
-        cal feedkeys("\<C-c>")
+        cal popup_close(self.bwid)
+        cal popup_close(self.pwid)
+        cal popup_close(self.ewid)
         cal feedkeys("\<C-c>")
         retu 1
-    elseif a:key is# "\<C-n>" || a:key is# "\<C-p>" || a:key is# "\<CR>"
-        cal popup_setoptions(a:wid, #{zindex: 99})
+    elseif a:key is# "\<C-n>" || a:key is# "\<C-p>" || a:key is# "\<C-d>" || a:key is# "\<C-u>" || a:key is# "\<CR>"
         cal popup_setoptions(self.rwid, #{zindex: 100})
+        cal popup_setoptions(self.ewid, #{zindex: 99})
+        cal popup_setoptions(self.pwid, #{zindex: 98})
+        cal feedkeys(a:key)
+        retu 1
+    elseif a:key is# "\<C-f>" || a:key is# "\<C-b>"
+        cal popup_setoptions(self.pwid, #{zindex: 100})
+        cal popup_setoptions(self.ewid, #{zindex: 99})
+        cal popup_setoptions(self.rwid, #{zindex: 98})
         cal feedkeys(a:key)
         retu 1
     elseif a:key is# "\<Tab>"
@@ -1539,6 +1605,7 @@ fu! s:mk.load() abort
     endfor
 endf
 
+" TODO why a lot of marks ... grep ?
 fu! s:mk.toggle() abort
     let lmk = sign_getplaced(bufname('%'), #{group: 'mkg', lnum: line('.')})[0].signs
     if empty(lmk)
@@ -1591,12 +1658,12 @@ fu! s:mk.listcb() abort
         cal EchoE('no marks')
         retu
     endif
-    let resources = deepcopy(list)->sort({ x,y -> x.lnum - y.lnum })
-        \ ->map({ _,v -> v.lnum.' '.getline(v.lnum) })
-    cal s:fzsearch.popup(#{list: resources,
+    cal s:fzsearch.popup(#{
         \ title: 'Marks in Current Buffer',
-        \ enter_prefix: '>>',
-        \ enter_title: 'Choose: <C-n/p> <CR> | ClearText: <C-w>',
+        \ list: sort(list, { x,y -> x.lnum - y.lnum })->map({ _,v -> v.lnum.': '.getline(v.lnum)}),
+        \ list_filetype: &filetype,
+        \ preview: 0,
+        \ enter_prefix: 0,
         \ func_confirm: 's:mkchoose',
         \ func_tab: { -> execute('echom "Tab"') },
         \ })
@@ -1618,9 +1685,7 @@ fu! s:mkchoose(wid, idx)
         cal EchoE('cancel')
         retu
     endif
-    let row = s:fzsearch.res[a:idx-1]
-    let line = split(row, ' ')[0]
-    cal cursor(line, 1)
+    exe split(s:fzsearch.res[a:idx-1], ':')[0]
     cal EchoI('jump to mark')
 endf
 
