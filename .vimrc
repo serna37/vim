@@ -998,15 +998,11 @@ fu! s:fzsearch.popup(v) abort
         \ minwidth: &columns/3, maxwidth: &columns/3,
         \ minheight: &lines/2+3, maxheight: &lines/2+3,
         \ pos: 'topleft', line: &lines/4, col: &columns/2+1,
+        \ firstline: 1,
         \ filter: function(self.pv, [0]),
         \ })
-        "\ firstline: 1,
+    " TODO preview file type
     cal setbufvar(winbufnr(self.pwid), '&filetype', 'markdown')
-
-    "cal popup_setoptions(self.ewid, #{})
-    ""cal popup_move(self.ewid, #{col: &columns/8})
-    ""cal popup_move(self.rwid, #{col: &columns/8})
-    "cal popup_setoptions(self.rwid, #{})
 endf
 
 fu! s:fzsearch.pv(_, wid, key) abort
@@ -1016,12 +1012,9 @@ fu! s:fzsearch.pv(_, wid, key) abort
         cal popup_close(self.ewid)
         cal feedkeys("\<C-c>")
     elseif a:key is# "\<C-f>"
-        " TODO ここには来てるが、resultwinにいっちゃう
-        " ここでfeedkeysするとenter winにいく
-        cal self.scroll(1)
-        ""cal feedkeys('jj')
+        cal self.scroll(a:wid, 1)
     elseif a:key is# "\<C-b>"
-        cal self.scroll(0)
+        cal self.scroll(a:wid, 0)
     elseif a:key is# "\<C-n>" || a:key is# "\<C-p>" || a:key is# "\<C-d>" || a:key is# "\<C-u>" || a:key is# "\<CR>"
         cal popup_setoptions(self.rwid, #{zindex: 100})
         cal popup_setoptions(self.ewid, #{zindex: 99})
@@ -1036,14 +1029,15 @@ fu! s:fzsearch.pv(_, wid, key) abort
     retu 1
 endf
 
-fu! s:fzsearch.scroll(vector) abort
+fu! s:fzsearch.scroll(wid, vector) abort
     if self.tid
         retu
     endif
     cal timer_stop(self.tid)
     let vec = a:vector ? "\<C-n>" : "\<C-p>"
-    let self.tid = timer_start(10, { -> feedkeys(vec) }, #{repeat: -1})
-    cal timer_start(400, self.scstop)
+    let self.tid = timer_start(10, { -> popup_filter_menu(a:wid, vec) }, #{repeat: -1})
+    let delay = a:wid == self.pwid ? 500 : 300
+    cal timer_start(delay, self.scstop)
 endf
 
 fu! s:fzsearch.scstop(_) abort
@@ -1060,10 +1054,10 @@ fu! s:fzsearch.jk(_, wid, key) abort
     elseif a:key is# "\<C-n>" || a:key is# "\<C-p>"
         retu popup_filter_menu(a:wid, a:key)
     elseif a:key is# "\<C-d>"
-        cal self.scroll(1)
+        cal self.scroll(a:wid, 1)
         retu 1
     elseif a:key is# "\<C-u>"
-        cal self.scroll(0)
+        cal self.scroll(a:wid, 0)
         retu 1
     elseif a:key is# "\<CR>"
         cal popup_close(self.ewid)
