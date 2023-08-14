@@ -98,10 +98,10 @@ nnoremap <Up> 4<C-w>-
 nnoremap <Down> 4<C-w>+
 
 " move buffer
-nnoremap <silent><C-n> <Plug>(buf-prev)
-nnoremap <silent><C-p> <Plug>(buf-next)
+nnoremap <C-n> <Plug>(buf-prev)
+nnoremap <C-p> <Plug>(buf-next)
 " close buffer
-nnoremap <silent><Leader>x <Plug>(buf-close)
+nnoremap <Leader>x <Plug>(buf-close)
 
 " terminal
 "nnoremap <silent><Leader>t :bo terminal ++rows=10<CR>
@@ -110,7 +110,7 @@ nnoremap <silent><Leader>t :cal popup_create(term_start([&shell],#{hidden:1,term
 tnoremap <Esc> <C-w>N
 
 " zen
-nnoremap <silent><Leader>z <Plug>(zen-mode)
+nnoremap <Leader>z <Plug>(zen-mode)
 " }}}
 
 " ##################         MOTION         ################### {{{
@@ -119,30 +119,30 @@ nnoremap j gj
 nnoremap k gk
 vnoremap <Tab> 5gj
 vnoremap <S-Tab> 5gk
-nnoremap <silent><Tab> 5j<Plug>(anchor)
-nnoremap <silent><S-Tab> 5k<Plug>(anchor)
+nnoremap <Tab> 5j<Plug>(anchor)
+nnoremap <S-Tab> 5k<Plug>(anchor)
 
 " comfortable scroll
-nnoremap <silent><C-u> <Plug>(scroll-u)
-nnoremap <silent><C-d> <Plug>(scroll-d)
-nnoremap <silent><C-b> <Plug>(scroll-b)
-nnoremap <silent><C-f> <Plug>(scroll-f)
+nnoremap <C-u> <Plug>(scroll-u)
+nnoremap <C-d> <Plug>(scroll-d)
+nnoremap <C-b> <Plug>(scroll-b)
+nnoremap <C-f> <Plug>(scroll-f)
 
 " f-scope toggle
-nnoremap <silent><Leader>w <Plug>(f-scope)
+nnoremap <Leader>w <Plug>(f-scope)
 
 " mark
-nnoremap <silent>mm <Plug>(mk-toggle)
-nnoremap <silent>mp <Plug>(mk-prev)
-nnoremap <silent>mn <Plug>(mk-next)
-nnoremap <silent>mc <Plug>(mk-clthis)
-nnoremap <silent>mx <Plug>(mk-clall)
-nnoremap <silent><Leader>m <Plug>(mk-list)
+nnoremap mm <Plug>(mk-toggle)
+nnoremap mp <Plug>(mk-prev)
+nnoremap mn <Plug>(mk-next)
+nnoremap mc <Plug>(mk-clthis)
+nnoremap mx <Plug>(mk-clall)
+nnoremap <Leader>m <Plug>(mk-list)
 " TODO mark全体リスト
 " TODO mi で annotation
 
 " IDE action menu
-nnoremap <silent><Leader>v <Plug>(ide-menu)
+nnoremap <Leader>v <Plug>(ide-menu)
 " }}}
 
 " ##################         EDIT           ################### {{{
@@ -211,57 +211,33 @@ set smartcase " don't ignore case when enterd UPPER CASE"
 set shortmess-=S " show hit word's number at right bottom
 
 " no move search word with multi highlight
-nnoremap <silent>* *N<Plug>(qikhl-toggle)
-nnoremap <silent># *N<Plug>(qikhl-toggle)
+nnoremap * *N<Plug>(qikhl-toggle)
+nnoremap # *N<Plug>(qikhl-toggle)
 nnoremap <silent><Leader>q <Plug>(qikhl-clear):noh<CR>
 
 " incremental search
-nnoremap <silent>s <Plug>(emotion)
-nnoremap <Leader>s /
-" TODO wip easymotion incremental search
-" TODO ファイル内部全体をfzfにするのもあり
-
-" =====================
-" TODO fzf current file test
-" TODO 割と良かった
-fu! TestFzf()
-    cal s:fzsearch.popup(#{
-        \ title: 'Current Buffer',
-        \ list: getline(1, line('$'))->map({ i,v -> i+1.': '.v }),
-        \ list_filetype: &filetype,
-        \ preview: 1,
-        \ enter_prefix: 0,
-        \ func_confirm: 'XXXXcallbak',
-        \ func_tab: { -> execute('echom "Tab"') },
-        \ })
-endf
-fu! XXXXcallbak(wid, idx)
-     if a:idx == -1 || empty(s:fzsearch.res)
-         retu
-     endif
-     exe split(s:fzsearch.res[a:idx-1], ':')[0]
-endf
-" =====================
+nnoremap s <Plug>(emotion)
+nnoremap <Leader>s <Plug>(fuzzy-search)
 
 " grep result -> quickfix
 au QuickFixCmdPost *grep* cwindow
 
 " explorer
-filetype plugin on
+filetype plugin indent on
 let g:netrw_liststyle = 3
 let g:netrw_altv = 1
 let g:netrw_winsize = 70
-nnoremap <silent><Leader>e <Plug>(explorer-toggle)
+nnoremap <Leader>e <Plug>(explorer-toggle)
 
-" fzf || fzf-imitation
-nnoremap <silent><leader>f <Plug>(smartfzf-fzf)
-nnoremap <silent><leader>h <Plug>(smartfzf-his)
-nnoremap <silent><leader>b <Plug>(smartfzf-buf)
+" fzf-imitation
+nnoremap <leader>f <Plug>(fzf-smartfiles)
+nnoremap <leader>h <Plug>(fzf-histories)
+nnoremap <leader>b <Plug>(fzf-buffers)
 
-" ripgrep || grep
-nnoremap <silent><Leader>g <Plug>(grep)
+" grep
+nnoremap <Leader>g <Plug>(grep)
 " vimgrep current file
-nnoremap <silent><Leader><Leader>s <Plug>(grep-current)
+nnoremap <Leader><Leader>s <Plug>(grep-current)
 " }}}
 
 " ##################         OTHERS         ################### {{{
@@ -285,9 +261,7 @@ set foldcolumn=1 " fold preview
 " ##################       ORIGINALS        ################### {{{
 
 " TODO リファクタ順番 dict functions aug Plug その他にしよう
-" TODO executeの使い方を直そう
 
-" TODO echo色をこれ使うように統一
 " color echo/echon, input {{{
 fu! EchoE(msg, ...) abort
     echohl DarkRed
@@ -368,50 +342,11 @@ fu! s:anchor.set() abort
 endf
 
 let s:anchor = s:anchor.set
-noremap <Plug>(anchor) :<C-u>cal <SID>anchor()<CR>
-" }}}
-
-" switch fzf {{{
-" no plugin -> call imitated fzf
-" plugin coc.nvim enable -> switch ProjectFiles / Files
-" plugin coc.nvim enable -> switch ProjectFiles / imitated fzf
-" TODO Filesをimitationに置き換えたいね！
-" TODO fzf mode フラグ管理変えるfz->fzf
-fu! s:smartFzf(mode) abort
-    if !exists(':Coc')
-        retu s:fzf.exe(a:mode)
-    endif
-    let pwd = getcwd()
-    cal expand('%:h')->chdir()
-    let gitroot = system('git rev-parse --show-superproject-working-tree --show-toplevel')
-      cal chdir(pwd)
-    execute(!v:shell_error ? 'CocCommand fzf-preview.ProjectFiles' : 'Files')
-endf
-
-" TODO fzfの検索候補はもう1ページのみにして、hisからls除いたやつ + ls + fzf にするか
-" それとも、検索前から選択肢が少ない方が精神的に良いか？
-" 上の方にls結果が出てるなら、lsのみの代用になるのでは？
-" キーをわざわざfhb選ぶより、脳死でfってできるほうがいいんか？
-noremap <Plug>(smartfzf-fzf) :<C-u>cal <SID>smartFzf('fz')<CR>
-noremap <Plug>(smartfzf-his) :<C-u>cal <SID>smartFzf('his')<CR>
-noremap <Plug>(smartfzf-buf) :<C-u>cal <SID>smartFzf('buf')<CR>
+noremap <silent><Plug>(anchor) :<C-u>cal <SID>anchor()<CR>
 " }}}
 
 " grep {{{
 fu! s:grep() abort
-    " plugin mode
-    " TODO いらんかも... 通常grepつよいぜ
-"    if exists(':Coc') && executable('rg')
-"        let w = InputI('ripgrep [word] >>', expand('<cword>'))
-"        cal EchoI('<<', 0)
-"        if empty(w)
-"            cal EchoE('cancel')
-"            retu
-"        endif
-"        execute('CocCommand fzf-preview.ProjectGrep -w --ignore-case '.w)
-"        retu
-"    endif
-    " no plugin
     echo 'grep by'
     cal EchoE(' [word]', 0)
     cal EchoI(' [ext]', 0)
@@ -453,7 +388,21 @@ fu! s:grep() abort
 endf
 
 " TODO 結果ないとき無言、なんか知らせたいね
-noremap <Plug>(grep) :<C-u>cal <SID>grep()<CR>
+noremap <silent><Plug>(grep) :<C-u>cal <SID>grep()<CR>
+" }}}
+
+" fuzzy search current file {{{
+fu! s:fuzzySearch() abort
+    cal s:fzsearch.popup(#{
+        \ title: 'Current Buffer',
+        \ list: getline(1, line('$'))->map({ i,v -> i+1.': '.v }),
+        \ list_filetype: &filetype,
+        \ preview_type: 'this',
+        \ enter_prefix: 0,
+        \ })
+endf
+
+noremap <silent><Plug>(fuzzy-search) :<C-u>cal <SID>fuzzySearch()<CR>
 " }}}
 
 " grep from current file {{{
@@ -472,7 +421,7 @@ fu! s:grepCurrent() abort
     cal EchoI('grep complete!')
 endf
 
-noremap <Plug>(grep-current) :<C-u>cal <SID>grepCurrent()<CR>
+noremap <silent><Plug>(grep-current) :<C-u>cal <SID>grepCurrent()<CR>
 " }}}
 
 " IDE menu {{{
@@ -521,7 +470,6 @@ fu! s:idemenu.open() abort
 endf
 
 " TODO callbackを使えばindex管理をしなくて良い
-" TODO ここから下、パイプなくすとこから
 fu! s:idemenu.choose(ctx, winid, key) abort
     if a:key is# 'j' && a:ctx.idx < len(a:ctx.files)-1
         let a:ctx.idx += 1
@@ -603,7 +551,7 @@ fu! s:idemenu.exe(idx) abort
 endf
 
 let s:idemenuopen = s:idemenu.open
-noremap <Plug>(ide-menu) :<C-u>cal <SID>idemenuopen()<CR>
+noremap <silent><Plug>(ide-menu) :<C-u>cal <SID>idemenuopen()<CR>
 " }}}
 
 " running cat (loading animation) {{{
@@ -912,6 +860,7 @@ endif
 
 " ##################       IMITATIONS       ################### {{{
 
+" TODO リファクタ、修正等
 " ===================================================================
 " junegunn/fzf.vim
 " ===================================================================
@@ -919,32 +868,39 @@ endif
 " usage
 " let arguments_def = #{
 "     \ title: popup title as String,
-"     \ list: search targets as List,
+"     \ list: search targets as List (preview_type=file? filepath this? no: value),
 "     \ list_filetype: syntax highlight filetype as String (0 ignore),
-"     \ preview: 0 ignore, 1 show preview file (list elem = file path),
+"     \ preview_type: file or this (list elem = filepath or lnum: char),
 "     \ enter_prefix: enter zone prefix text as String (0 to default value),
-"     \ func_confirm: confirm function name as String,
-"     TODO fzsearch tab mode change
-"     \ func_tab: { -> execute('echom "Tab"') },
 "     \ }
 " and call like this.
 " cal s:fzsearch.popup(arguments_def)
 "
 " callback function sample
 " fu! s:simple_echo(wid, idx)
-"     if a:idx == -1 || empty(s:fzsearch.res)
+"     if a:idx == -1
 "         retu
 "     endif
 "     echom s:fzsearch.res[a:idx-1]
 " endf
 
-let s:fzsearch = #{bwid: 0, ewid: 0, rwid: 0, pwid: 0, tid: 0, res: []}
+let s:fzsearch = #{bwid: 0, ewid: 0, rwid: 0, pwid: 0, tid: 0, res: [],
+    \ ffdict: #{vimrc: 'vim', js: 'javascript', py: 'python', md: 'markdown',
+        \ ts: 'typescript', tsx: 'typescriptreact',
+        \ },
+    \ }
+
+let s:fzsearch.allow_exts = glob($VIMRUNTIME.'/ftplugin/*.vim')->split('\n')
+            \ ->map({_,v->matchstr(v,'[^/]\+\.vim')->split('\.')[0]})
 
 fu! s:fzsearch.popup(v) abort
-    ""let self.max = &lines/2-1
-    let self.max = 100
-    let self.pr = a:v.enter_prefix ?? '>>'
+    let self.list = a:v.list
+    let self.wd = ''
+    let self.max = 50
     let self.res = a:v.list[0:self.max]
+    let self.ridx = 0
+    let self.pr = a:v.enter_prefix ?? '>>'
+    let self.pv_upd = a:v.preview_type == 'file'
 
     let self.bwid = popup_create([], #{title: ' '.a:v.title.' ',
         \ zindex: 50, mapping: 0, scrollbar: 0,
@@ -965,34 +921,32 @@ fu! s:fzsearch.popup(v) abort
         \ minwidth: &columns/3, maxwidth: &columns/3,
         \ minheight: 1, maxheight: 1,
         \ line: &lines*3/4+2, col: &columns/7+1,
-        \ filter: function(self.fil, [#{lst: a:v.list, wd: [], ft: a:v.func_tab}]),
+        \ filter: function(self.fil, [#{wd: []}]),
         \ })
+        ""\ filter: function(self.fil, [#{lst: a:v.list, wd: [], ft: a:v.func_tab}]),
 
-    let self.rwid = popup_menu(self.res, #{title: ' Choose: <C-n/p> <C-d/u> <CR> ',
+    let self.rwid = popup_menu(self.res, #{title: ' Choose: <C-n/p> <CR> ',
         \ zindex: 99, mapping: 0, scrollbar: 1,
         \ border: [], borderchars: ['─','│','─','│','╭','╮','╯','╰'],
         \ minwidth: &columns/3, maxwidth: &columns/3,
         \ minheight: &lines/2, maxheight: &lines/2,
         \ pos: 'topleft', line: &lines/4, col: &columns/7,
-        \ callback: a:v.func_confirm,
+        \ callback: 's:fzsearch_confirm',
         \ filter: function(self.jk, [0]),
         \ })
-    " TODO row number intercept to syntax highlight ...
     if !a:v.list_filetype
         cal setbufvar(winbufnr(self.rwid), '&filetype', a:v.list_filetype)
     endif
 
     " TODO fzf fzsearch util popup border font color ...
 
-    " TODO キーに応じてzindex変えながらスクロールで複数行下に。
-
-    " TODO firstlineでpreview 位置かえられる
-    " preview typeにして、行指定かパス指定かにして
-    " 行指定->firstlineを動的に
-    " パス指定-> catで描画を動的に
-    " TODO cat error ハンドリング
-    let cat = system('cat '.self.res[0])->split('\n')
-    let self.pwid = popup_menu(cat, #{title: ' File Preview | Scroll: <C-f/b> ',
+    let path = a:v.preview_type == 'this' ? bufname('%') : substitute(self.res[0], '\~', $HOME, 'g')
+    let read = ['Cannot open file.', 'please check this file path.', path]
+    try
+        let read = readfile(path)
+    catch
+    endtry
+    let self.pwid = popup_menu(read, #{title: ' File Preview | Scroll: <C-d/u> ',
         \ zindex: 98, mapping: 0, scrollbar: 1,
         \ border: [], borderchars: ['─','│','─','│','╭','╮','╯','╰'],
         \ minwidth: &columns/3, maxwidth: &columns/3,
@@ -1001,32 +955,35 @@ fu! s:fzsearch.popup(v) abort
         \ firstline: 1,
         \ filter: function(self.pv, [0]),
         \ })
-    " TODO preview file type
-    cal setbufvar(winbufnr(self.pwid), '&filetype', 'markdown')
+    let ext = matchstr(path, '[^\.]\+$')
+    let ext = ext !~ '^[a-zA-Z0-9]\+$' ? '' : ext
+    if has_key(self.ffdict, ext)
+        let ext = self.ffdict[ext]
+    elseif match(self.allow_exts, ext) == -1
+        let ext = ''
+    endif
+    cal setbufvar(winbufnr(self.pwid), '&filetype', self.pv_upd ? ext : &filetype)
+    if empty(self.res)
+        cal popup_setoptions(self.pwid, #{firstline: split(self.res[self.ridx], ':')[0]})
+    endif
 endf
 
-fu! s:fzsearch.pv(_, wid, key) abort
-    if a:key is# "\<Esc>"
-        cal popup_close(self.bwid)
-        cal popup_close(self.pwid)
-        cal popup_close(self.ewid)
-        cal feedkeys("\<C-c>")
-    elseif a:key is# "\<C-f>"
-        cal self.scroll(a:wid, 1)
-    elseif a:key is# "\<C-b>"
-        cal self.scroll(a:wid, 0)
-    elseif a:key is# "\<C-n>" || a:key is# "\<C-p>" || a:key is# "\<C-d>" || a:key is# "\<C-u>" || a:key is# "\<CR>"
-        cal popup_setoptions(self.rwid, #{zindex: 100})
-        cal popup_setoptions(self.ewid, #{zindex: 99})
-        cal popup_setoptions(self.pwid, #{zindex: 98})
-        cal feedkeys(a:key)
-    else
-        cal popup_setoptions(self.ewid, #{zindex: 100})
-        cal popup_setoptions(self.rwid, #{zindex: 99})
-        cal popup_setoptions(self.pwid, #{zindex: 98})
-        cal feedkeys(a:key)
+fu! s:fzsearch_confirm(wid, idx) abort
+    if a:idx == -1
+        cal EchoE('cancel')
+        retu
     endif
-    retu 1
+    let result = s:fzsearch.res[a:idx-1]
+    if s:fzsearch.pv_upd
+        exe 'e '.result
+    else
+        let l = split(result, ':')[0]
+        cal EchoI('jump to '.l)
+        exe l
+    endif
+    " finalize
+    let s:fzsearch.list = []
+    let s:fzsearch.res = []
 endf
 
 fu! s:fzsearch.scroll(wid, vector) abort
@@ -1034,6 +991,7 @@ fu! s:fzsearch.scroll(wid, vector) abort
         retu
     endif
     cal timer_stop(self.tid)
+    " TODO fzf preview scroll 上に余白欲しい
     let vec = a:vector ? "\<C-n>" : "\<C-p>"
     let self.tid = timer_start(10, { -> popup_filter_menu(a:wid, vec) }, #{repeat: -1})
     let delay = a:wid == self.pwid ? 500 : 300
@@ -1045,38 +1003,64 @@ fu! s:fzsearch.scstop(_) abort
     let self.tid = 0
 endf
 
-fu! s:fzsearch.jk(_, wid, key) abort
-    if a:key is# "\<Esc>"
-        cal popup_close(self.bwid)
-        cal popup_close(self.pwid)
-        cal popup_close(self.ewid)
-        cal feedkeys("\<C-c>")
-    elseif a:key is# "\<C-n>" || a:key is# "\<C-p>"
-        retu popup_filter_menu(a:wid, a:key)
-    elseif a:key is# "\<C-d>"
-        cal self.scroll(a:wid, 1)
-        retu 1
-    elseif a:key is# "\<C-u>"
-        cal self.scroll(a:wid, 0)
-        retu 1
-    elseif a:key is# "\<CR>"
-        cal popup_close(self.ewid)
-        cal popup_close(self.pwid)
-        cal popup_close(self.bwid)
-        retu popup_filter_menu(a:wid, a:key)
-    elseif a:key is# "\<C-f>" || a:key is# "\<C-b>"
-        cal popup_setoptions(self.pwid, #{zindex: 100})
-        cal popup_setoptions(self.ewid, #{zindex: 99})
-        cal popup_setoptions(self.rwid, #{zindex: 98})
-        cal feedkeys(a:key)
-        retu 1
-    else
-        cal popup_setoptions(self.ewid, #{zindex: 100})
-        cal popup_setoptions(self.rwid, #{zindex: 99})
-        cal popup_setoptions(self.pwid, #{zindex: 98})
-        cal feedkeys(a:key)
+fu! s:fzsearch.pvupd() abort
+    let win = winbufnr(self.pwid)
+    if self.pv_upd
+        " del
+        cal deletebufline(win, 1, getbufinfo(win)[0].linecount)
+        echo ''
+        " put
+        if empty(self.res)
+            retu
+        endif
+        let path = substitute(self.res[self.ridx], '\~', $HOME, 'g')
+        let read = ['Cannot open file.', 'please check this file path.', path]
+        try
+            let read = readfile(path)
+        catch
+        endtry
+        cal setbufline(win, 1, read)
+        " syntax
+        let ext = matchstr(path, '[^\.]\+$')
+        let ext = ext !~ '^[a-zA-Z0-9]\+$' ? '' : ext
+        if has_key(self.ffdict, ext)
+            let ext = self.ffdict[ext]
+        elseif match(self.allow_exts, ext) == -1
+            let ext = ''
+        endif
+        cal setbufvar(win, '&filetype', ext)
+        " line
+        cal popup_setoptions(self.pwid, #{firstline: 1})
+        retu
     endif
-    retu 1
+
+    if empty(self.res)
+        retu
+    endif
+    " TODO fzf preview scroll 上に余白ほしい
+    " TODO fzf preview カーソル位置が行数と合わないのでなんか変
+    cal popup_setoptions(self.pwid, #{firstline: split(self.res[self.ridx], ':')[0]})
+endf
+
+fu! s:fzsearch.list_upd() abort
+    " upd match result list
+    let filterd = empty(self.wd) ? self.list : matchfuzzy(self.list, self.wd)
+    let self.res = filterd[0:self.max]
+    let self.ridx = len(self.res)-1 < self.ridx ? len(self.res)-1 : self.ridx
+    cal setbufline(winbufnr(self.ewid), 1, self.pr . self.wd)
+    cal deletebufline(winbufnr(self.rwid), 1, self.max)
+    echo ''
+    cal setbufline(winbufnr(self.rwid), 1, self.res)
+    " highlight match char
+    cal clearmatches(self.rwid)
+    for i in range(0, strlen(self.wd)-1)
+        let char = strpart(self.wd, i, 1)
+        if char != '.'
+            cal matchadd('DarkRed', char, 16, -1, #{window: self.rwid})
+        endif
+    endfor
+    " upd preview
+    cal self.pvupd()
 endf
 
 fu! s:fzsearch.fil(ctx, wid, key) abort
@@ -1086,25 +1070,26 @@ fu! s:fzsearch.fil(ctx, wid, key) abort
         cal popup_close(self.ewid)
         cal feedkeys("\<C-c>")
         retu 1
-    elseif a:key is# "\<C-n>" || a:key is# "\<C-p>" || a:key is# "\<C-d>" || a:key is# "\<C-u>" || a:key is# "\<CR>"
+    elseif a:key is# "\<C-n>" || a:key is# "\<C-p>" || a:key is# "\<CR>"
+        " only largest zindex window is active.
         cal popup_setoptions(self.rwid, #{zindex: 100})
         cal popup_setoptions(self.ewid, #{zindex: 99})
         cal popup_setoptions(self.pwid, #{zindex: 98})
         cal feedkeys(a:key)
         retu 1
-    elseif a:key is# "\<C-f>" || a:key is# "\<C-b>"
+    elseif a:key is# "\<C-d>" || a:key is# "\<C-u>"
         cal popup_setoptions(self.pwid, #{zindex: 100})
         cal popup_setoptions(self.ewid, #{zindex: 99})
         cal popup_setoptions(self.rwid, #{zindex: 98})
         cal feedkeys(a:key)
         retu 1
-    elseif a:key is# "\<Tab>"
+    ""elseif a:key is# "\<Tab>"
         " TODO うけつけねぇ
-        cal a:ctx.ft()
+        ""cal a:ctx.ft()
         " TODO 文字列で関数名を入力さておき、ここではfunctionとかで実行しよう
         " たぶんfuncredが悪い"
-        echom 'asdasdasdas'
-        retu 1
+        ""echom 'asdasdasdas'
+        ""retu 1
     " TODO fzf copy shold D-v only or Shift Insert. C-v want split
     elseif a:key is# "\<C-v>" || a:key is# "\<D-v>"
         for i in range(0, strlen(@+)-1)
@@ -1124,14 +1109,182 @@ fu! s:fzsearch.fil(ctx, wid, key) abort
         cal add(a:ctx.wd, a:key)
     endif
 
-    let wd = join(a:ctx.wd, '')
-    let filterd = empty(wd) ? a:ctx.lst : matchfuzzy(a:ctx.lst, wd)
-    let self.res = filterd[0:self.max]
-    cal setbufline(winbufnr(a:wid), 1, self.pr.wd)
-    cal deletebufline(winbufnr(self.rwid), 1, self.max)
-    cal setbufline(winbufnr(self.rwid), 1, self.res)
+    let self.wd = join(a:ctx.wd, '')
+    cal self.list_upd()
     retu a:key is# "x" || a:key is# "\<Space>" ? 1 : popup_filter_menu(a:wid, a:key)
 endf
+
+
+fu! s:fzsearch.jk(_, wid, key) abort
+    if a:key is# "\<Esc>"
+        cal popup_close(self.bwid)
+        cal popup_close(self.pwid)
+        cal popup_close(self.ewid)
+        cal feedkeys("\<C-c>")
+    elseif a:key is# "\<C-n>"
+        let self.ridx = self.ridx == len(self.res)-1 ? len(self.res)-1 : self.ridx+1
+        cal self.pvupd()
+        retu popup_filter_menu(a:wid, a:key)
+    elseif a:key is# "\<C-p>"
+        let self.ridx = self.ridx ? self.ridx-1 : 0
+        cal self.pvupd()
+        retu popup_filter_menu(a:wid, a:key)
+    elseif a:key is# "\<CR>"
+        cal popup_close(self.ewid)
+        cal popup_close(self.pwid)
+        cal popup_close(self.bwid)
+        retu popup_filter_menu(a:wid, empty(self.res) ? "\<C-c>" : a:key)
+    elseif a:key is# "\<C-d>" || a:key is# "\<C-u>"
+        cal popup_setoptions(self.pwid, #{zindex: 100})
+        cal popup_setoptions(self.ewid, #{zindex: 99})
+        cal popup_setoptions(self.rwid, #{zindex: 98})
+        cal feedkeys(a:key)
+    else
+        cal popup_setoptions(self.ewid, #{zindex: 100})
+        cal popup_setoptions(self.rwid, #{zindex: 99})
+        cal popup_setoptions(self.pwid, #{zindex: 98})
+        cal feedkeys(a:key)
+    endif
+    retu 1
+endf
+
+fu! s:fzsearch.pv(_, wid, key) abort
+    if a:key is# "\<Esc>"
+        cal popup_close(self.bwid)
+        cal popup_close(self.pwid)
+        cal popup_close(self.ewid)
+        cal feedkeys("\<C-c>")
+    elseif a:key is# "\<C-d>"
+        cal self.scroll(a:wid, 1)
+    elseif a:key is# "\<C-u>"
+        cal self.scroll(a:wid, 0)
+    elseif a:key is# "\<C-n>" || a:key is# "\<C-p>" || a:key is# "\<CR>"
+        cal popup_setoptions(self.rwid, #{zindex: 100})
+        cal popup_setoptions(self.ewid, #{zindex: 99})
+        cal popup_setoptions(self.pwid, #{zindex: 98})
+        cal feedkeys(a:key)
+    else
+        cal popup_setoptions(self.ewid, #{zindex: 100})
+        cal popup_setoptions(self.rwid, #{zindex: 99})
+        cal popup_setoptions(self.pwid, #{zindex: 98})
+        cal feedkeys(a:key)
+    endif
+    retu 1
+endf
+
+" =====================
+fu! s:fzf_histories()
+    cal s:fzsearch.popup(#{
+        \ title: 'Histories',
+        \ list: execute('ol')->split('\n')->map({_,v -> split(v, ': ')[1]}),
+        \ list_filetype: 0,
+        \ preview_type: 'file',
+        \ enter_prefix: '['.substitute(getcwd(), $HOME, '~', 'g').']>>',
+        \ })
+endf
+
+fu! s:fzf_buffers()
+    cal s:fzsearch.popup(#{
+        \ title: 'Buffers',
+        \ list: execute('ls')->split('\n')->map({_,v -> split(v, '"')[1]})
+            \ ->filter({_,v -> v != '[No Name]' && v != '[無名]'}),
+        \ list_filetype: 0,
+        \ preview_type: 'file',
+        \ enter_prefix: '['.substitute(getcwd(), $HOME, '~', 'g').']>>',
+        \ })
+endf
+" =====================
+
+noremap <silent><Plug>(fzf-histories) :<C-u>cal <SID>fzf_histories()<CR>
+noremap <silent><Plug>(fzf-buffers) :<C-u>cal <SID>fzf_buffers()<CR>
+" }}}
+
+" ===================================================================
+" junegunn/fzf
+" ===================================================================
+" TODO リファクタ
+" {{{
+let s:fzf = #{cache: [], maxdepth: 5, gcache: [],
+    \ not_path_arr: [
+         \'"*/.**/*"',
+         \'"*node_modules/*"', '"*target/*"'
+         \'"*Applications/*"', '"*AppData/*"', '"*Library/*"',
+         \'"*Music/*"', '"*Pictures/*"', '"*Movies/*"', '"*Videos/*"'
+         \'"*OneDrive/*"',
+    \ ],
+\}
+
+" TODO delete
+fu! TestFzfMaxDepth(n) abort
+    let s:fzf.maxdepth = a:n
+endf
+" TODO maxdepth かえるコマンド作るか
+
+let s:fzf.postfix = ' -type f -not -path '.join(s:fzf.not_path_arr, ' -not -path ')
+let s:fzf.searched = getcwd()
+let s:fzf.get_gitls = {-> system('git ls-files -co')->split('\n')->filter({_,v->!empty(v)}) }
+let s:fzf.get_file_d1 = {-> system('find . -mindepth 1 -maxdepth 1'.s:fzf.postfix)->split('\n')->filter({_,v->!empty(v)}) }
+let s:fzf.get_file = { v -> 'find . -mindepth '.v.' -maxdepth '.v.s:fzf.postfix }
+
+fu! s:fzf.files() abort
+    let pwd = getcwd()
+    let chk = system('git status')
+    let self.is_git = v:shell_error ? 0 : 1
+
+    " moved or first
+    if stridx(pwd, self.searched) == -1
+                \ || (self.is_git && empty(self.gcache))
+                \ || (!self.is_git && empty(self.cache))
+        let self.searched = pwd
+
+        if self.is_git
+            let self.gcache = self.get_gitls()
+        else
+            let self.cache = self.get_file_d1()
+            cal self.asyncfind()
+        endif
+    endif
+
+    cal s:fzsearch.popup(#{
+        \ title: self.is_git ? 'Project Files' : 'Files',
+        \ list: self.is_git ? self.gcache : self.cache,
+        \ list_filetype: 0,
+        \ preview_type: 'file',
+        \ enter_prefix: '['.substitute(pwd, $HOME, '~', 'g').']>>',
+        \ })
+endf
+
+fu! s:fzf.asyncfind() abort
+    cal s:runcat.start()
+    " TODO popup design
+    let self.notwid = popup_notification('find files in ['.s:fzf.searched.'] and caching ...', #{zindex: 51, line: &lines, col: 5})
+
+    let self.jobcnt = self.maxdepth-1
+    let self.endjobcnt = 0
+    for depth in range(2, self.maxdepth)
+        cal job_start(self.get_file(depth), #{out_cb: self.asyncfind_start, close_cb: self.asyncfind_end})
+    endfor
+endf
+
+fu! s:fzf.asyncfind_start(ch, msg) abort
+    cal add(self.cache, a:msg)
+endf
+
+fu! s:fzf.asyncfind_end(ch) abort
+    let s:fzsearch.list = self.cache
+    cal s:fzsearch.list_upd()
+
+    let self.endjobcnt += 1
+    if self.endjobcnt == self.jobcnt
+        cal s:runcat.stop()
+        cal popup_close(self.notwid)
+        " TODO popup design
+        cal popup_notification('find files cached !', #{zindex: 51, line: &lines, col: 5})
+    endif
+endf
+
+let s:fzfexe = s:fzf.files
+noremap <silent><Plug>(fzf-smartfiles) :<C-u>cal <SID>fzfexe()<CR>
 " }}}
 
 " ===================================================================
@@ -1220,7 +1373,7 @@ fu! s:NetrwToggle()
     endfor
     execute('Vex 15')
 endf
-noremap <Plug>(explorer-toggle) :<C-u>cal <SID>NetrwToggle()<CR>
+noremap <silent><Plug>(explorer-toggle) :<C-u>cal <SID>NetrwToggle()<CR>
 
 
 " }}}
@@ -1370,9 +1523,9 @@ aug tabLine
     au ColorScheme * hi TabLineFill ctermfg=235 ctermbg=238
 aug END
 
-noremap <Plug>(buf-prev) :<C-u>cal <SID>moveBuf('prev')<CR>
-noremap <Plug>(buf-next) :<C-u>cal <SID>moveBuf('next')<CR>
-noremap <Plug>(buf-close) :<C-u>cal <SID>closeBuf()<CR>
+noremap <silent><Plug>(buf-prev) :<C-u>cal <SID>moveBuf('prev')<CR>
+noremap <silent><Plug>(buf-next) :<C-u>cal <SID>moveBuf('next')<CR>
+noremap <silent><Plug>(buf-close) :<C-u>cal <SID>closeBuf()<CR>
 " }}}
 
 " ===================================================================
@@ -1417,153 +1570,15 @@ fu! s:scroll.toggle(tid) abort
 endf
 
 let s:scroll = s:scroll.exe
-noremap <Plug>(scroll-d) :<C-u>cal <SID>scroll(1, 30)<CR>
-noremap <Plug>(scroll-u) :<C-u>cal <SID>scroll(0, 30)<CR>
-noremap <Plug>(scroll-f) :<C-u>cal <SID>scroll(1, 10)<CR>
-noremap <Plug>(scroll-b) :<C-u>cal <SID>scroll(0, 10)<CR>
+noremap <silent><Plug>(scroll-d) :<C-u>cal <SID>scroll(1, 30)<CR>
+noremap <silent><Plug>(scroll-u) :<C-u>cal <SID>scroll(0, 30)<CR>
+noremap <silent><Plug>(scroll-f) :<C-u>cal <SID>scroll(1, 10)<CR>
+noremap <silent><Plug>(scroll-b) :<C-u>cal <SID>scroll(0, 10)<CR>
 
 fu! Scroll(vec, del) abort " for coc
     cal s:scroll(a:vec, a:del)
     retu "\<Ignore>"
 endf
-" }}}
-
-" ===================================================================
-" junegunn/fzf
-" ===================================================================
-" TODO リファクタ
-" {{{
-let s:fzf = #{
-    \not_path_arr: [
-         \'"*/.**/*"',
-         \'"*node_modules/*"', '"*target/*"'
-         \'"*Applications/*"', '"*AppData/*"', '"*Library/*"',
-         \'"*Music/*"', '"*Pictures/*"', '"*Movies/*"', '"*Videos/*"'
-         \'"*OneDrive/*"',
-    \],
-    \chache: [],
-    \start_fz: ''
-\}
-let s:fzf.find_cmd = 'find . -type f -name "*" -not -path '.join(s:fzf.not_path_arr, ' -not -path ')
-let s:fzf.searched = execute('pwd')[1:] " first char is ^@, so trim
-
-" TODO modeの管理下手なので直そうな
-fu! s:fzf.exe(fz) abort " open window
-    if stridx(execute('pwd')[1:], s:fzf.searched) == -1 || empty(s:fzf.chache)
-        cal s:fzf.refind()
-    endif
-    let s:fzf.start_fz = a:fz
-    let s:fzf.mode = s:fzf.start_fz == 'fz' ? 'fzf' : 'his'
-    let aaaaaaaaaaaaaaaaaa = substitute(getcwd(), $HOME, '~', 'g')
-    let s:fzf.mode_title = s:fzf.mode == 'his' ? '(*^-^)/ BUF & MRU' : '(*"@w@)/ FZF ['.(empty(matchstr(s:fzf.searched, '[^'.$HOME.'].*$')) ? s:fzf.searched : '~/'.matchstr(s:fzf.searched, '[^'.$HOME.'].*$')).']'
-    let pwd = execute('pwd')[1:]
-    let s:fzf.pwd_prefix = 'pwd:['.(empty(matchstr(pwd, '[^'.$HOME.'].*$')) ? pwd : '~/'.matchstr(pwd, '[^'.$HOME.'].*$')).']>>'
-    let s:fzf.enter_keyword = []
-    let s:fzf.his_result = split(execute('ls'), '\n')->map({ _,v -> split(v, '"')[1] })->filter({ _,v -> v != '[No Name]' && v != '[無名]' })
-     \+split(execute('oldfiles'), '\n')->map({ _,v -> split(v, ': ')[1] })
-    let s:fzf.filterd = s:fzf.mode == 'his' ? s:fzf.his_result[0:29] : s:fzf.chache[0:29]
-    let s:fzf.winid_enter = popup_create(s:fzf.pwd_prefix, #{title: 'MRU<>FZF:<Tab>/choose:<CR>/end:<Esc>/chache refresh:<C-f>',    border: [], zindex: 99, minwidth: &columns/2, maxwidth: &columns/2, maxheight: 1, line: &columns/4-&columns/36, mapping: 0, filter: s:fzf.refresh_result})
-    cal s:fzf.open_result_win()
-endf
-fu! s:fzf.open_result_win() abort
-    let s:fzf.cidx = 0
-    let s:fzf.winid_result = popup_menu(s:fzf.filterd, #{title: s:fzf.mode_title, border: [], zindex: 98, minwidth: &columns/2, maxwidth: &columns/2, minheight: 2, maxheight: &lines/2, filter: s:fzf.choose})
-endf
-
-fu! s:fzf.refind() abort " async find command
-    cal s:runcat.start()
-    let s:fzf.chache = []
-    let s:fzf.searched = execute('pwd')[1:]
-    cal EchoW('find files in ['.s:fzf.searched.'] and chache ...')
-    cal job_start(s:fzf.find_cmd, #{out_cb: s:fzf.find_start, close_cb: s:fzf.find_end})
-endf
-fu! s:fzf.find_start(ch, msg) abort
-    cal add(s:fzf.chache, a:msg)
-endf
-fu! s:fzf.find_end(ch) abort
-    cal EchoI('find files in ['.s:fzf.searched.'] and chache is complete!!')
-    cal s:runcat.stop()
-    " after init, see fzf if specified
-    " TODO fzf find mode ... 
-    if s:fzf.start_fz == 'fz' && s:fzf.mode == 'his'
-        cal win_execute(s:fzf.winid_enter, 'cal feedkeys("\<Tab>")')
-    elseif s:fzf.start_fz == 'fz' && s:fzf.mode == 'fzf'
-        cal win_execute(s:fzf.winid_enter, 'cal feedkeys("\<Tab>\<Tab>")')
-    endif
-endf
-
-fu! s:fzf.refresh_result(winid, key) abort " event to draw search result
-    if a:key is# "\<Esc>"
-        cal popup_close(s:fzf.winid_enter)
-        cal popup_close(s:fzf.winid_result)
-        retu 1
-    elseif a:key is# "\<CR>"
-        cal popup_close(s:fzf.winid_enter)
-        retu 1
-    elseif a:key is# "\<C-f>"
-        cal s:fzf.refind()
-    elseif a:key is# "\<C-v>"
-        for i in range(0,strlen(@")-1)
-            cal add(s:fzf.enter_keyword, strpart(@",i,1))
-        endfor
-    elseif a:key is# "\<Tab>"
-        let s:fzf.mode = s:fzf.mode == 'his' ? 'fzf' : 'his'
-    let s:fzf.mode_title = s:fzf.mode == 'his' ? '(*^-^)/ BUF & MRU' : '(*"@w@)/ FZF ['.(empty(matchstr(s:fzf.searched, '[^'.$HOME.'].*$')) ? s:fzf.searched : '~/'.matchstr(s:fzf.searched, '[^'.$HOME.'].*$')).']'
-        cal popup_close(s:fzf.winid_result)
-        if s:fzf.mode == 'his'
-            let s:fzf.filterd = len(s:fzf.enter_keyword) != 0 ? matchfuzzy(s:fzf.his_result, join(s:fzf.enter_keyword, '')) : s:fzf.his_result
-        else
-            let s:fzf.filterd = len(s:fzf.enter_keyword) != 0 ? matchfuzzy(s:fzf.chache, join(s:fzf.enter_keyword, '')) : s:fzf.chache
-        endif
-        let s:fzf.filterd = s:fzf.filterd[0:29]
-        cal s:fzf.open_result_win()
-        retu 1
-    elseif a:key is# "\<BS>" && len(s:fzf.enter_keyword) > 0
-        unlet s:fzf.enter_keyword[len(s:fzf.enter_keyword)-1]
-    elseif a:key is# "\<BS>" && len(s:fzf.enter_keyword) == 0
-    " noop
-    elseif a:key is# "\<C-w>"
-        let s:fzf.enter_keyword = []
-    elseif strtrans(a:key) == "<80><fd>`"
-        " noop (for polyglot bug adhoc)
-        retu
-    else
-        let s:fzf.enter_keyword = add(s:fzf.enter_keyword, a:key)
-    endif
-
-    if s:fzf.mode == 'his'
-        let s:fzf.filterd = len(s:fzf.enter_keyword) != 0 ? matchfuzzy(s:fzf.his_result, join(s:fzf.enter_keyword, '')) : s:fzf.his_result
-    else
-        let s:fzf.filterd = len(s:fzf.enter_keyword) != 0 ? matchfuzzy(s:fzf.chache, join(s:fzf.enter_keyword, '')) : s:fzf.chache
-    endif
-
-    cal setbufline(winbufnr(s:fzf.winid_enter), 1, s:fzf.pwd_prefix . join(s:fzf.enter_keyword, ''))
-    cal setbufline(winbufnr(s:fzf.winid_result), 1, map(range(1,30), { i,v -> '' }))
-    cal setbufline(winbufnr(s:fzf.winid_result), 1, s:fzf.filterd[0:29]) " re view only first 30 files
-    retu a:key is# "x" || a:key is# "\<Space>" ? 1 : popup_filter_menu(a:winid, a:key)
-endf
-
-fu! s:fzf.choose(winid, key) abort
-    if a:key is# 'j'
-        let s:fzf.cidx = s:fzf.cidx == len(s:fzf.filterd)-1 ? len(s:fzf.filterd)-1 : s:fzf.cidx + 1
-    elseif a:key is# 'k'
-    let s:fzf.cidx = s:fzf.cidx == 0 ? 0 : s:fzf.cidx - 1
-    elseif a:key is# "\<CR>"
-    retu s:fzf.open(a:winid, 'e', s:fzf.filterd[s:fzf.cidx])
-    elseif a:key is# "\<C-v>"
-    retu s:fzf.open(a:winid, 'vnew', s:fzf.filterd[s:fzf.cidx])
-    elseif a:key is# "\<C-t>"
-    retu s:fzf.open(a:winid, 'tabnew', s:fzf.filterd[s:fzf.cidx])
-    endif
-    retu popup_filter_menu(a:winid, a:key)
-endf
-fu! s:fzf.open(winid, op, f) abort
-    cal popup_close(a:winid)
-    cal s:runcat.stop()
-    exe a:op a:f
-    retu 1
-endf
-
 " }}}
 
 " ===================================================================
@@ -1599,7 +1614,7 @@ fu! s:mk.load() abort
     endfor
 endf
 
-" TODO why a lot of marks ... grep ?
+" TODO mk mark マーク増える問題
 fu! s:mk.toggle() abort
     let lmk = sign_getplaced(bufname('%'), #{group: 'mkg', lnum: line('.')})[0].signs
     if empty(lmk)
@@ -1656,31 +1671,9 @@ fu! s:mk.listcb() abort
         \ title: 'Marks in Current Buffer',
         \ list: sort(list, { x,y -> x.lnum - y.lnum })->map({ _,v -> v.lnum.': '.getline(v.lnum)}),
         \ list_filetype: &filetype,
-        \ preview: 0,
+        \ preview_type: 'this',
         \ enter_prefix: 0,
-        \ func_confirm: 's:mkchoose',
-        \ func_tab: { -> execute('echom "Tab"') },
         \ })
-endf
-
-" TODO mk 全体検索
-" TODO mk signを全て取得
-" sign_getplaced()
-" これをgroupでfilterして表示
-" ファイルから検索か?
-" TODO signを現在のバッファから取得 → タブで切り替える？
-
-fu! s:mk.listall() abort
-endf
-
-" choose callback
-fu! s:mkchoose(wid, idx)
-    if a:idx == -1 || empty(s:fzsearch.res)
-        cal EchoE('cancel')
-        retu
-    endif
-    exe split(s:fzsearch.res[a:idx-1], ':')[0]
-    cal EchoI('jump to mark')
 endf
 
 aug mk_st
@@ -1696,12 +1689,12 @@ let s:mkclthis = s:mk.clthis
 let s:mkclall = s:mk.clall
 let s:mklist = s:mk.listcb
 
-noremap <Plug>(mk-toggle) :<C-u>cal <SID>mktoggle()<CR>
-noremap <Plug>(mk-next) :<C-u>cal <SID>mknext()<CR>
-noremap <Plug>(mk-prev) :<C-u>cal <SID>mkprev()<CR>
-noremap <Plug>(mk-clthis) :<C-u>cal <SID>mkclthis()<CR>
-noremap <Plug>(mk-clall) :<C-u>cal <SID>mkclall()<CR>
-noremap <Plug>(mk-list) :<C-u>cal <SID>mklist()<CR>
+noremap <silent><Plug>(mk-toggle) :<C-u>cal <SID>mktoggle()<CR>
+noremap <silent><Plug>(mk-next) :<C-u>cal <SID>mknext()<CR>
+noremap <silent><Plug>(mk-prev) :<C-u>cal <SID>mkprev()<CR>
+noremap <silent><Plug>(mk-clthis) :<C-u>cal <SID>mkclthis()<CR>
+noremap <silent><Plug>(mk-clall) :<C-u>cal <SID>mkclall()<CR>
+noremap <silent><Plug>(mk-list) :<C-u>cal <SID>mklist()<CR>
 " }}}
 
 " ===================================================================
@@ -1768,8 +1761,8 @@ aug END
 
 let s:quickhlset = s:quickhl.set
 let s:quickhlclear = s:quickhl.clear
-noremap <Plug>(qikhl-toggle) :<C-u>cal <SID>quickhlset()<CR>
-noremap <Plug>(qikhl-clear) :<C-u>cal <SID>quickhlclear()<CR>
+noremap <silent><Plug>(qikhl-toggle) :<C-u>cal <SID>quickhlset()<CR>
+noremap <silent><Plug>(qikhl-clear) :<C-u>cal <SID>quickhlclear()<CR>
 " }}}
 
 " ===================================================================
@@ -1862,7 +1855,7 @@ aug fmode_colors
 aug END
 
 let s:fmodetoggle = s:fmode.toggle
-noremap <Plug>(f-scope) :<C-u>cal <SID>fmodetoggle()<CR>
+noremap <silent><Plug>(f-scope) :<C-u>cal <SID>fmodetoggle()<CR>
 " }}}
 
 " ===================================================================
@@ -1897,7 +1890,7 @@ fu! s:zenModeToggle() abort
     setl number relativenumber
 endf
 
-noremap <Plug>(zen-mode) :<C-u>cal <SID>zenModeToggle()<CR>
+noremap <silent><Plug>(zen-mode) :<C-u>cal <SID>zenModeToggle()<CR>
 " }}}
 
 " ===================================================================
@@ -2100,7 +2093,7 @@ aug emotion_hl
 aug END
 
 let s:emotion = s:emotion.exe
-noremap <Plug>(emotion) :<C-u>cal <SID>emotion()<CR>
+noremap <silent><Plug>(emotion) :<C-u>cal <SID>emotion()<CR>
 " }}}
 
 " ===================================================================
