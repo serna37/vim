@@ -138,8 +138,6 @@ nnoremap mn <Plug>(mk-next)
 nnoremap mc <Plug>(mk-clthis)
 nnoremap mx <Plug>(mk-clall)
 nnoremap <Leader>m <Plug>(mk-list)
-" TODO mark全体リスト
-" TODO mi で annotation
 
 " IDE action menu
 nnoremap <Leader>v <Plug>(ide-menu)
@@ -2127,13 +2125,8 @@ endf
 " neoclide/coc.nvim has special args
 " TODO delete some
 let s:plug.repos = [
-    \ 'easymotion/vim-easymotion',
     \ 'mhinz/vim-startify',
-    \ 'junegunn/goyo.vim', 'junegunn/limelight.vim',
-    \ 'junegunn/fzf', 'junegunn/fzf.vim',
     \ 'github/copilot.vim', 'thinca/vim-quickrun', 'puremourning/vimspector',
-    \ 'sheerun/vim-polyglot', 'uiiaoo/java-syntax.vim',
-    \ 'vim-airline/vim-airline', 'vim-airline/vim-airline-themes',
     \ ]
 let s:plug.repos = [
     \ 'mhinz/vim-startify',
