@@ -75,6 +75,7 @@ also see [wiki-debug](https://github.com/serna37/vim/wiki/Debug)
 - [github/copilot.vim](https://github.com/github/copilot.vim)
 
 # Inspired Plugins (no install)
+this `vimrc` including functions inspired these plugins.
 - [simeji/winresizer](https://github.com/simeji/winresizer)
 - [jiangmiao/auto-pairs](https://github.com/jiangmiao/auto-pairs)
 - [vim-airline/vim-airline](https://github.com/vim-airline/vim-airline)
@@ -90,6 +91,7 @@ also see [wiki-debug](https://github.com/serna37/vim/wiki/Debug)
 - [mhinz/vim-startify](https://github.com/mhinz/vim-startify)
 
 # Original
+this `vimrc` including these functions.
 - Running Cat
 - Tab Anchor
 - Fuzzy Search Current File
