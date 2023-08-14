@@ -89,6 +89,8 @@ this `vimrc` including functions inspired these plugins.
 - [MattesGroeger/vim-bookmarks](https://github.com/MattesGroeger/vim-bookmarks)
 - [junegunn/goyo.vim](https://github.com/junegunn/goyo.vim)
 - [mhinz/vim-startify](https://github.com/mhinz/vim-startify)
+- [markonm/traces.vim](https://github.com/markonm/traces.vim)
+- [thinca/vim-quickrun](https://github.com/thinca/vim-quickrun)
 - [joshdick/onedark.vim](https://github.com/joshdick/onedark.vim)
 
 # Original

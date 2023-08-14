@@ -244,9 +244,9 @@ endf
 fu! s:runcat.start(...) abort
     cal self.stop()
     " TODO run cat animation maskいじくりたい
-    " TODO OneDarkGreenChar statuslineでの color
+    " TODO User_greenfg_blackbg statuslineでの color
     let self.winid = popup_create(self.cat[0], #{line: 1, border: [0,0,0,0], mask: [[1,-1,1,1]], zindex: 1})
-    "cal setwinvar(self.winid, '&wincolor', 'OneDarkGreenChar')
+    "cal setwinvar(self.winid, '&wincolor', 'User_greenfg_blackbg')
     "cal matchaddpos('DarkRed', self.cheatpos_red, 16, -1, #{window: self.cheatid})
     "cal matchaddpos('DarkBlue', self.cheatpos_blue, 16, -1, #{window: self.cheatid})
     if a:0
@@ -441,7 +441,6 @@ noremap <silent><Plug>(fuzzy-search) :<C-u>cal <SID>fuzzySearch()<CR>
 
 " Grep current file {{{
 fu! s:grepCurrent() abort
-" TODO 結果ないときエラー
     cal EchoI('grep from this file. (empty to cancel)')
     let word = InputI('[word]>>', expand('<cword>'))
     cal EchoI('<<', 0)
@@ -450,9 +449,14 @@ fu! s:grepCurrent() abort
         retu
     endif
     cal EchoW(printf('grep word[%s] processing in [%s] ...', word, expand('%:t')))
-    exe 'vimgrep /'.word.'/gj %'
-    cw
-    cal EchoI('grep complete!')
+    try
+        exe 'vimgrep /'.word.'/gj %'
+        cw
+    catch
+        cal EchoE('grep no hit')
+    finally
+        cal EchoI('grep complete!')
+    endtry
 endf
 
 noremap <silent><Plug>(grep-current) :<C-u>cal <SID>grepCurrent()<CR>
@@ -492,15 +496,20 @@ fu! s:grep() abort
     cal EchoE(' word['.word.']', 0)
     cal EchoI(' ext['.ext.']', 0)
     echon ' processing in'
-    cal EchoW(' target['.target.']')
+    cal EchoW(' target['.target.']', 0)
     echon ' ...'
     echo ''
-    cgetexpr system('grep -rin --include="*.'.ext.'" "'.word.'" '.target)
+    let result = system('grep -rin --include="*.'.ext.'" "'.word.'" '.target)
+    if empty(result)
+        cal EchoE('grep no hit')
+        cal EchoI('grep complete!')
+        retu
+    endif
+    cgetexpr result
     cw
     cal EchoI('grep complete!')
 endf
 
-" TODO 結果ないとき無言、なんか知らせたいね
 noremap <silent><Plug>(grep) :<C-u>cal <SID>grep()<CR>
 " }}}
 
@@ -539,11 +548,11 @@ fu! s:idemenu.open() abort
         \ callback: 's:idemenu_exe',
         \ })
         ""\ filter: function(self.choose, [{'idx': 0, 'files': self.menu }]),
-    cal setwinvar(self.menuid, '&wincolor', 'OneDarkGreenChar')
+    cal setwinvar(self.menuid, '&wincolor', 'User_greenfg_blackbg')
     cal matchaddpos('DarkRed', self.menupos_red1, 16, -1, #{window: self.menuid})
     cal matchaddpos('DarkRed', self.menupos_red2, 16, -1, #{window: self.menuid})
     let self.cheatid = popup_create(self.cheat, #{title: self.cheattitle, line: &lines-5})
-    cal setwinvar(self.cheatid, '&wincolor', 'OneDarkGreenChar')
+    cal setwinvar(self.cheatid, '&wincolor', 'User_greenfg_blackbg')
     cal matchaddpos('DarkRed', self.cheatpos_red, 16, -1, #{window: self.cheatid})
     cal matchaddpos('DarkBlue', self.cheatpos_blue, 16, -1, #{window: self.cheatid})
 endf
@@ -570,7 +579,7 @@ fu! s:idemenu_exe(_, idx) abort
             cal popup_close(s:idemenu.cheatid)
             retu 1
         endif
-        exe 'top terminal ++rows=10 ++shell git add .&&git commit -m "'.w.'"&&git push'
+        exe 'top terminal ++rows=10 ++shell git add . && git commit -m "'.w.'" && git push'
     elseif a:idx == 4
         if exists(':CocCommand')
             exe 'CocCommand fzf-preview.QuickFix'
@@ -847,32 +856,39 @@ inoremap <silent><expr><BS> AutoPairsDelete()
 " {{{
 " TODO リファクタ
 
-" status line with git info
 let g:right_arrow = ''
 let g:left_arrow = ''
-let powerline_chk_mac = trim(system('fc-list | grep powerline | wc -l'))
-let powerline_chk_win = trim(system('cd /C/Windows/Fonts&&ls | grep powerline | wc -l'))
+let powerline_chk_mac = system('fc-list | grep powerline | wc -l')->trim()
+let powerline_chk_win = system('cd /C/Windows/Fonts && ls | grep powerline | wc -l')->trim()
 if !powerline_chk_mac+0 && !powerline_chk_win+0
     let g:right_arrow = '▶︎'
     let g:left_arrow = '◀︎'
 endif
-let g:modes = {'i': ['#OneDarkBule#', '#OneDarkBlueChar#', 'INSERT'], 'n': ['#OneDarkGreen#', '#OneDarkGreenChar#', 'NORMAL'], 'R': ['#OneDarkRed#', '#OneDarkRedChar#', 'REPLACE'], 'c': ['#OneDarkGreen#', '#OneDarkGreenChar#', 'COMMAND'], 't': ['#OneDarkRed#', '#OneDarkRedChar#', 'TERMIAL'], 'v': ['#OneDarkPink#', '#OneDarkPinkChar#', 'VISUAL'], 'V': ['#OneDarkPink#', '#OneDarkPinkChar#', 'VISUAL'], "\<C-v>": ['#OneDarkPink#', '#OneDarkPinkChar#', 'VISUAL']}
+
+let g:modes = {
+    \ 'i': ['#User_blackfg_bluebg_bold#', '#User_bluefg_blackbg#', 'INSERT'],
+    \ 'n': ['#User_blackfg_greenbg_bold#', '#User_greenfg_blackbg#', 'NORMAL'],
+    \ 'R': ['#User_blackfg_redbg_bold#', '#User_redfg_blackbg#', 'REPLACE'],
+    \ 'c': ['#User_blackfg_greenbg_bold#', '#User_greenfg_blackbg#', 'COMMAND'],
+    \ 't': ['#User_blackfg_redbg_bold#', '#User_redfg_blackbg#', 'TERMIAL'],
+    \ 'v': ['#User_blackfg_pinkbg_bold#', '#User_pinkfg_blackbg#', 'VISUAL'],
+    \ 'V': ['#User_blackfg_pinkbg_bold#', '#User_pinkfg_blackbg#', 'VISUAL'],
+    \ "\<C-v>": ['#User_blackfg_pinkbg_bold#', '#User_pinkfg_blackbg#', 'VISUAL'],
+    \ }
 
 let g:ff_table = {'dos' : 'CRLF', 'unix' : 'LF', 'mac' : 'CR'}
+
 let g:gitinf = 'no git '
 fu! s:gitinfo() abort
-    try
-        cal system('git status')
-    catch
+    if !executable('git')
         retu
-    endtry
-    if trim(system('cd '.expand('%:h').' && git status')) =~ "^fatal:"
+    endif
+    let status = system('cd '.expand('%:h').' && git status')->trim()
+    if status =~ "^fatal:"
         let g:gitinf = 'no repo '
         retu
     endif
     " TODO gitstatus結果を使いまわした方が早い？
-    " TODO
-    " いまどのwindow みてるか分かりにくい、forcus window のstatus colorを抑えたい
     let cmd = "cd ".expand('%:h')." && git status --short | awk -F ' ' '{print($1)}' | grep -c "
     let a = trim(system(cmd."'A'"))
     let aa = a !='0'?'+'.a :''
@@ -882,34 +898,35 @@ fu! s:gitinfo() abort
     let nwnw = nw !='0'?'?'.nw :''
     let er = trim(system(cmd."'U'"))
     let ee = er !='0'?'✗'.er :''
-    let g:gitinf = trim(system("cd ".expand('%:h')."&&git branch | awk -F '*' '{print($2)}'")).join([aa,mm,nwnw,ee],' ')
+    let g:gitinf = trim(system("cd ".expand('%:h')." && git branch | awk -F '*' '{print($2)}'")).join([aa,mm,nwnw,ee],' ')
 endf
 
-" TODO onedark系ハイライトを1箇所にまとめたいね -> どこで使う予定かリストアップ
-" TODO airline, popup
-" TODO onedarkカラースキームimitationとは別のはず。
-
 fu! g:SetStatusLine() abort
-    let filetype_tmp = split(execute('set filetype?'), '=')
-    let filetype = len(filetype_tmp) >= 2 ? filetype_tmp[1] : ''
-    let mode = match(keys(g:modes), mode()) != -1 ? g:modes[mode()] : ['#OneDarkRed#', '#OneDarkRedChar#', 'SP']
-    retu '%'.mode[0].' '.mode[2].' '.'%'.mode[1].g:right_arrow.'%#OneDarkBlackArrow#'.g:right_arrow.'%#OneDarkChar# %<%f%m%r%h%w %#OneDarkGrayArrow#'.g:right_arrow.'%#OneDarkGreenChar# %{g:gitinf}%#OneDarkBlackArrow#'.g:right_arrow.'%#StatusLine# %=%#OneDarkBlackArrow#'.g:left_arrow.'%#OneDarkGreenChar# '.filetype.' %#OneDarkGrayArrow#'.g:left_arrow.'%#OneDarkChar# %p%% %l/%L %02v%#OneDarkBlackArrow#'.g:left_arrow.'%'.mode[1].g:left_arrow.'%'.mode[0].' [%{&fenc!=""?&fenc:&enc}][%{g:ff_table[&ff]}] %*'
+    let mode = get(g:modes, mode(), ['#User_blackfg_redbg_bold#', '#User_redfg_blackbg#', 'SP'])
+    retu '%'.mode[0].' '.mode[2].' '.'%'.mode[1].g:right_arrow.'%#User_blackfg_graybg#'.g:right_arrow
+        \ .'%#User_greenfg_graybg# %<%f%m%r%h%w %#User_grayfg_blackbg#'.g:right_arrow
+        \ .'%#User_greenfg_blackbg# %{g:gitinf}%*'.g:right_arrow
+        \ .'%* %='
+        \ .'%*'.g:left_arrow.'%#User_greenfg_blackbg# %{&filetype}'
+        \ .' %#User_grayfg_blackbg#'.g:left_arrow.'%#User_greenfg_graybg# %p%% %l/%L %02v%#User_blackfg_graybg#'.g:left_arrow
+        \ .'%'.mode[1].g:left_arrow.'%'.mode[0].' [%{&fenc!=""?&fenc:&enc}][%{g:ff_table[&ff]}] %*'
 endf
 set stl=%!g:SetStatusLine()
 
 " tabline
 fu! s:buffers_label() abort
+    " TODO リファクタ
     let b = ''
     for v in split(execute('ls'), '\n')->map({ _,v -> split(v, ' ')})
         let x = copy(v)->filter({ _,v -> !empty(v) })
         if stridx(x[1], 'F') == -1 && stridx(x[1], 'R') == -1
-            let hi = stridx(x[1], '%') != -1 ? '%#OneDarkGreenThin#' : '%#OneDarkChar#'
-            let hiar = stridx(x[1], '%') != -1 ? '%#OneDarkGreenChar#' : '%#OneDarkGrayArrow#'
-            let hiarb = stridx(x[1], '%') != -1 ? '%#OneDarkGreenArrowBottom#' : '%#OneDarkBlackArrow#'
+            let hi = stridx(x[1], '%') != -1 ? '%#User_blackfg_greenbg#' : '%#User_greenfg_graybg#'
+            let hiar = stridx(x[1], '%') != -1 ? '%#User_greenfg_blackbg#' : '%#User_grayfg_blackbg#'
+            let hiarb = stridx(x[1], '%') != -1 ? '%#User_blackfg_greenbg#' : '%#User_blackfg_graybg#'
             if x[2] == '+'
-                let hi = '%#OneDarkBlueThin#'
-                let hiar = '%#OneDarkBlueChar#'
-                let hiarb = '%#OneDarkBlueThin#'
+                let hi = '%#User_blackfg_bluebg#'
+                let hiar = '%#User_bluefg_blackbg#'
+                let hiarb = '%#User_blackfg_bluebg#'
             endif
 "[^/]*$
             let f = x[2] == '+' ? '✗'.matchstr(join(split(x[3],'"'),''),'[^/]*$') : matchstr(join(split(x[2],'"'),''),'[^/]*$')
@@ -919,7 +936,7 @@ fu! s:buffers_label() abort
     retu b
 endf
 fu! s:tabpage_label(n) abort
-    let hi = a:n is tabpagenr() ? '%#OneDarkGreenThin#' : '%#OneDarkChar#'
+    let hi = a:n is tabpagenr() ? '%#User_blackfg_greenbg#' : '%#User_greenfg_graybg#'
     let bufnrs = tabpagebuflist(a:n)
     let no = len(bufnrs)
     if no is 1
@@ -961,29 +978,26 @@ fu! s:closeBuf() abort
     execute('bd ' . now_b)
 endf
 
-aug statusLine
+aug user_onedark
     au!
-    au BufWinEnter,BufWritePost * cal s:gitinfo()
-    au ColorScheme * hi OneDarkGreen cterm=bold ctermfg=234 ctermbg=114
-    au ColorScheme * hi OneDarkGreenChar ctermfg=113 ctermbg=235
-    au ColorScheme * hi OneDarkBule cterm=bold ctermfg=234 ctermbg=39
-    au ColorScheme * hi OneDarkBlueChar ctermfg=38 ctermbg=235
-    au ColorScheme * hi OneDarkPink cterm=bold ctermfg=234 ctermbg=170
-    au ColorScheme * hi OneDarkPinkChar ctermfg=169 ctermbg=235
-    au ColorScheme * hi OneDarkRed cterm=bold ctermfg=234 ctermbg=204
-    au ColorScheme * hi OneDarkRedChar ctermfg=203 ctermbg=235
-    au ColorScheme * hi OneDarkBlackArrow ctermfg=234 ctermbg=238
-    au ColorScheme * hi OneDarkChar ctermfg=113 ctermbg=238
-    au ColorScheme * hi OneDarkGrayArrow ctermfg=237 ctermbg=235
-    au ColorScheme * hi StatusLine ctermfg=113 ctermbg=238
+    au ColorScheme * hi User_greenfg_blackbg ctermfg=114 ctermbg=235
+    au ColorScheme * hi User_greenfg_graybg ctermfg=114 ctermbg=238
+    au ColorScheme * hi User_bluefg_blackbg ctermfg=39 ctermbg=235
+    au ColorScheme * hi User_pinkfg_blackbg ctermfg=169 ctermbg=235
+    au ColorScheme * hi User_redfg_blackbg ctermfg=203 ctermbg=235
+    au ColorScheme * hi User_grayfg_blackbg ctermfg=238 ctermbg=235
+    au ColorScheme * hi User_blackfg_graybg ctermfg=235 ctermbg=238
+    au ColorScheme * hi User_blackfg_greenbg ctermfg=235 ctermbg=114
+    au ColorScheme * hi User_blackfg_greenbg_bold cterm=bold ctermfg=234 ctermbg=114
+    au ColorScheme * hi User_blackfg_bluebg ctermfg=235 ctermbg=39
+    au ColorScheme * hi User_blackfg_bluebg_bold cterm=bold ctermfg=234 ctermbg=39
+    au ColorScheme * hi User_blackfg_pinkbg_bold cterm=bold ctermfg=234 ctermbg=170
+    au ColorScheme * hi User_blackfg_redbg_bold cterm=bold ctermfg=234 ctermbg=204
 aug END
 
-aug tabLine
+aug status_tabLine
     au!
-    au ColorScheme * hi OneDarkGreenThin ctermfg=235 ctermbg=114
-    au ColorScheme * hi OneDarkBlueThin ctermfg=235 ctermbg=39
-    au ColorScheme * hi OneDarkGreenArrowBottom ctermfg=235 ctermbg=114
-    au ColorScheme * hi TabLineFill ctermfg=235 ctermbg=238
+    au BufWinEnter,BufWritePost * cal s:gitinfo()
 aug END
 
 noremap <silent><Plug>(buf-prev) :<C-u>cal <SID>moveBuf('prev')<CR>
@@ -2064,6 +2078,36 @@ noremap <silent><Plug>(zen-mode) :<C-u>cal <SID>zenModeToggle()<CR>
 
 " }}}
 
+" ===================================================================
+" markonm/traces.vim
+" ===================================================================
+" {{{
+" TODO 作成
+
+" TODO 置換プレビュー
+
+
+
+
+
+
+" }}}
+
+" ===================================================================
+" thinca/vim-quickrun
+" ===================================================================
+" {{{
+" TODO 作成
+
+" TODO quick run
+
+
+
+
+
+
+" }}}
+
 " }}}
 
 " ##################      PLUG MANAGE       ################### {{{
@@ -2095,8 +2139,8 @@ let s:plug.coc_config = ['{',
     \]
 
 fu! s:plug.install() abort
-    let cmd = "mkdir -p ~/.vim/pack/plugins/start&&cd ~/.vim/pack/plugins/start&&repos=('".join(self.repos,"' '")."')&&for v in ${repos[@]};do git clone --depth 1 https://github.com/${v};done"
-      \ ."&&git clone -b release https://github.com/neoclide/coc.nvim"
+    let cmd = "mkdir -p ~/.vim/pack/plugins/start && cd ~/.vim/pack/plugins/start && repos=('".join(self.repos,"' '")."') && for v in ${repos[@]};do git clone --depth 1 https://github.com/${v};done"
+      \ ." && git clone -b release https://github.com/neoclide/coc.nvim"
     cal s:runcat.start()
     cal job_start(["/bin/zsh","-c",cmd], #{close_cb: self.coc_setup})
     cal EchoI('colors, plugins installing...')
@@ -2122,7 +2166,7 @@ fu! s:plug.uninstall() abort
         cal EchoI('cancel')
         retu
     endif
-    exe "bo terminal ++shell echo 'start'&&rm -rf ~/.vim&&echo 'end. PLEASE REBOOT VIM'"
+    exe "bo terminal ++shell echo 'start' && rm -rf ~/.vim && echo 'end. PLEASE REBOOT VIM'"
 endf
 
 com! PlugInstall cal s:plug.install()
@@ -3043,12 +3087,12 @@ call s:h("SpellBad", { "fg": s:red, "gui": "underline", "cterm": "underline" }) 
 call s:h("SpellCap", { "fg": s:dark_yellow }) " Word that should start with a capital. This will be combined with the highlighting used otherwise.
 call s:h("SpellLocal", { "fg": s:dark_yellow }) " Word that is recognized by the spellchecker as one that is used in another region. This will be combined with the highlighting used otherwise.
 call s:h("SpellRare", { "fg": s:dark_yellow }) " Word that is recognized by the spellchecker as one that is hardly ever used. spell This will be combined with the highlighting used otherwise.
-"call s:h("StatusLine", { "fg": s:white, "bg": s:cursor_grey }) " status line of current window
+call s:h("StatusLine", { "fg": s:black, "bg": s:cursor_grey }) " status line of current window
 call s:h("StatusLineNC", { "fg": s:comment_grey }) " status lines of not-current windows Note: if this is equal to "StatusLine" Vim will use "^^^" in the status line of the current window.
 call s:h("StatusLineTerm", { "fg": s:white, "bg": s:cursor_grey }) " status line of current :terminal window
 call s:h("StatusLineTermNC", { "fg": s:comment_grey }) " status line of non-current :terminal window
 call s:h("TabLine", { "fg": s:comment_grey }) " tab pages line, not active tab page label
-"call s:h("TabLineFill", {}) " tab pages line, where there are no labels
+call s:h("TabLineFill", {}) " tab pages line, where there are no labels
 call s:h("TabLineSel", { "fg": s:white }) " tab pages line, active tab page label
 call s:h("Terminal", { "fg": s:white, "bg": s:black }) " terminal window (see terminal-size-color)
 call s:h("Title", { "fg": s:green }) " titles for output from ":set all", ":autocmd" etc.
