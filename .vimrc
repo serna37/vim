@@ -545,7 +545,6 @@ let s:idemenu = #{
         \ '[Run*]           run current program',
         \ '[Debug*]         debug current program',
         \ '[Run as Shell]   run current row as shell command',
-        \ '[Color random]   change colorscheme at random',
     \ ],
     \ menupos_red1: [[1,1,17],[2,1,17],[3,1,17],[4,1,17],[5,1,17],[6,1,17]],
     \ menupos_red2: [[7,1,17],[8,1,17],[9,1,17]],
@@ -650,11 +649,6 @@ fu! s:idemenu.exe(idx) abort
         endif
     elseif a:idx == 7
         exe 'top terminal ++rows=10 ++shell eval '.getline('.')
-    elseif a:idx == 8
-        let self.tobecolor = glob('~/.vim/colors') != '' ? self.colors_plug[localtime() % len(self.colors_plug)] : self.colors[localtime() % len(self.colors)]
-        exe 'echo "change [".execute("colorscheme")[1:]."] -> [".self.tobecolor."]"'
-        cal timer_start(500, { -> execute('colorscheme '.self.tobecolor) })
-     " TODO runcatいれる？
     endif
     retu 0
 endf
@@ -1953,7 +1947,7 @@ noremap <silent><Plug>(qikhl-clear) :<C-u>cal <SID>quickhlclear()<CR>
 sign define mk text=⚑ texthl=DarkBlue
 
 let s:mk = #{winid: 0, tle: 'marks', allwinid: 0, atle: 'marks-allfiles',
-    \ path: $HOME.'/.vim/.mk',
+    \ path: $HOME.'/.mk',
     \ list: { -> sign_getplaced(bufname('%'), #{group: 'mkg'})[0].signs },
     \ next: { _,v -> v.lnum > line('.') }, prev: { _,v -> v.lnum < line('.') },
     \ }
@@ -2114,77 +2108,57 @@ noremap <silent><Plug>(zen-mode) :<C-u>cal <SID>zenModeToggle()<CR>
 " }}}
 
 " ##################      PLUG MANAGE       ################### {{{
-" TODO リファクタ
-let s:plug = #{colors: [ 'onedark.vim', 'hybrid_material.vim', 'molokai.vim' ]}
-
-fu! s:plug.color_install() abort
-    exe "bo terminal ++shell echo 'start'&&mkdir -p ~/.vim/colors&&cd ~/.vim/colors&&colors=('".join(s:plug.colors,"' '")."')&&for v in ${colors[@]};do curl https://raw.githubusercontent.com/serna37/vim-color/master/${v}>${v};done&&echo 'end'"
-endf
-
 " repo
 " neoclide/coc.nvim has special args
 " TODO delete some
+let s:plug = #{}
 let s:plug.repos = [
     \ 'mhinz/vim-startify',
-    \ 'github/copilot.vim', 'thinca/vim-quickrun', 'puremourning/vimspector',
-    \ ]
-let s:plug.repos = [
-    \ 'mhinz/vim-startify',
+    \ 'thinca/vim-quickrun',
     \ 'github/copilot.vim', 'puremourning/vimspector',
     \ ]
 
 " coc extentions
+    ""\ 'coc-fzf-preview', 'coc-explorer', 'coc-lists', 'coc-snippets',
 let s:plug.coc_extentions = [
-    \ 'coc-fzf-preview', 'coc-explorer', 'coc-lists', 'coc-snippets',
+    \ 'coc-explorer', 'coc-snippets',
     \ 'coc-sh', 'coc-vimlsp', 'coc-json', 'coc-sql', 'coc-html', 'coc-css',
     \ 'coc-tsserver', 'coc-clangd', 'coc-go', 'coc-pyright', 'coc-java',
     \ ]
 
-fu! s:plug.install() abort
-    " colors
-    let color_cmd = "mkdir -p ~/.vim/colors&&cd ~/.vim/colors&&colors=('".join(s:plug.colors,"' '")."')&&for v in ${colors[@]};do curl https://raw.githubusercontent.com/serna37/vim-color/master/${v}>${v};done"
-    " plugins
-    let cmd = "mkdir -p ~/.vim/pack/plugins/start&&cd ~/.vim/pack/plugins/start&&repos=('".join(s:plug.repos,"' '")."')&&for v in ${repos[@]};do git clone --depth 1 https://github.com/${v};done"
-      \ ."&&git clone -b release https://github.com/neoclide/coc.nvim"
-      \ ."&&fzf/install --no-key-bindings --completion --no-bash --no-zsh --no-fish"
+let s:plug.coc_config = ['{',
+    \ '    "snippets.ultisnips.pythonPrompt": false,',
+    \ '    "explorer.icon.enableNerdfont": true,',
+    \ '    "explorer.file.showHiddenFiles": true,',
+    \ '    "python.formatting.provider": "yapf",',
+    \ '    "pyright.inlayHints.variableTypes": false',
+    \ '}',
+    \]
 
-    let cmd = "mkdir -p ~/.vim/pack/plugins/start&&cd ~/.vim/pack/plugins/start"
-        \ ."&&git clone -b release https://github.com/neoclide/coc.nvim"
-    ""cal s:runcat.start() | cal job_start(["/bin/zsh","-c",color_cmd]) | cal job_start(["/bin/zsh","-c",cmd], #{close_cb: s:plug.coc_setup})
+fu! s:plug.install() abort
+    let cmd = "mkdir -p ~/.vim/pack/plugins/start&&cd ~/.vim/pack/plugins/start&&repos=('".join(self.repos,"' '")."')&&for v in ${repos[@]};do git clone --depth 1 https://github.com/${v};done"
+      \ ."&&git clone -b release https://github.com/neoclide/coc.nvim"
     cal s:runcat.start()
-    cal job_start(["/bin/zsh","-c",cmd], #{close_cb: s:plug.coc_setup})
-    echo 'colors, plugins installing...'
-    cal popup_notification('colors, plugins installing...', #{border: [], line: &columns/4-&columns/37, close: 'button'})
+    cal job_start(["/bin/zsh","-c",cmd], #{close_cb: self.coc_setup})
+    cal EchoI('colors, plugins installing...')
+    cal popup_notification('colors, plugins installing...', #{zindex: 999, line: &lines, col: 5})
 endf
 
-" TODO onedark use
 " coc extentions
 fu! s:plug.coc_setup(ch) abort
     cal s:runcat.stop()
-    cal EchoE('colors, plugins installed. coc-extentions installing. PLEASE REBOOT VIM after this.')
-    " TODO 色とか綺麗に zindex9999
-    cal popup_notification('colors, plugins installed. coc-extentions installing. PLEASE REBOOT VIM after this.', #{ border: [], line: &columns/4-&columns/37, close: "button" })
+    cal EchoE('plugins installed. coc-extentions installing. PLEASE REBOOT VIM after this.')
+    cal popup_notification('colors, plugins installed. coc-extentions installing. PLEASE REBOOT VIM after this.', #{zindex: 999, line: &lines, col: 5})
     exe 'source ~/.vim/pack/plugins/start/coc.nvim/plugin/coc.vim'
-    exe 'CocInstall '.join(s:plug.coc_extentions,' ')
-    let cocconfig = ['{',
-        \ '    \"snippets.ultisnips.pythonPrompt\": false,',
-        \ '    \"explorer.icon.enableNerdfont\": true,',
-        \ '    \"explorer.file.showHiddenFiles\": true,',
-        \ '    \"python.formatting.provider\": \"yapf\",',
-        \ '    \"pyright.inlayHints.variableTypes\": false',
-        \ '}',
-        \]
-    for v in cocconfig
-        cal system('echo "'.v.'" >> ~/.vim/coc-settings.json')
-    endfor
+    exe 'CocInstall '.join(self.coc_extentions, ' ')
+    cal writefile(self.coc_config, $HOME.'/.vim/coc-settings.json')
     "cal coc#util#install() if git clone --depth 1, need this statement
 endf
 
 " uninstall
 fu! s:plug.uninstall() abort
     cal EchoE('delete ~/.vim')
-    cal EchoE('Are you sure to delete these folders ?')
-    let w = confirm("Save changes?", "&Yes\n&No\n&Cancel")
+    let w = confirm('Are you sure to delete these folders ?', "&Yes\n&No\n&Cancel")
     if w != 1
         cal EchoI('cancel')
         retu
@@ -2192,7 +2166,6 @@ fu! s:plug.uninstall() abort
     exe "bo terminal ++shell echo 'start'&&rm -rf ~/.vim&&echo 'end. PLEASE REBOOT VIM'"
 endf
 
-com! ColorInstall cal s:plug.color_install()
 com! PlugInstall cal s:plug.install()
 com! PlugUnInstall cal s:plug.uninstall()
 " }}}
@@ -2808,31 +2781,6 @@ let g:vimspector_enable_mappings = 'VISUAL_STUDIO'
 " fzf run time path(git, homebrew)
 set rtp+=~/.vim/pack/plugins/start/fzf
 set rtp+=/opt/homebrew/opt/fzf
-" TODO batいるっけ？
-set rtp+=/opt/homebrew/opt/bat
-
-" TODO delete
-" easy motion
-let g:EasyMotion_do_mapping = 0
-let g:EasyMotion_smartcase = 1
-let g:EasyMotion_keys='swadjkhlnmf'
-
-" TODO delete
-" airline
-let g:airline_theme = 'deus'
-let g:airline#extensions#tabline#enabled = 1
-let g:airline#extensions#tabline#buffer_idx_mode = 1
-let g:airline_powerline_fonts = 1
-
-" TODO delete
-" auto pair
-let g:AutoPairsMapCh = 0
-
-" TODO delete
-" zen
-let g:limelight_conceal_ctermfg = 'gray'
-autocmd! User GoyoEnter Limelight
-autocmd! User GoyoLeave Limelight!
 
 " startify
 " ぼっちざろっく{{{
@@ -2867,34 +2815,13 @@ let g:startify_custom_header = g:btr_logo
 " }}}
 
 " ##################      PLUGIN KEYMAP     ################### {{{
-
-" for no override default motion, if glob( plugin path ) is need
-" TODO existsになおす？
-
-" TODO delete
-" tabline motion
-if glob('~/.vim/pack/plugins/start/vim-airline') != ''
-    nmap <silent><C-n> <Plug>AirlineSelectPrevTab
-    nmap <silent><C-p> <Plug>AirlineSelectNextTab
-endif
-
 " coc
-if glob('~/.vim/pack/plugins/start/coc.nvim') != ''
-    " file search
+if exists(':CocCommand')
+    " explorer
     nnoremap <silent><Leader>e :CocCommand explorer --width 30<CR>
-    nnoremap <silent><leader>h :CocCommand fzf-preview.MruFiles<CR>
-    nnoremap <silent><leader>b :CocCommand fzf-preview.AllBuffers<CR>
 
     " cursor highlight
     autocmd CursorHold * silent cal CocActionAsync('highlight')
-
-    " grep
-    nnoremap <Leader><Leader>s :CocList words<CR>
-
-    " jump
-    nnoremap <silent><Leader>l :CocCommand fzf-preview.Lines<CR>
-    nnoremap <silent><Leader>j :CocCommand fzf-preview.Jumps<CR>
-    nnoremap <silent><Leader>c :CocCommand fzf-preview.Changes<CR>
 
     " completion @ coc
     inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
@@ -2912,20 +2839,6 @@ if glob('~/.vim/pack/plugins/start/coc.nvim') != ''
     nnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : Scroll(1, 10)
     nnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : Scroll(0, 10)
 endif
-
-" TODO delete
-" easy motion
-if glob('~/.vim/pack/plugins/start/vim-easymotion') != ''
-    nnoremap s <Plug>(easymotion-bd-w)
-    nnoremap <Leader>s <Plug>(easymotion-sn)
-endif
-
-" TODO delete
-" zen mode
-if glob('~/.vim/pack/plugins/start/goyo.vim') != ''
-    nnoremap <silent><Leader>z :Goyo<CR>
-endif
-
 " }}}
 " }}}
 
@@ -2940,10 +2853,6 @@ aug base_color
     au ColorScheme * hi Normal ctermbg=235
 aug END
 colorscheme torte
-if glob('~/.vim/colors/') != ''
-    colorscheme onedark
-endif
-
 cal s:fmode.activate()
 
 " ===================================================================
