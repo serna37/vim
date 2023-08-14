@@ -39,7 +39,6 @@ let mapleader = "\<SPACE>"
 " file
 set fileformat=unix " LF
 set fileencoding=utf8 " charset
-
 " vim specific
 set noswapfile " no create swap file
 set nobackup " no create backup file
@@ -47,7 +46,6 @@ set noundofile " no create undo file
 set hidden " enable go other buffer without save
 set autoread " re read file when changed outside vim
 set clipboard+=unnamed " copy yanked fot clipboard
-
 " reopen, go row
 aug reopenGoRow
     au!
@@ -58,24 +56,19 @@ aug END
 " ##################     VISUALIZATION      ################### {{{
 " enable syntax highlight
 syntax on
-
 " window
 set background=dark " basic color
 set title " show filename on terminal title
 set showcmd " show enterd command on right bottom
-
 " visible
 set list " show invisible char
 set listchars=tab:»-,trail:-,eol:↲,extends:»,precedes:«,nbsp:% " custom invisible char
-
 " row number + relativenumber
 set number relativenumber
-
 " cursor
 set scrolloff=5 " page top bottom offset view row
 set cursorline cursorcolumn " show cursor line/column
 set ruler " show row/col position number at right bottom
-
 " show status, tabline
 set laststatus=2 showtabline=2
 " }}}
@@ -96,19 +89,16 @@ nnoremap <Left> 4<C-w><
 nnoremap <Right> 4<C-w>>
 nnoremap <Up> 4<C-w>-
 nnoremap <Down> 4<C-w>+
-
 " move buffer
 nnoremap <C-n> <Plug>(buf-prev)
 nnoremap <C-p> <Plug>(buf-next)
 " close buffer
 nnoremap <Leader>x <Plug>(buf-close)
-
 " terminal
 "nnoremap <silent><Leader>t :bo terminal ++rows=10<CR>
 nnoremap <silent><Leader>t :cal popup_create(term_start([&shell],#{hidden:1,term_finish:'close'}),#{border:[],minwidth:&columns*3/4,minheight:&lines*3/4})<CR>
 " terminal read only mode (i to return terminal mode)
 tnoremap <Esc> <C-w>N
-
 " zen
 nnoremap <Leader>z <Plug>(zen-mode)
 " }}}
@@ -121,16 +111,13 @@ vnoremap <Tab> 5gj
 vnoremap <S-Tab> 5gk
 nnoremap <Tab> 5j<Plug>(anchor)
 nnoremap <S-Tab> 5k<Plug>(anchor)
-
 " comfortable scroll
 nnoremap <C-u> <Plug>(scroll-u)
 nnoremap <C-d> <Plug>(scroll-d)
 nnoremap <C-b> <Plug>(scroll-b)
 nnoremap <C-f> <Plug>(scroll-f)
-
 " f-scope toggle
 nnoremap <Leader>w <Plug>(f-scope)
-
 " mark
 nnoremap mm <Plug>(mk-toggle)
 nnoremap mp <Plug>(mk-prev)
@@ -138,7 +125,6 @@ nnoremap mn <Plug>(mk-next)
 nnoremap mc <Plug>(mk-clthis)
 nnoremap mx <Plug>(mk-clall)
 nnoremap <Leader>m <Plug>(mk-list)
-
 " IDE action menu
 nnoremap <Leader>v <Plug>(ide-menu)
 " }}}
@@ -148,31 +134,25 @@ nnoremap <Leader>v <Plug>(ide-menu)
 set virtualedit=all " virtual cursor movement
 set whichwrap=b,s,h,l,<,>,[,],~ " motion over row
 set backspace=indent,eol,start " backspace attitude on insert mode
-
 " parentheses
 set showmatch " jump pair of parentheses when write
 set matchtime=3 " jump term sec
-
 " move cursor at insert mode
 inoremap <C-h> <C-o>h
 inoremap <C-l> <C-o>l
 inoremap <C-k> <C-o>k
 inoremap <C-j> <C-o>j
-
 " d = delete(no clipboard)
 nnoremap d "_d
 vnoremap d "_d
-
 " x = cut(yank register)
 nnoremap x "+x
 vnoremap x "+x
-
 " p P = paste(from yank register)
 nnoremap p "+p
 nnoremap P "+P
 vnoremap p "+p
 vnoremap P "+P
-
 " block move at visual mode
 vnoremap <C-j> "zx"zp`[V`]
 vnoremap <C-k> "zx<Up>"zP`[V`]
@@ -186,14 +166,12 @@ set smarttab " use shiftwidth
 set shiftwidth=4 " auto indent width
 set tabstop=4 " view width of Tab
 set expandtab " Tab to Space
-
 " word
 set wildmenu " command mode completion enable
 set wildchar=<Tab> " command mode comletion key
 set wildmode=full " command mode completion match mode
 set complete=.,w,b,u,U,k,kspell,s,i,d,t " insert mode completion resource
 set completeopt=menuone,noinsert,preview,popup " insert mode completion window
-
 " completion with Tab
 inoremap <expr><CR> pumvisible() ? '<C-y>' : '<CR>'
 inoremap <expr><Tab> pumvisible() ? '<C-n>' : '<C-t>'
@@ -207,31 +185,25 @@ set hlsearch " highlight match words
 set ignorecase " ignore case search
 set smartcase " don't ignore case when enterd UPPER CASE"
 set shortmess-=S " show hit word's number at right bottom
-
 " no move search word with multi highlight
 nnoremap * *N<Plug>(qikhl-toggle)
 nnoremap # *N<Plug>(qikhl-toggle)
 nnoremap <silent><Leader>q <Plug>(qikhl-clear):noh<CR>
-
 " incremental search
 nnoremap s <Plug>(emotion)
 nnoremap <Leader>s <Plug>(fuzzy-search)
-
 " grep result -> quickfix
 au QuickFixCmdPost *grep* cwindow
-
 " explorer
 filetype plugin indent on
 let g:netrw_liststyle = 3
 let g:netrw_altv = 1
 let g:netrw_winsize = 70
 nnoremap <Leader>e <Plug>(explorer-toggle)
-
 " fzf-imitation
 nnoremap <leader>f <Plug>(fzf-smartfiles)
 nnoremap <leader>h <Plug>(fzf-histories)
 nnoremap <leader>b <Plug>(fzf-buffers)
-
 " grep
 nnoremap <Leader>g <Plug>(grep)
 " vimgrep current file
@@ -243,7 +215,6 @@ nnoremap <Leader><Leader>s <Plug>(grep-current)
 scriptencoding utf-8 " this file's charset
 set ttyfast " fast terminal connection
 set regexpengine=0 " chose regexp engin
-
 " fold
 set foldmethod=marker " fold marker
 set foldlevel=0 " fold max depth
@@ -258,7 +229,7 @@ set foldcolumn=1 " fold preview
 " {{{
 " ##################       ORIGINALS        ################### {{{
 
-" running cat (loading animation) {{{
+" Running Cat (loading animation) {{{
 " TODO runcat delay もっと緩急
 let s:runcat = #{frame: 0, winid: 0, tid: 0, delay: 300}
 fu! s:runcat.animation(_) abort
@@ -275,9 +246,9 @@ fu! s:runcat.start(...) abort
     " TODO run cat animation maskいじくりたい
     " TODO OneDarkGreenChar statuslineでの color
     let self.winid = popup_create(self.cat[0], #{line: 1, border: [0,0,0,0], mask: [[1,-1,1,1]], zindex: 1})
-    cal setwinvar(self.winid, '&wincolor', 'OneDarkGreenChar')
-    ""cal matchaddpos('DarkRed', self.cheatpos_red, 16, -1, #{window: self.cheatid})
-    ""cal matchaddpos('DarkBlue', self.cheatpos_blue, 16, -1, #{window: self.cheatid})
+    "cal setwinvar(self.winid, '&wincolor', 'OneDarkGreenChar')
+    "cal matchaddpos('DarkRed', self.cheatpos_red, 16, -1, #{window: self.cheatid})
+    "cal matchaddpos('DarkBlue', self.cheatpos_blue, 16, -1, #{window: self.cheatid})
     if a:0
         let self.delay = 500-(a:1-1)*100
     endif
@@ -435,7 +406,7 @@ aug logging_char_color
 aug END
 " }}}
 
-" tab 5row anchor {{{
+" Tab 5row Anchor {{{
 sign define anch text=> texthl=DarkRed
 let s:anchor = #{tid: 0,
     \ getlines: { l -> l-5 > 0 ? [l-5, l, l+5] : [l, l+5] },
@@ -454,7 +425,7 @@ let s:anchor = s:anchor.set
 noremap <silent><Plug>(anchor) :<C-u>cal <SID>anchor()<CR>
 " }}}
 
-" fuzzy search current file {{{
+" Fuzzy search current file {{{
 fu! s:fuzzySearch() abort
     cal s:fzsearch.popup(#{
         \ title: 'Current Buffer',
@@ -468,7 +439,7 @@ endf
 noremap <silent><Plug>(fuzzy-search) :<C-u>cal <SID>fuzzySearch()<CR>
 " }}}
 
-" grep from current file {{{
+" Grep current file {{{
 fu! s:grepCurrent() abort
 " TODO 結果ないときエラー
     cal EchoI('grep from this file. (empty to cancel)')
@@ -487,7 +458,7 @@ endf
 noremap <silent><Plug>(grep-current) :<C-u>cal <SID>grepCurrent()<CR>
 " }}}
 
-" grep {{{
+" Grep {{{
 fu! s:grep() abort
     echo 'grep by'
     cal EchoE(' [word]', 0)
@@ -547,7 +518,7 @@ let s:idemenu = #{
         \ '[Run as Shell]   run current row as shell command',
     \ ],
     \ menupos_red1: [[1,1,17],[2,1,17],[3,1,17],[4,1,17],[5,1,17],[6,1,17]],
-    \ menupos_red2: [[7,1,17],[8,1,17],[9,1,17]],
+    \ menupos_red2: [[7,1,17],[8,1,17]],
     \ cheatid: 0, cheattitle: ' LSP KeyMaps ',
     \ cheat: [
         \ ' (Space d) [Definition]     Go to Definition ',
@@ -559,97 +530,85 @@ let s:idemenu = #{
     \ ],
     \ cheatpos_red: [[1,1,28],[2,1,28],[3,1,28],[4,1,28],[5,1,28],[6,1,28]],
     \ cheatpos_blue: [[1,1,10],[2,1,10],[3,1,10],[4,1,10],[5,1,10],[6,1,10]],
-    \ colors: ['torte', 'elflord', 'pablo'],
-    \ colors_plug: ['onedark', 'hybrid_material', 'molokai']
     \ }
 
 " TODO OneDark statuslineでの緑をidemenuで使ってる
 fu! s:idemenu.open() abort
     let self.menuid = popup_menu(self.menu, #{title: self.menutitle,
         \ border: [], borderchars: ['─','│','─','│','╭','╮','╯','╰'],
-        \ filter: function(self.choose, [{'idx': 0, 'files': self.menu }])})
+        \ callback: 's:idemenu_exe',
+        \ })
+        ""\ filter: function(self.choose, [{'idx': 0, 'files': self.menu }]),
     cal setwinvar(self.menuid, '&wincolor', 'OneDarkGreenChar')
     cal matchaddpos('DarkRed', self.menupos_red1, 16, -1, #{window: self.menuid})
     cal matchaddpos('DarkRed', self.menupos_red2, 16, -1, #{window: self.menuid})
-    let self.cheatid = popup_create(self.cheat, #{title: self.cheattitle, line: &columns/4})
+    let self.cheatid = popup_create(self.cheat, #{title: self.cheattitle, line: &lines-5})
     cal setwinvar(self.cheatid, '&wincolor', 'OneDarkGreenChar')
     cal matchaddpos('DarkRed', self.cheatpos_red, 16, -1, #{window: self.cheatid})
     cal matchaddpos('DarkBlue', self.cheatpos_blue, 16, -1, #{window: self.cheatid})
 endf
 
-" TODO callbackを使えばindex管理をしなくて良い
-fu! s:idemenu.choose(ctx, winid, key) abort
-    if a:key is# 'j' && a:ctx.idx < len(a:ctx.files)-1
-        let a:ctx.idx += 1
-    elseif a:key is# 'k' && a:ctx.idx > 0
-        let a:ctx.idx -= 1
-    elseif a:key is# "\<Esc>" || a:key is# "\<Space>"
-        cal popup_close(self.cheatid)
-    elseif a:key is# "\<CR>"
-        if !self.exe(a:ctx.idx)
-            cal popup_close(self.cheatid)
-        else
-            retu 1
-        endif
-    endif
-    retu popup_filter_menu(a:winid, a:key)
-endf
-
-" return err flg
-fu! s:idemenu.exe(idx) abort
-    if a:idx == 0
+fu! s:idemenu_exe(_, idx) abort
+    if a:idx == 1
         if exists(':Coc')
             cal CocActionAsync('format')
         else
             execute('norm gg=G'.line('.').'G')
         endif
-    elseif a:idx == 1
+    elseif a:idx == 2
         if exists(':Coc')
             cal CocActionAsync('rename')
         else
             cal EchoE('Sorry, [ReName*] needs coc.nvim.')
+            cal popup_close(s:idemenu.cheatid)
             retu 1
         endif
-    elseif a:idx == 2
-        let w = EchoI('commit message>>')
+    elseif a:idx == 3
+        let w = InputI('commit message>>')
         if empty(w)
             cal EchoE('cancel')
+            cal popup_close(s:idemenu.cheatid)
             retu 1
         endif
         exe 'top terminal ++rows=10 ++shell git add .&&git commit -m "'.w.'"&&git push'
-    elseif a:idx == 3
+    elseif a:idx == 4
         if exists(':CocCommand')
             exe 'CocCommand fzf-preview.QuickFix'
         else
             " TODO getqflist() 結果をfzsearch使えばいけるぞ"
             cal EchoE('Sorry, [QuickFix-Grep*] needs coc.nvim.')
+            cal popup_close(s:idemenu.cheatid)
             retu 1
         endif
-    elseif a:idx == 4
+    elseif a:idx == 5
         if exists(':CocCommand')
             exe 'CocCommand snippets.editSnippets'
         else
             cal EchoE('Sorry, [Snippet*] needs coc.nvim.')
+            cal popup_close(s:idemenu.cheatid)
             retu 1
         endif
-    elseif a:idx == 5
+    elseif a:idx == 6
         " TODO quickrun 再現予定
         if exists(':QuickRun')
             exe 'QuickRun -hook/time/enable 1'
         else
             cal EchoE('Sorry, [Run*] needs vim-quickrun.')
+            cal popup_close(s:idemenu.cheatid)
             retu 1
         endif
-    elseif a:idx == 6
+    elseif a:idx == 7
         if exists(':Vimspector')
             cal vimspector#Launch()
         else
             cal EchoE('Sorry, [Debug*] needs vimspector.')
+            cal popup_close(s:idemenu.cheatid)
             retu 1
         endif
-    elseif a:idx == 7
+    elseif a:idx == 8
         exe 'top terminal ++rows=10 ++shell eval '.getline('.')
     endif
+    cal popup_close(s:idemenu.cheatid)
     retu 0
 endf
 
@@ -855,13 +814,13 @@ endif
 " ===================================================================
 " {{{
 " TODO リファクタ
+let s:pairs_start = ["(", "[", "{", "<", "'", '"', "`"]
+let s:pairs_end = [")", "]", "}", ">", "'", '"', "`"]
 fu! AutoPairsDelete()
-    let pairs_start = ["(", "[", "{", "<", "'", '"', "`"]
-    let pairs_end = [")", "]", "}", ">", "'", '"', "`"]
     let pre_cursor_char = getline('.')[col('.')-2]
     let on_cursor_char = getline('.')[col('.')-1]
-    let pre_chk = match(pairs_start, pre_cursor_char)
-    let on_chk = match(pairs_end, on_cursor_char)
+    let pre_chk = match(s:pairs_start, pre_cursor_char)
+    let on_chk = match(s:pairs_end, on_cursor_char)
     if pre_chk != -1 && pre_chk == on_chk
         retu "\<RIGHT>\<BS>\<BS>"
     endif
