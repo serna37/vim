@@ -260,7 +260,118 @@ set foldcolumn=1 " fold preview
 " {{{
 " ##################       ORIGINALS        ################### {{{
 
-" TODO リファクタ順番 dict functions aug Plug その他にしよう
+" running cat (loading animation) {{{
+" TODO runcat delay もっと緩急
+let s:runcat = #{frame: 0, winid: 0, tid: 0, delay: 300}
+fu! s:runcat.animation(_) abort
+    cal setbufline(winbufnr(self.winid), 1, self.cat[self.frame])
+    let self.frame = self.frame == 4 ? 0 : self.frame + 1
+    let self.tid = timer_start(self.delay, self.animation)
+endf
+fu! s:runcat.stop() abort
+    cal popup_close(self.winid)
+    cal timer_stop(self.tid)
+endf
+fu! s:runcat.start(...) abort
+    cal self.stop()
+    " TODO run cat animation maskいじくりたい
+    " TODO OneDarkGreenChar statuslineでの color
+    let self.winid = popup_create(self.cat[0], #{line: 1, border: [0,0,0,0], mask: [[1,-1,1,1]], zindex: 1})
+    cal setwinvar(self.winid, '&wincolor', 'OneDarkGreenChar')
+    ""cal matchaddpos('DarkRed', self.cheatpos_red, 16, -1, #{window: self.cheatid})
+    ""cal matchaddpos('DarkBlue', self.cheatpos_blue, 16, -1, #{window: self.cheatid})
+    if a:0
+        let self.delay = 500-(a:1-1)*100
+    endif
+    cal self.animation(0)
+endf
+fu! s:runcat_gear_list(A, L, P) abort
+    retu ['1', '2', '3', '4', '5']
+endf
+
+" running cat AA {{{
+let s:runcat.cat = [
+    \[
+    \ '                                                            ',
+    \ '                               =?7I=~             ~~        ',
+    \ '                            =NMMMMMMMMMD+      :+OMO:       ',
+    \ '                          ~NMMMMMMMMMMMMMMMNNMMMMMMMM=      ',
+    \ '                        :DMMMMMMMMMMMMMMMMMMMMMMMMMMMN=     ',
+    \ '                      IMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM8:     ',
+    \ '                  :$MMMMMMMMMMMMMMMMMMMMMMMMMMMM?           ',
+    \ '             :~ZMMMMMNI :DMMMMMMMMMMMMMMMMMNN$:             ',
+    \ '       :+8NMMMMMMMO~     =NMMMMMMM?  +MMD~                  ',
+    \ '     8MMMMMMM8+:           :?OMMMM+ =NMM~                   ',
+    \ '                             :DMMZ  7MM+                    ',
+    \ '                              ?NMMMMMMD:                    ',
+    \ '                                 :?777~                     ',
+    \],
+    \[
+    \ '                                                            ',
+    \ '                                                     :O~    ',
+    \ '                                          +I777ZDNMMMMMI    ',
+    \ '                        :+Z8DDDNNNNDD88NMMMMMMMMMMMMMMMM$   ',
+    \ '                     +DMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM=  ',
+    \ '                  :$MMMMMMMMMMMMMMMMMMMMMMMMMMMMMN888DMM8:  ',
+    \ '                :OMMMMMMMMMMMMMMMMMMMMMMMMMMMMMD            ',
+    \ '              ?NMMMMMMMMMMMMMMMMMMMMMMMMD?~=DMMMI           ',
+    \ '    7MMMMMMMMMMMMZ+NMMMMMMMMMNNNNN87?~: +NDDMMN~            ',
+    \ '     ~?$OZZI=:   7MMMMMMMMMN=            =DM8:              ',
+    \ '                  8MMN888$:                                 ',
+    \ '                  :DMMD$                                    ',
+    \ '                    =7$=                                    ',
+    \],
+    \[
+    \ '                                                            ',
+    \ '                                                            ',
+    \ '                         ~~++?????IIIIIIII7$77I?+I$$77OD:   ',
+    \ '              ~7ODNNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM7   ',
+    \ '         ~ZNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM?  ',
+    \ '      :$MMMMZ=?MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM$  ',
+    \ '    =NMM8~  :OMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM8: :~77   ',
+    \ '  =NMM+  :DMMMMMMMMMMMMMN+     :=OMMMMMMMMMMD$8MMMMMD?      ',
+    \ ' OMN=  ?NMMMMMMMMMMNZ+::             ::~::      IMMMMMMM$   ',
+    \ ' ::  ZMMMMMMN?:                                =MMO:  =$~   ',
+    \ '    ~8Z~DMN=                                                ',
+    \ '                                                            ',
+    \ '                                                            ',
+    \],
+    \[
+    \ '                                                            ',
+    \ '                      :IZOZI:                               ',
+    \ '                   INMMMMMMMMMD+                     ?:     ',
+    \ '                =DMMMMMMMMMMMMMMMM8$II7$OO87:  :=ODDMM+     ',
+    \ '             :OMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM8    ',
+    \ '           =NMMD+ 8MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMI   ',
+    \ '        :8MMMZ7DDDMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM7   ',
+    \ '      +NMMM7 ~MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM7           ',
+    \ '   :7MMMM7   +MMNMMMMM$: :?8NNMMMMMMMMMMNNMMMMMN:           ',
+    \ '  =DMMN?    :8MM~  :                      :8MMMMMMMMN8?:    ',
+    \ '   =~      8MMM7                             ?8MMMD+?ZNM?   ',
+    \ '            +~                                  :$NMMN7     ',
+    \ '                                                   :IDD=    ',
+    \],
+    \[
+    \ '                                                            ',
+    \ '                            ~~:                             ',
+    \ '                        =ONMMMMMMD$~                        ',
+    \ '                     +8MMMMMMMMMMMMMNZ:           :         ',
+    \ '                  ~8MMMMMMMMMMMMMMMMMMMMDD8DDDNDDM8         ',
+    \ '               =OMMMM$DMMMMMMMMMMMMMMMMMMMMMMMMMMMM+        ',
+    \ '           :OMMMMNI:  NMMMMMMM$ZNMMMMMMMMMMMMMMMMMM8:       ',
+    \ '        ~DMMMNI:    :NMMMMMMMZ   =NMMMMMMMMMMMMMMMMM=       ',
+    \ '      =NMMN+         OMMMMMD~      :ZNMMMMMMMMO  :+:        ',
+    \ '      :?=:            +MM?            7MM8 +NMMMI:          ',
+    \ '                       :NM8=           ZM$    :ZNMMMD       ',
+    \ '                         ?$=           :DMO:       II       ',
+    \ '                                        :I+                 ',
+    \]
+\]
+" }}}
+
+com! -bar -nargs=? -complete=customlist,s:runcat_gear_list RunCat cal s:runcat.start(<f-args>)
+com! -bar RunCatStop cal s:runcat.stop()
+" }}}
 
 " color echo/echon, input {{{
 fu! EchoE(msg, ...) abort
@@ -345,6 +456,39 @@ let s:anchor = s:anchor.set
 noremap <silent><Plug>(anchor) :<C-u>cal <SID>anchor()<CR>
 " }}}
 
+" fuzzy search current file {{{
+fu! s:fuzzySearch() abort
+    cal s:fzsearch.popup(#{
+        \ title: 'Current Buffer',
+        \ list: getline(1, line('$'))->map({ i,v -> i+1.': '.v }),
+        \ list_filetype: &filetype,
+        \ preview_type: 'this',
+        \ enter_prefix: 0,
+        \ })
+endf
+
+noremap <silent><Plug>(fuzzy-search) :<C-u>cal <SID>fuzzySearch()<CR>
+" }}}
+
+" grep from current file {{{
+fu! s:grepCurrent() abort
+" TODO 結果ないときエラー
+    cal EchoI('grep from this file. (empty to cancel)')
+    let word = InputI('[word]>>', expand('<cword>'))
+    cal EchoI('<<', 0)
+    if empty(word)
+        cal EchoE('cancel')
+        retu
+    endif
+    cal EchoW(printf('grep word[%s] processing in [%s] ...', word, expand('%:t')))
+    exe 'vimgrep /'.word.'/gj %'
+    cw
+    cal EchoI('grep complete!')
+endf
+
+noremap <silent><Plug>(grep-current) :<C-u>cal <SID>grepCurrent()<CR>
+" }}}
+
 " grep {{{
 fu! s:grep() abort
     echo 'grep by'
@@ -389,39 +533,6 @@ endf
 
 " TODO 結果ないとき無言、なんか知らせたいね
 noremap <silent><Plug>(grep) :<C-u>cal <SID>grep()<CR>
-" }}}
-
-" fuzzy search current file {{{
-fu! s:fuzzySearch() abort
-    cal s:fzsearch.popup(#{
-        \ title: 'Current Buffer',
-        \ list: getline(1, line('$'))->map({ i,v -> i+1.': '.v }),
-        \ list_filetype: &filetype,
-        \ preview_type: 'this',
-        \ enter_prefix: 0,
-        \ })
-endf
-
-noremap <silent><Plug>(fuzzy-search) :<C-u>cal <SID>fuzzySearch()<CR>
-" }}}
-
-" grep from current file {{{
-fu! s:grepCurrent() abort
-" TODO 結果ないときエラー
-    cal EchoI('grep from this file. (empty to cancel)')
-    let word = InputI('[word]>>', expand('<cword>'))
-    cal EchoI('<<', 0)
-    if empty(word)
-        cal EchoE('cancel')
-        retu
-    endif
-    cal EchoW(printf('grep word[%s] processing in [%s] ...', word, expand('%:t')))
-    exe 'vimgrep /'.word.'/gj %'
-    cw
-    cal EchoI('grep complete!')
-endf
-
-noremap <silent><Plug>(grep-current) :<C-u>cal <SID>grepCurrent()<CR>
 " }}}
 
 " IDE menu {{{
@@ -554,118 +665,7 @@ let s:idemenuopen = s:idemenu.open
 noremap <silent><Plug>(ide-menu) :<C-u>cal <SID>idemenuopen()<CR>
 " }}}
 
-" running cat (loading animation) {{{
-" TODO runcat delay もっと緩急
-let s:runcat = #{frame: 0, winid: 0, tid: 0, delay: 300}
-fu! s:runcat.animation(_) abort
-    cal setbufline(winbufnr(self.winid), 1, self.cat[self.frame])
-    let self.frame = self.frame == 4 ? 0 : self.frame + 1
-    let self.tid = timer_start(self.delay, self.animation)
-endf
-fu! s:runcat.stop() abort
-    cal popup_close(self.winid)
-    cal timer_stop(self.tid)
-endf
-fu! s:runcat.start(...) abort
-    cal self.stop()
-    " TODO run cat animation maskいじくりたい
-    " TODO OneDarkGreenChar statuslineでの color
-    let self.winid = popup_create(self.cat[0], #{line: 1, border: [0,0,0,0], mask: [[1,-1,1,1]], zindex: 1})
-    cal setwinvar(self.winid, '&wincolor', 'OneDarkGreenChar')
-    ""cal matchaddpos('DarkRed', self.cheatpos_red, 16, -1, #{window: self.cheatid})
-    ""cal matchaddpos('DarkBlue', self.cheatpos_blue, 16, -1, #{window: self.cheatid})
-    if a:0
-        let self.delay = 500-(a:1-1)*100
-    endif
-    cal self.animation(0)
-endf
-fu! s:runcat_gear_list(A, L, P) abort
-    retu ['1', '2', '3', '4', '5']
-endf
-
-" running cat AA {{{
-let s:runcat.cat = [
-    \[
-    \ '                                                            ',
-    \ '                               =?7I=~             ~~        ',
-    \ '                            =NMMMMMMMMMD+      :+OMO:       ',
-    \ '                          ~NMMMMMMMMMMMMMMMNNMMMMMMMM=      ',
-    \ '                        :DMMMMMMMMMMMMMMMMMMMMMMMMMMMN=     ',
-    \ '                      IMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM8:     ',
-    \ '                  :$MMMMMMMMMMMMMMMMMMMMMMMMMMMM?           ',
-    \ '             :~ZMMMMMNI :DMMMMMMMMMMMMMMMMMNN$:             ',
-    \ '       :+8NMMMMMMMO~     =NMMMMMMM?  +MMD~                  ',
-    \ '     8MMMMMMM8+:           :?OMMMM+ =NMM~                   ',
-    \ '                             :DMMZ  7MM+                    ',
-    \ '                              ?NMMMMMMD:                    ',
-    \ '                                 :?777~                     ',
-    \],
-    \[
-    \ '                                                            ',
-    \ '                                                     :O~    ',
-    \ '                                          +I777ZDNMMMMMI    ',
-    \ '                        :+Z8DDDNNNNDD88NMMMMMMMMMMMMMMMM$   ',
-    \ '                     +DMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM=  ',
-    \ '                  :$MMMMMMMMMMMMMMMMMMMMMMMMMMMMMN888DMM8:  ',
-    \ '                :OMMMMMMMMMMMMMMMMMMMMMMMMMMMMMD            ',
-    \ '              ?NMMMMMMMMMMMMMMMMMMMMMMMMD?~=DMMMI           ',
-    \ '    7MMMMMMMMMMMMZ+NMMMMMMMMMNNNNN87?~: +NDDMMN~            ',
-    \ '     ~?$OZZI=:   7MMMMMMMMMN=            =DM8:              ',
-    \ '                  8MMN888$:                                 ',
-    \ '                  :DMMD$                                    ',
-    \ '                    =7$=                                    ',
-    \],
-    \[
-    \ '                                                            ',
-    \ '                                                            ',
-    \ '                         ~~++?????IIIIIIII7$77I?+I$$77OD:   ',
-    \ '              ~7ODNNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM7   ',
-    \ '         ~ZNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM?  ',
-    \ '      :$MMMMZ=?MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM$  ',
-    \ '    =NMM8~  :OMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM8: :~77   ',
-    \ '  =NMM+  :DMMMMMMMMMMMMMN+     :=OMMMMMMMMMMD$8MMMMMD?      ',
-    \ ' OMN=  ?NMMMMMMMMMMNZ+::             ::~::      IMMMMMMM$   ',
-    \ ' ::  ZMMMMMMN?:                                =MMO:  =$~   ',
-    \ '    ~8Z~DMN=                                                ',
-    \ '                                                            ',
-    \ '                                                            ',
-    \],
-    \[
-    \ '                                                            ',
-    \ '                      :IZOZI:                               ',
-    \ '                   INMMMMMMMMMD+                     ?:     ',
-    \ '                =DMMMMMMMMMMMMMMMM8$II7$OO87:  :=ODDMM+     ',
-    \ '             :OMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM8    ',
-    \ '           =NMMD+ 8MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMI   ',
-    \ '        :8MMMZ7DDDMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM7   ',
-    \ '      +NMMM7 ~MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM7           ',
-    \ '   :7MMMM7   +MMNMMMMM$: :?8NNMMMMMMMMMMNNMMMMMN:           ',
-    \ '  =DMMN?    :8MM~  :                      :8MMMMMMMMN8?:    ',
-    \ '   =~      8MMM7                             ?8MMMD+?ZNM?   ',
-    \ '            +~                                  :$NMMN7     ',
-    \ '                                                   :IDD=    ',
-    \],
-    \[
-    \ '                                                            ',
-    \ '                            ~~:                             ',
-    \ '                        =ONMMMMMMD$~                        ',
-    \ '                     +8MMMMMMMMMMMMMNZ:           :         ',
-    \ '                  ~8MMMMMMMMMMMMMMMMMMMMDD8DDDNDDM8         ',
-    \ '               =OMMMM$DMMMMMMMMMMMMMMMMMMMMMMMMMMMM+        ',
-    \ '           :OMMMMNI:  NMMMMMMM$ZNMMMMMMMMMMMMMMMMMM8:       ',
-    \ '        ~DMMMNI:    :NMMMMMMMZ   =NMMMMMMMMMMMMMMMMM=       ',
-    \ '      =NMMN+         OMMMMMD~      :ZNMMMMMMMMO  :+:        ',
-    \ '      :?=:            +MM?            7MM8 +NMMMI:          ',
-    \ '                       :NM8=           ZM$    :ZNMMMD       ',
-    \ '                         ?$=           :DMO:       II       ',
-    \ '                                        :I+                 ',
-    \]
-\]
-" }}}
-
-com! -bar -nargs=? -complete=customlist,s:runcat_gear_list RunCat cal s:runcat.start(<f-args>)
-com! -bar RunCatStop cal s:runcat.stop()
-" }}}
+" cheat sheet {{{
 
 " TODO cheat sheet startifyのあとでリファクタ
 " IDE menuにある程度キーマップ入れても良いかもね
@@ -688,9 +688,8 @@ com! -bar RunCatStop cal s:runcat.stop()
 " mark
 " ハイライト消す
 " visualでのブロック移動
-"
 
-" cheat sheet {{{
+
 " cursor hold
 " motion cheat sheet on popup
 
@@ -818,9 +817,8 @@ endf
 
 " }}}
 
-" TODO リファクタ
 " completion {{{
-
+" TODO リファクタ
 " TODO ~の後ろで正規表現やりに行っちゃう。=は大丈夫
 ""let s:completion = #{exclude: [" ()[]{}<>'`".'"'], confirmed: 0, done: {-> execute('let s:completion.confirmed = 1')}}
 let s:completion = #{exclude: [" ~()[]{}<>'`".'"'], opened: 0, confirmed: 0}
@@ -860,11 +858,193 @@ endif
 
 " ##################       IMITATIONS       ################### {{{
 
-" TODO リファクタ、修正等
+" ===================================================================
+" jiangmiao/auto-pairs
+" ===================================================================
+" {{{
+" TODO リファクタ
+fu! AutoPairsDelete()
+    let pairs_start = ["(", "[", "{", "<", "'", '"', "`"]
+    let pairs_end = [")", "]", "}", ">", "'", '"', "`"]
+    let pre_cursor_char = getline('.')[col('.')-2]
+    let on_cursor_char = getline('.')[col('.')-1]
+    let pre_chk = match(pairs_start, pre_cursor_char)
+    let on_chk = match(pairs_end, on_cursor_char)
+    if pre_chk != -1 && pre_chk == on_chk
+        retu "\<RIGHT>\<BS>\<BS>"
+    endif
+    retu "\<BS>"
+endf
+
+inoremap ( ()<LEFT>
+inoremap [ []<LEFT>
+inoremap { {}<LEFT>
+inoremap < <><LEFT>
+inoremap ' ''<LEFT>
+inoremap " ""<LEFT>
+inoremap ` ``<LEFT>
+" TODO ~の後ろで正規表現やりに行っちゃう。=は大丈夫
+inoremap <silent><expr><BS> AutoPairsDelete()
+""inoremap <silent><BS> <C-r>=AutoPairsDelete()
+
+" TODO 直前に押したキーが(なら、()と入力しても良いってしたい
+" }}}
+
+" ===================================================================
+" vim-airline/vim-airline
+" ===================================================================
+" {{{
+" TODO リファクタ
+
+" status line with git info
+let g:right_arrow = ''
+let g:left_arrow = ''
+let powerline_chk_mac = trim(system('fc-list | grep powerline | wc -l'))
+let powerline_chk_win = trim(system('cd /C/Windows/Fonts&&ls | grep powerline | wc -l'))
+if !powerline_chk_mac+0 && !powerline_chk_win+0
+    let g:right_arrow = '▶︎'
+    let g:left_arrow = '◀︎'
+endif
+let g:modes = {'i': ['#OneDarkBule#', '#OneDarkBlueChar#', 'INSERT'], 'n': ['#OneDarkGreen#', '#OneDarkGreenChar#', 'NORMAL'], 'R': ['#OneDarkRed#', '#OneDarkRedChar#', 'REPLACE'], 'c': ['#OneDarkGreen#', '#OneDarkGreenChar#', 'COMMAND'], 't': ['#OneDarkRed#', '#OneDarkRedChar#', 'TERMIAL'], 'v': ['#OneDarkPink#', '#OneDarkPinkChar#', 'VISUAL'], 'V': ['#OneDarkPink#', '#OneDarkPinkChar#', 'VISUAL'], "\<C-v>": ['#OneDarkPink#', '#OneDarkPinkChar#', 'VISUAL']}
+
+let g:ff_table = {'dos' : 'CRLF', 'unix' : 'LF', 'mac' : 'CR'}
+let g:gitinf = 'no git '
+fu! s:gitinfo() abort
+    try
+        cal system('git status')
+    catch
+        retu
+    endtry
+    if trim(system('cd '.expand('%:h').' && git status')) =~ "^fatal:"
+        let g:gitinf = 'no repo '
+        retu
+    endif
+    " TODO gitstatus結果を使いまわした方が早い？
+    " TODO
+    " いまどのwindow みてるか分かりにくい、forcus window のstatus colorを抑えたい
+    let cmd = "cd ".expand('%:h')." && git status --short | awk -F ' ' '{print($1)}' | grep -c "
+    let a = trim(system(cmd."'A'"))
+    let aa = a !='0'?'+'.a :''
+    let m = trim(system(cmd."-e 'M' -e 'D'"))
+    let mm = m !='0'?'!'.m :''
+    let nw = trim(system(cmd."'??'"))
+    let nwnw = nw !='0'?'?'.nw :''
+    let er = trim(system(cmd."'U'"))
+    let ee = er !='0'?'✗'.er :''
+    let g:gitinf = trim(system("cd ".expand('%:h')."&&git branch | awk -F '*' '{print($2)}'")).join([aa,mm,nwnw,ee],' ')
+endf
+
+" TODO onedark系ハイライトを1箇所にまとめたいね -> どこで使う予定かリストアップ
+" TODO airline, popup
+" TODO onedarkカラースキームimitationとは別のはず。
+
+fu! g:SetStatusLine() abort
+    let filetype_tmp = split(execute('set filetype?'), '=')
+    let filetype = len(filetype_tmp) >= 2 ? filetype_tmp[1] : ''
+    let mode = match(keys(g:modes), mode()) != -1 ? g:modes[mode()] : ['#OneDarkRed#', '#OneDarkRedChar#', 'SP']
+    retu '%'.mode[0].' '.mode[2].' '.'%'.mode[1].g:right_arrow.'%#OneDarkBlackArrow#'.g:right_arrow.'%#OneDarkChar# %<%f%m%r%h%w %#OneDarkGrayArrow#'.g:right_arrow.'%#OneDarkGreenChar# %{g:gitinf}%#OneDarkBlackArrow#'.g:right_arrow.'%#StatusLine# %=%#OneDarkBlackArrow#'.g:left_arrow.'%#OneDarkGreenChar# '.filetype.' %#OneDarkGrayArrow#'.g:left_arrow.'%#OneDarkChar# %p%% %l/%L %02v%#OneDarkBlackArrow#'.g:left_arrow.'%'.mode[1].g:left_arrow.'%'.mode[0].' [%{&fenc!=""?&fenc:&enc}][%{g:ff_table[&ff]}] %*'
+endf
+set stl=%!g:SetStatusLine()
+
+" tabline
+fu! s:buffers_label() abort
+    let b = ''
+    for v in split(execute('ls'), '\n')->map({ _,v -> split(v, ' ')})
+        let x = copy(v)->filter({ _,v -> !empty(v) })
+        if stridx(x[1], 'F') == -1 && stridx(x[1], 'R') == -1
+            let hi = stridx(x[1], '%') != -1 ? '%#OneDarkGreenThin#' : '%#OneDarkChar#'
+            let hiar = stridx(x[1], '%') != -1 ? '%#OneDarkGreenChar#' : '%#OneDarkGrayArrow#'
+            let hiarb = stridx(x[1], '%') != -1 ? '%#OneDarkGreenArrowBottom#' : '%#OneDarkBlackArrow#'
+            if x[2] == '+'
+                let hi = '%#OneDarkBlueThin#'
+                let hiar = '%#OneDarkBlueChar#'
+                let hiarb = '%#OneDarkBlueThin#'
+            endif
+"[^/]*$
+            let f = x[2] == '+' ? '✗'.matchstr(join(split(x[3],'"'),''),'[^/]*$') : matchstr(join(split(x[2],'"'),''),'[^/]*$')
+            let b = b.'%'.x[0].'T'.hiarb.g:right_arrow.hi.f.hiar.g:right_arrow
+        endif
+    endfor
+    retu b
+endf
+fu! s:tabpage_label(n) abort
+    let hi = a:n is tabpagenr() ? '%#OneDarkGreenThin#' : '%#OneDarkChar#'
+    let bufnrs = tabpagebuflist(a:n)
+    let no = len(bufnrs)
+    if no is 1
+        let no = ''
+    endif
+    let mod = len(filter(copy(bufnrs), 'getbufvar(v:val, "&modified")')) ? '✗' : ''
+    let fname = pathshorten(bufname(bufnrs[tabpagewinnr(a:n) - 1]))
+    retu '%'.a:n.'T'.hi.no.mod.fname.' ⁍|'.'%T%#TabLineFill#'
+endf
+fu! g:SetTabLine() abort
+    if tabpagenr('$') == 1
+        retu s:buffers_label()
+    endif
+    retu range(1,tabpagenr('$'))->map('s:tabpage_label(v:val)')->join(' ').' %#TabLineFill#%T'
+endf
+set tabline=%!g:SetTabLine()
+
+fu! s:moveBuf(flg) abort
+    let current_id = ''
+    let buf_arr = []
+    for v in split(execute('ls'), '\n')->map({ _,v -> split(v, ' ')})
+        let x = copy(v)->filter({ _,v -> !empty(v) })
+        if stridx(x[1], 'F') == -1 && stridx(x[1], 'R') == -1
+            cal add(buf_arr, x[0])
+            if stridx(x[1], '%') != -1
+                let current_id = x[0]
+            endif
+        endif
+    endfor
+    let buf_idx = a:flg == 'next' ? match(buf_arr, current_id) + 1 : match(buf_arr, current_id) - 1
+    let buf_id = buf_idx == len(buf_arr) ? buf_arr[0] : buf_arr[buf_idx]
+    exe 'b '.buf_id
+endf
+
+fu! s:closeBuf() abort
+    let now_b = bufnr('%')
+    " TODO airline not key, you should call function
+    execute("norm \<C-n>")
+    execute('bd ' . now_b)
+endf
+
+aug statusLine
+    au!
+    au BufWinEnter,BufWritePost * cal s:gitinfo()
+    au ColorScheme * hi OneDarkGreen cterm=bold ctermfg=234 ctermbg=114
+    au ColorScheme * hi OneDarkGreenChar ctermfg=113 ctermbg=235
+    au ColorScheme * hi OneDarkBule cterm=bold ctermfg=234 ctermbg=39
+    au ColorScheme * hi OneDarkBlueChar ctermfg=38 ctermbg=235
+    au ColorScheme * hi OneDarkPink cterm=bold ctermfg=234 ctermbg=170
+    au ColorScheme * hi OneDarkPinkChar ctermfg=169 ctermbg=235
+    au ColorScheme * hi OneDarkRed cterm=bold ctermfg=234 ctermbg=204
+    au ColorScheme * hi OneDarkRedChar ctermfg=203 ctermbg=235
+    au ColorScheme * hi OneDarkBlackArrow ctermfg=234 ctermbg=238
+    au ColorScheme * hi OneDarkChar ctermfg=113 ctermbg=238
+    au ColorScheme * hi OneDarkGrayArrow ctermfg=237 ctermbg=235
+    au ColorScheme * hi StatusLine ctermfg=113 ctermbg=238
+aug END
+
+aug tabLine
+    au!
+    au ColorScheme * hi OneDarkGreenThin ctermfg=235 ctermbg=114
+    au ColorScheme * hi OneDarkBlueThin ctermfg=235 ctermbg=39
+    au ColorScheme * hi OneDarkGreenArrowBottom ctermfg=235 ctermbg=114
+    au ColorScheme * hi TabLineFill ctermfg=235 ctermbg=238
+aug END
+
+noremap <silent><Plug>(buf-prev) :<C-u>cal <SID>moveBuf('prev')<CR>
+noremap <silent><Plug>(buf-next) :<C-u>cal <SID>moveBuf('next')<CR>
+noremap <silent><Plug>(buf-close) :<C-u>cal <SID>closeBuf()<CR>
+" }}}
+
 " ===================================================================
 " junegunn/fzf.vim
 " ===================================================================
 " {{{
+" TODO リファクタ、修正等
 " usage
 " let arguments_def = #{
 "     \ title: popup title as String,
@@ -938,8 +1118,6 @@ fu! s:fzsearch.popup(v) abort
         cal setbufvar(winbufnr(self.rwid), '&filetype', a:v.list_filetype)
     endif
 
-    " TODO fzf fzsearch util popup border font color ...
-
     let path = a:v.preview_type == 'this' ? bufname('%') : substitute(self.res[0], '\~', $HOME, 'g')
     let read = ['Cannot open file.', 'please check this file path.', path]
     try
@@ -971,6 +1149,7 @@ endf
 fu! s:fzsearch_confirm(wid, idx) abort
     if a:idx == -1
         cal EchoE('cancel')
+        cal s:fzsearch.finalize()
         retu
     endif
     let result = s:fzsearch.res[a:idx-1]
@@ -981,9 +1160,14 @@ fu! s:fzsearch_confirm(wid, idx) abort
         cal EchoI('jump to '.l)
         exe l
     endif
-    " finalize
+    cal s:fzsearch.finalize()
+endf
+
+fu! s:fzsearch.finalize() abort
     let s:fzsearch.list = []
     let s:fzsearch.res = []
+    cal s:runcat.stop()
+    cal popup_clear()
 endf
 
 fu! s:fzsearch.scroll(wid, vector) abort
@@ -1202,8 +1386,8 @@ noremap <silent><Plug>(fzf-buffers) :<C-u>cal <SID>fzf_buffers()<CR>
 " ===================================================================
 " junegunn/fzf
 " ===================================================================
-" TODO リファクタ
 " {{{
+" TODO リファクタ
 let s:fzf = #{cache: [], maxdepth: 5, gcache: [],
     \ not_path_arr: [
          \'"*/.**/*"',
@@ -1288,42 +1472,10 @@ noremap <silent><Plug>(fzf-smartfiles) :<C-u>cal <SID>fzfexe()<CR>
 " }}}
 
 " ===================================================================
-" jiangmiao/auto-pairs
-" ===================================================================
-" TODO リファクタ
-" {{{
-fu! AutoPairsDelete()
-    let pairs_start = ["(", "[", "{", "<", "'", '"', "`"]
-    let pairs_end = [")", "]", "}", ">", "'", '"', "`"]
-    let pre_cursor_char = getline('.')[col('.')-2]
-    let on_cursor_char = getline('.')[col('.')-1]
-    let pre_chk = match(pairs_start, pre_cursor_char)
-    let on_chk = match(pairs_end, on_cursor_char)
-    if pre_chk != -1 && pre_chk == on_chk
-        retu "\<RIGHT>\<BS>\<BS>"
-    endif
-    retu "\<BS>"
-endf
-
-inoremap ( ()<LEFT>
-inoremap [ []<LEFT>
-inoremap { {}<LEFT>
-inoremap < <><LEFT>
-inoremap ' ''<LEFT>
-inoremap " ""<LEFT>
-inoremap ` ``<LEFT>
-" TODO ~の後ろで正規表現やりに行っちゃう。=は大丈夫
-inoremap <silent><expr><BS> AutoPairsDelete()
-""inoremap <silent><BS> <C-r>=AutoPairsDelete()
-
-" TODO 直前に押したキーが(なら、()と入力しても良いってしたい
-" }}}
-
-" ===================================================================
 " preservim/nerdtree
 " ===================================================================
-" TODO リファクタ
 " {{{
+" TODO リファクタ
 
 " TODO nerdtree
 augroup netrw_motion
@@ -1376,156 +1528,6 @@ endf
 noremap <silent><Plug>(explorer-toggle) :<C-u>cal <SID>NetrwToggle()<CR>
 
 
-" }}}
-
-" ===================================================================
-" vim-airline/vim-airline
-" ===================================================================
-" TODO リファクタ
-" {{{
-
-" status line with git info
-let g:right_arrow = ''
-let g:left_arrow = ''
-let powerline_chk_mac = trim(system('fc-list | grep powerline | wc -l'))
-let powerline_chk_win = trim(system('cd /C/Windows/Fonts&&ls | grep powerline | wc -l'))
-if !powerline_chk_mac+0 && !powerline_chk_win+0
-    let g:right_arrow = '▶︎'
-    let g:left_arrow = '◀︎'
-endif
-let g:modes = {'i': ['#OneDarkBule#', '#OneDarkBlueChar#', 'INSERT'], 'n': ['#OneDarkGreen#', '#OneDarkGreenChar#', 'NORMAL'], 'R': ['#OneDarkRed#', '#OneDarkRedChar#', 'REPLACE'], 'c': ['#OneDarkGreen#', '#OneDarkGreenChar#', 'COMMAND'], 't': ['#OneDarkRed#', '#OneDarkRedChar#', 'TERMIAL'], 'v': ['#OneDarkPink#', '#OneDarkPinkChar#', 'VISUAL'], 'V': ['#OneDarkPink#', '#OneDarkPinkChar#', 'VISUAL'], "\<C-v>": ['#OneDarkPink#', '#OneDarkPinkChar#', 'VISUAL']}
-
-let g:ff_table = {'dos' : 'CRLF', 'unix' : 'LF', 'mac' : 'CR'}
-let g:gitinf = 'no git '
-fu! s:gitinfo() abort
-    try
-        cal system('git status')
-    catch
-        retu
-    endtry
-    if trim(system('cd '.expand('%:h').' && git status')) =~ "^fatal:"
-        let g:gitinf = 'no repo '
-        retu
-    endif
-    " TODO gitstatus結果を使いまわした方が早い？
-    " TODO
-    " いまどのwindow みてるか分かりにくい、forcus window のstatus colorを抑えたい
-    let cmd = "cd ".expand('%:h')." && git status --short | awk -F ' ' '{print($1)}' | grep -c "
-    let a = trim(system(cmd."'A'"))
-    let aa = a !='0'?'+'.a :''
-    let m = trim(system(cmd."-e 'M' -e 'D'"))
-    let mm = m !='0'?'!'.m :''
-    let nw = trim(system(cmd."'??'"))
-    let nwnw = nw !='0'?'?'.nw :''
-    let er = trim(system(cmd."'U'"))
-    let ee = er !='0'?'✗'.er :''
-    let g:gitinf = trim(system("cd ".expand('%:h')."&&git branch | awk -F '*' '{print($2)}'")).join([aa,mm,nwnw,ee],' ')
-endf
-
-" TODO onedark系ハイライトを1箇所にまとめたいね -> どこで使う予定かリストアップ
-" TODO airline, popup
-" TODO onedarkカラースキームimitationとは別のはず。
-
-fu! g:SetStatusLine() abort
-    let filetype_tmp = split(execute('set filetype?'), '=')
-    let filetype = len(filetype_tmp) >= 2 ? filetype_tmp[1] : ''
-    let mode = match(keys(g:modes), mode()) != -1 ? g:modes[mode()] : ['#OneDarkRed#', '#OneDarkRedChar#', 'SP']
-    retu '%'.mode[0].' '.mode[2].' '.'%'.mode[1].g:right_arrow.'%#OneDarkBlackArrow#'.g:right_arrow.'%#OneDarkChar# %<%f%m%r%h%w %#OneDarkGrayArrow#'.g:right_arrow.'%#OneDarkGreenChar# %{g:gitinf}%#OneDarkBlackArrow#'.g:right_arrow.'%#StatusLine# %=%#OneDarkBlackArrow#'.g:left_arrow.'%#OneDarkGreenChar# '.filetype.' %#OneDarkGrayArrow#'.g:left_arrow.'%#OneDarkChar# %p%% %l/%L %02v%#OneDarkBlackArrow#'.g:left_arrow.'%'.mode[1].g:left_arrow.'%'.mode[0].' [%{&fenc!=""?&fenc:&enc}][%{g:ff_table[&ff]}] %*'
-endf
-set stl=%!g:SetStatusLine()
-
-" tabline
-fu! s:buffers_label() abort
-    let b = ''
-    for v in split(execute('ls'), '\n')->map({ _,v -> split(v, ' ')})
-        let x = copy(v)->filter({ _,v -> !empty(v) })
-        if stridx(x[1], 'F') == -1 && stridx(x[1], 'R') == -1
-            let hi = stridx(x[1], '%') != -1 ? '%#OneDarkGreenThin#' : '%#OneDarkChar#'
-            let hiar = stridx(x[1], '%') != -1 ? '%#OneDarkGreenChar#' : '%#OneDarkGrayArrow#'
-            let hiarb = stridx(x[1], '%') != -1 ? '%#OneDarkGreenArrowBottom#' : '%#OneDarkBlackArrow#'
-            if x[2] == '+'
-                let hi = '%#OneDarkBlueThin#'
-                let hiar = '%#OneDarkBlueChar#'
-                let hiarb = '%#OneDarkBlueThin#'
-            endif
-"[^/]*$
-            let f = x[2] == '+' ? '✗'.matchstr(join(split(x[3],'"'),''),'[^/]*$') : matchstr(join(split(x[2],'"'),''),'[^/]*$')
-            let b = b.'%'.x[0].'T'.hiarb.g:right_arrow.hi.f.hiar.g:right_arrow
-        endif
-    endfor
-    retu b
-endf
-fu! s:tabpage_label(n) abort
-    let hi = a:n is tabpagenr() ? '%#OneDarkGreenThin#' : '%#OneDarkChar#'
-    let bufnrs = tabpagebuflist(a:n)
-    let no = len(bufnrs)
-    if no is 1
-        let no = ''
-    endif
-    let mod = len(filter(copy(bufnrs), 'getbufvar(v:val, "&modified")')) ? '✗' : ''
-    let fname = pathshorten(bufname(bufnrs[tabpagewinnr(a:n) - 1]))
-    retu '%'.a:n.'T'.hi.no.mod.fname.' ⁍|'.'%T%#TabLineFill#'
-endf
-fu! g:SetTabLine() abort
-    if tabpagenr('$') == 1
-        retu s:buffers_label()
-    endif
-    retu range(1,tabpagenr('$'))->map('s:tabpage_label(v:val)')->join(' ').' %#TabLineFill#%T'
-endf
-set tabline=%!g:SetTabLine()
-
-fu! s:moveBuf(flg) abort
-    let current_id = ''
-    let buf_arr = []
-    for v in split(execute('ls'), '\n')->map({ _,v -> split(v, ' ')})
-        let x = copy(v)->filter({ _,v -> !empty(v) })
-        if stridx(x[1], 'F') == -1 && stridx(x[1], 'R') == -1
-            cal add(buf_arr, x[0])
-            if stridx(x[1], '%') != -1
-                let current_id = x[0]
-            endif
-        endif
-    endfor
-    let buf_idx = a:flg == 'next' ? match(buf_arr, current_id) + 1 : match(buf_arr, current_id) - 1
-    let buf_id = buf_idx == len(buf_arr) ? buf_arr[0] : buf_arr[buf_idx]
-    exe 'b '.buf_id
-endf
-
-fu! s:closeBuf() abort
-    let now_b = bufnr('%')
-    " TODO airline not key, you should call function
-    execute("norm \<C-n>")
-    execute('bd ' . now_b)
-endf
-
-aug statusLine
-    au!
-    au BufWinEnter,BufWritePost * cal s:gitinfo()
-    au ColorScheme * hi OneDarkGreen cterm=bold ctermfg=234 ctermbg=114
-    au ColorScheme * hi OneDarkGreenChar ctermfg=113 ctermbg=235
-    au ColorScheme * hi OneDarkBule cterm=bold ctermfg=234 ctermbg=39
-    au ColorScheme * hi OneDarkBlueChar ctermfg=38 ctermbg=235
-    au ColorScheme * hi OneDarkPink cterm=bold ctermfg=234 ctermbg=170
-    au ColorScheme * hi OneDarkPinkChar ctermfg=169 ctermbg=235
-    au ColorScheme * hi OneDarkRed cterm=bold ctermfg=234 ctermbg=204
-    au ColorScheme * hi OneDarkRedChar ctermfg=203 ctermbg=235
-    au ColorScheme * hi OneDarkBlackArrow ctermfg=234 ctermbg=238
-    au ColorScheme * hi OneDarkChar ctermfg=113 ctermbg=238
-    au ColorScheme * hi OneDarkGrayArrow ctermfg=237 ctermbg=235
-    au ColorScheme * hi StatusLine ctermfg=113 ctermbg=238
-aug END
-
-aug tabLine
-    au!
-    au ColorScheme * hi OneDarkGreenThin ctermfg=235 ctermbg=114
-    au ColorScheme * hi OneDarkBlueThin ctermfg=235 ctermbg=39
-    au ColorScheme * hi OneDarkGreenArrowBottom ctermfg=235 ctermbg=114
-    au ColorScheme * hi TabLineFill ctermfg=235 ctermbg=238
-aug END
-
-noremap <silent><Plug>(buf-prev) :<C-u>cal <SID>moveBuf('prev')<CR>
-noremap <silent><Plug>(buf-next) :<C-u>cal <SID>moveBuf('next')<CR>
-noremap <silent><Plug>(buf-close) :<C-u>cal <SID>closeBuf()<CR>
 " }}}
 
 " ===================================================================
@@ -1582,322 +1584,10 @@ endf
 " }}}
 
 " ===================================================================
-" MattesGroeger/vim-bookmarks
-" ===================================================================
-" TODO リファクタ
-" {{{
-sign define mk text=⚑ texthl=DarkBlue
-
-let s:mk = #{winid: 0, tle: 'marks', allwinid: 0, atle: 'marks-allfiles',
-    \ path: $HOME.'/.vim/.mk',
-    \ list: { -> sign_getplaced(bufname('%'), #{group: 'mkg'})[0].signs },
-    \ next: { _,v -> v.lnum > line('.') }, prev: { _,v -> v.lnum < line('.') },
-    \ }
-
-fu! s:mk.read() abort
-    retu glob(self.path)->empty() ? {} : readfile(self.path)->join('')->js_decode() ?? {}
-endf
-
-fu! s:mk.save() abort
-    let alldata = self.read()
-    let alldata[expand('%:p')] = self.list()
-    cal writefile([js_encode(alldata)], self.path)
-endf
-
-fu! s:mk.load() abort
-    let alldata = self.read()
-    if !has_key(alldata, expand('%:p'))
-        retu
-    endif
-    for v in alldata[expand('%:p')]
-        cal sign_place(v.id, v.group, v.name, bufname('%'), #{lnum: v.lnum})
-    endfor
-endf
-
-" TODO mk mark マーク増える問題
-fu! s:mk.toggle() abort
-    let lmk = sign_getplaced(bufname('%'), #{group: 'mkg', lnum: line('.')})[0].signs
-    if empty(lmk)
-        cal EchoI('mark')
-        cal sign_place(0, 'mkg', 'mk', bufname('%'), #{lnum: line('.')})
-    else
-        cal EchoI('remove mark')
-        cal sign_unplace('mkg', #{buffer: bufname('%'), id: lmk[0].id})
-    endif
-    cal self.save()
-endf
-
-" echo async because jump with scroll need time
-fu! s:mk.jump(next) abort
-    let list = self.list()
-    if empty(list)
-        cal EchoE('no marks')
-        retu
-    endif
-    let cnt = len(list)
-    let Vector = a:next ? self.next : self.prev
-    let can = deepcopy(list)->filter(Vector)->sort({ x, y -> x.lnum - y.lnum })
-    if empty(can)
-        cal EchoW('no next marks')
-        retu
-    endif
-    cal sign_jump((a:next ? can[0] : can[-1]).id, 'mkg', bufname('%'))
-    cal timer_start(100, { -> EchoI(printf('mark jump [%s/%s]', a:next ? cnt - len(can) + 1 : len(can), cnt)) })
-endf
-
-fu! s:mk.clthis() abort
-    cal sign_unplace('mkg', #{buffer: bufname('%')})
-    cal self.save()
-    cal EchoI('clear mark in this file')
-endf
-
-fu! s:mk.clall() abort
-    if confirm('clear mark in all files ?', "&Yes\n&No\n&Cancel") != 1
-        cal EchoW('cancel', 0)
-        retu
-    endif
-    cal sign_unplace('mkg')
-    cal writefile([], self.path)
-    cal EchoI('clear ALL marks', 0)
-endf
-
-fu! s:mk.listcb() abort
-    let list = self.list()
-    if empty(list)
-        cal EchoE('no marks')
-        retu
-    endif
-    cal s:fzsearch.popup(#{
-        \ title: 'Marks in Current Buffer',
-        \ list: sort(list, { x,y -> x.lnum - y.lnum })->map({ _,v -> v.lnum.': '.getline(v.lnum)}),
-        \ list_filetype: &filetype,
-        \ preview_type: 'this',
-        \ enter_prefix: 0,
-        \ })
-endf
-
-aug mk_st
-    au!
-    au BufEnter * cal s:mk.load()
-    au BufWritePost * cal s:mk.save()
-aug END
-
-let s:mktoggle = s:mk.toggle
-let s:mknext = function(s:mk.jump, [1])
-let s:mkprev = function(s:mk.jump, [0])
-let s:mkclthis = s:mk.clthis
-let s:mkclall = s:mk.clall
-let s:mklist = s:mk.listcb
-
-noremap <silent><Plug>(mk-toggle) :<C-u>cal <SID>mktoggle()<CR>
-noremap <silent><Plug>(mk-next) :<C-u>cal <SID>mknext()<CR>
-noremap <silent><Plug>(mk-prev) :<C-u>cal <SID>mkprev()<CR>
-noremap <silent><Plug>(mk-clthis) :<C-u>cal <SID>mkclthis()<CR>
-noremap <silent><Plug>(mk-clall) :<C-u>cal <SID>mkclall()<CR>
-noremap <silent><Plug>(mk-list) :<C-u>cal <SID>mklist()<CR>
-" }}}
-
-" ===================================================================
-" t9md/vim-quickhl
-" ===================================================================
-" TODO リファクタ
-" {{{
-" TODO 整理
-let s:quickhl = #{hlidx: 0, reseted: 0}
-let s:quickhl.hl= [
-    \ "cterm=bold ctermfg=16 ctermbg=153 gui=bold guifg=#ffffff guibg=#0a7383",
-    \ "cterm=bold ctermfg=7 ctermbg=1 gui=bold guibg=#a07040 guifg=#ffffff",
-    \ "cterm=bold ctermfg=7 ctermbg=2 gui=bold guibg=#4070a0 guifg=#ffffff",
-    \ "cterm=bold ctermfg=7 ctermbg=3 gui=bold guibg=#40a070 guifg=#ffffff",
-    \ "cterm=bold ctermfg=7 ctermbg=4 gui=bold guibg=#70a040 guifg=#ffffff",
-    \ "cterm=bold ctermfg=7 ctermbg=5 gui=bold guibg=#0070e0 guifg=#ffffff",
-    \ "cterm=bold ctermfg=7 ctermbg=6 gui=bold guibg=#007020 guifg=#ffffff",
-    \ "cterm=bold ctermfg=7 ctermbg=21 gui=bold guibg=#d4a00d guifg=#ffffff",
-    \ "cterm=bold ctermfg=7 ctermbg=22 gui=bold guibg=#06287e guifg=#ffffff",
-    \ "cterm=bold ctermfg=7 ctermbg=45 gui=bold guibg=#5b3674 guifg=#ffffff",
-    \ "cterm=bold ctermfg=7 ctermbg=16 gui=bold guibg=#4c8f2f guifg=#ffffff",
-    \ "cterm=bold ctermfg=7 ctermbg=50 gui=bold guibg=#1060a0 guifg=#ffffff",
-    \ "cterm=bold ctermfg=7 ctermbg=56 gui=bold guibg=#a0b0c0 guifg=black",
-    \ ]
-
-fu! s:quickhl.hlini() abort
-    for v in s:quickhl.hl
-        exe 'hi UserSearchHi'.index(s:quickhl.hl, v).' '.v
-    endfor
-endf
-
-fu! s:quickhl.reset(cw) abort
-    let s:quickhl.reseted = 0
-    let already = getmatches()->filter({ _,v -> has_key(v, 'pattern') ? v.pattern == a:cw : 0 })
-    if !empty(already)
-        cal matchdelete(already[0].id)
-        let s:quickhl.reseted = 1
-    endif
-endf
-
-fu! s:quickhl.set() abort
-    let current_win = winnr()
-    let cw = expand('<cword>')
-    windo cal s:quickhl.reset(cw)
-    if s:quickhl.reseted
-        exe current_win.'wincmd w'
-        retu
-    endif
-    windo cal matchadd('UserSearchHi'.s:quickhl.hlidx, cw)
-    let s:quickhl.hlidx = s:quickhl.hlidx >= len(s:quickhl.hl)-1 ? 0 : s:quickhl.hlidx + 1
-    exe current_win.'wincmd w'
-endf
-
-fu! s:quickhl.clear() abort
-    let current_win = winnr()
-    windo cal getmatches()->filter({ _,v -> v.group =~ 'UserSearchHi.*' })->map('execute("cal matchdelete(v:val.id)")')
-    exe current_win.'wincmd w'
-endf
-
-aug quickhl
-    au!
-    au ColorScheme * cal s:quickhl.hlini()
-aug END
-
-let s:quickhlset = s:quickhl.set
-let s:quickhlclear = s:quickhl.clear
-noremap <silent><Plug>(qikhl-toggle) :<C-u>cal <SID>quickhlset()<CR>
-noremap <silent><Plug>(qikhl-clear) :<C-u>cal <SID>quickhlclear()<CR>
-" }}}
-
-" ===================================================================
-" unblevable/quick-scope
-" ===================================================================
-" TODO リファクタ
-" {{{
-let s:fmode = #{flg: 1}
-
-fu! s:fmode.set() abort
-    cal getmatches()->filter({ _,v -> v.group =~ 'FScope.*' })->map('execute("cal matchdelete(v:val.id)")')
-    let rn = line('.')
-    let cn = col('.')
-    let rtxt = getline('.')
-    let tar = []
-    let tar2 = []
-    let bak = []
-    let bak2 = []
-    let offset = 0
-    while offset != -1
-        let start = matchstrpos(rtxt, '\<.', offset)
-        let offset = matchstrpos(rtxt, '.\>', offset)[2]
-        let ashiato = start[1] >= cn ? rtxt[cn:start[1]-1] : rtxt[start[2]+1:cn]
-        if stridx(ashiato, start[0]) == -1 && start[0] =~ '[ -~]'
-            cal add(start[1] >= cn ? tar : bak, [rn, start[2]]) " uniq char
-        elseif start[2] > 0 && start[0] =~ '[ -~]'
-            let next_char = rtxt[start[2]:start[2]]
-            if start[1] >= cn
-                cal add(stridx(ashiato, next_char) == -1 ? tar : tar2, [rn, start[2]+1]) " uniq char
-            else
-                cal add(stridx(ashiato, next_char) == -1 ? bak    : bak2 , [rn, start[2]+1])
-            endif
-        endif
-    endwhile
-    if !empty(tar)
-        cal matchaddpos('FScopePrimary', tar, 16)
-        endif
-    if !empty(tar2)
-        cal matchaddpos('FScopeSecondary', tar2, 16)
-    endif
-    if !empty(bak)
-        cal matchaddpos('FScopeBackPrimary', bak, 16)
-    endif
-    if !empty(bak2) 
-        cal matchaddpos('FScopeBackSecondary', bak2, 16) 
-    endif
-endf
-
-fu! s:fmode.activate() abort
-    aug f_scope
-        au!
-        au CursorMoved * cal s:fmode.set()
-    aug End
-    cal s:fmode.set()
-endf
-
-fu! s:fmode.deactivate() abort
-    aug f_scope
-        au!
-    aug End
-    let current_win = win_getid()
-    windo cal getmatches()->filter({ _,v -> v.group =~ 'FScope.*' })->map('execute("cal matchdelete(v:val.id)")')
-    cal win_gotoid(current_win)
-endf
-
-fu! s:fmode.toggle() abort
-    if s:fmode.flg
-        let s:fmode.flg = 0
-        cal s:fmode.deactivate()
-    else
-        let s:fmode.flg = 1
-        cal s:fmode.activate()
-    endif
-endf
-
-fu! s:fmode.takeover() abort
-    if s:fmode.flg
-        cal s:fmode.activate()
-    else
-        cal s:fmode.deactivate()
-    endif
-endf
-
-aug fmode_colors
-    au!
-    au ColorScheme * hi FScopePrimary ctermfg=196 cterm=underline guifg=#66D9EF guibg=#000000
-    au ColorScheme * hi FScopeSecondary ctermfg=219 cterm=underline guifg=#66D9EF guibg=#000000
-    au ColorScheme * hi FScopeBackPrimary ctermfg=51 cterm=underline guifg=#66D9EF guibg=#000000
-    au ColorScheme * hi FScopeBackSecondary ctermfg=33 cterm=underline guifg=#66D9EF guibg=#000000
-aug END
-
-let s:fmodetoggle = s:fmode.toggle
-noremap <silent><Plug>(f-scope) :<C-u>cal <SID>fmodetoggle()<CR>
-" }}}
-
-" ===================================================================
-" junegunn/goyo.vim
-" ===================================================================
-" TODO リファクタ
-" {{{
-let s:zen_mode = #{flg: 0, vert_split: []}
-fu! s:zenModeToggle() abort
-    if s:zen_mode.flg
-        let s:zen_mode.flg = 0
-        set number cursorline cursorcolumn laststatus=2 showtabline=2
-        tabc
-        exe 'hi VertSplit '.join(s:zen_mode.vert_split[2:], ' ')
-        retu
-    endif
-    let s:zen_mode.flg = 1
-    tab split
-    norm zR
-    set nonumber norelativenumber nocursorline nocursorcolumn laststatus=0 showtabline=0
-    vert to new
-    setl buftype=nofile bufhidden=wipe nomodifiable nobuflisted noswapfile nonu noru winfixheight
-    vert res 40
-    exe winnr('#').'wincmd w'
-    vert bo new
-    setl buftype=nofile bufhidden=wipe nomodifiable nobuflisted noswapfile nonu noru winfixheight
-    vert res 40
-    exe winnr('#').'wincmd w'
-    "['NonText', 'FoldColumn', 'ColorColumn', 'VertSplit', 'StatusLine', 'StatusLineNC', 'SignColumn']
-    let s:zen_mode.vert_split = split(execute('hi VertSplit'),' ')->filter({ _,v -> !empty(v) })
-    exe 'hi VertSplit ctermfg=black ctermbg=NONE cterm=NONE'
-    setl number relativenumber
-endf
-
-noremap <silent><Plug>(zen-mode) :<C-u>cal <SID>zenModeToggle()<CR>
-" }}}
-
-" ===================================================================
 " easymotion/vim-easymotion
 " ===================================================================
-" TODO リファクタ
 " {{{
+" TODO リファクタ
 " m, g read some function doesn't work just as I want
 let s:emotion = #{keypos: [], klen: 1, keys: ['s', 'w', 'a', 'd', 'j', 'k', 'h', 'l'], popid: 0}
 
@@ -2097,10 +1787,322 @@ noremap <silent><Plug>(emotion) :<C-u>cal <SID>emotion()<CR>
 " }}}
 
 " ===================================================================
+" unblevable/quick-scope
+" ===================================================================
+" {{{
+" TODO リファクタ
+let s:fmode = #{flg: 1}
+
+fu! s:fmode.set() abort
+    cal getmatches()->filter({ _,v -> v.group =~ 'FScope.*' })->map('execute("cal matchdelete(v:val.id)")')
+    let rn = line('.')
+    let cn = col('.')
+    let rtxt = getline('.')
+    let tar = []
+    let tar2 = []
+    let bak = []
+    let bak2 = []
+    let offset = 0
+    while offset != -1
+        let start = matchstrpos(rtxt, '\<.', offset)
+        let offset = matchstrpos(rtxt, '.\>', offset)[2]
+        let ashiato = start[1] >= cn ? rtxt[cn:start[1]-1] : rtxt[start[2]+1:cn]
+        if stridx(ashiato, start[0]) == -1 && start[0] =~ '[ -~]'
+            cal add(start[1] >= cn ? tar : bak, [rn, start[2]]) " uniq char
+        elseif start[2] > 0 && start[0] =~ '[ -~]'
+            let next_char = rtxt[start[2]:start[2]]
+            if start[1] >= cn
+                cal add(stridx(ashiato, next_char) == -1 ? tar : tar2, [rn, start[2]+1]) " uniq char
+            else
+                cal add(stridx(ashiato, next_char) == -1 ? bak    : bak2 , [rn, start[2]+1])
+            endif
+        endif
+    endwhile
+    if !empty(tar)
+        cal matchaddpos('FScopePrimary', tar, 16)
+        endif
+    if !empty(tar2)
+        cal matchaddpos('FScopeSecondary', tar2, 16)
+    endif
+    if !empty(bak)
+        cal matchaddpos('FScopeBackPrimary', bak, 16)
+    endif
+    if !empty(bak2) 
+        cal matchaddpos('FScopeBackSecondary', bak2, 16) 
+    endif
+endf
+
+fu! s:fmode.activate() abort
+    aug f_scope
+        au!
+        au CursorMoved * cal s:fmode.set()
+    aug End
+    cal s:fmode.set()
+endf
+
+fu! s:fmode.deactivate() abort
+    aug f_scope
+        au!
+    aug End
+    let current_win = win_getid()
+    windo cal getmatches()->filter({ _,v -> v.group =~ 'FScope.*' })->map('execute("cal matchdelete(v:val.id)")')
+    cal win_gotoid(current_win)
+endf
+
+fu! s:fmode.toggle() abort
+    if s:fmode.flg
+        let s:fmode.flg = 0
+        cal s:fmode.deactivate()
+    else
+        let s:fmode.flg = 1
+        cal s:fmode.activate()
+    endif
+endf
+
+fu! s:fmode.takeover() abort
+    if s:fmode.flg
+        cal s:fmode.activate()
+    else
+        cal s:fmode.deactivate()
+    endif
+endf
+
+aug fmode_colors
+    au!
+    au ColorScheme * hi FScopePrimary ctermfg=196 cterm=underline guifg=#66D9EF guibg=#000000
+    au ColorScheme * hi FScopeSecondary ctermfg=219 cterm=underline guifg=#66D9EF guibg=#000000
+    au ColorScheme * hi FScopeBackPrimary ctermfg=51 cterm=underline guifg=#66D9EF guibg=#000000
+    au ColorScheme * hi FScopeBackSecondary ctermfg=33 cterm=underline guifg=#66D9EF guibg=#000000
+aug END
+
+let s:fmodetoggle = s:fmode.toggle
+noremap <silent><Plug>(f-scope) :<C-u>cal <SID>fmodetoggle()<CR>
+" }}}
+
+" ===================================================================
+" t9md/vim-quickhl
+" ===================================================================
+" {{{
+" TODO リファクタ
+" TODO 整理
+let s:quickhl = #{hlidx: 0, reseted: 0}
+let s:quickhl.hl= [
+    \ "cterm=bold ctermfg=16 ctermbg=153 gui=bold guifg=#ffffff guibg=#0a7383",
+    \ "cterm=bold ctermfg=7 ctermbg=1 gui=bold guibg=#a07040 guifg=#ffffff",
+    \ "cterm=bold ctermfg=7 ctermbg=2 gui=bold guibg=#4070a0 guifg=#ffffff",
+    \ "cterm=bold ctermfg=7 ctermbg=3 gui=bold guibg=#40a070 guifg=#ffffff",
+    \ "cterm=bold ctermfg=7 ctermbg=4 gui=bold guibg=#70a040 guifg=#ffffff",
+    \ "cterm=bold ctermfg=7 ctermbg=5 gui=bold guibg=#0070e0 guifg=#ffffff",
+    \ "cterm=bold ctermfg=7 ctermbg=6 gui=bold guibg=#007020 guifg=#ffffff",
+    \ "cterm=bold ctermfg=7 ctermbg=21 gui=bold guibg=#d4a00d guifg=#ffffff",
+    \ "cterm=bold ctermfg=7 ctermbg=22 gui=bold guibg=#06287e guifg=#ffffff",
+    \ "cterm=bold ctermfg=7 ctermbg=45 gui=bold guibg=#5b3674 guifg=#ffffff",
+    \ "cterm=bold ctermfg=7 ctermbg=16 gui=bold guibg=#4c8f2f guifg=#ffffff",
+    \ "cterm=bold ctermfg=7 ctermbg=50 gui=bold guibg=#1060a0 guifg=#ffffff",
+    \ "cterm=bold ctermfg=7 ctermbg=56 gui=bold guibg=#a0b0c0 guifg=black",
+    \ ]
+
+fu! s:quickhl.hlini() abort
+    for v in s:quickhl.hl
+        exe 'hi UserSearchHi'.index(s:quickhl.hl, v).' '.v
+    endfor
+endf
+
+fu! s:quickhl.reset(cw) abort
+    let s:quickhl.reseted = 0
+    let already = getmatches()->filter({ _,v -> has_key(v, 'pattern') ? v.pattern == a:cw : 0 })
+    if !empty(already)
+        cal matchdelete(already[0].id)
+        let s:quickhl.reseted = 1
+    endif
+endf
+
+fu! s:quickhl.set() abort
+    let current_win = winnr()
+    let cw = expand('<cword>')
+    windo cal s:quickhl.reset(cw)
+    if s:quickhl.reseted
+        exe current_win.'wincmd w'
+        retu
+    endif
+    windo cal matchadd('UserSearchHi'.s:quickhl.hlidx, cw)
+    let s:quickhl.hlidx = s:quickhl.hlidx >= len(s:quickhl.hl)-1 ? 0 : s:quickhl.hlidx + 1
+    exe current_win.'wincmd w'
+endf
+
+fu! s:quickhl.clear() abort
+    let current_win = winnr()
+    windo cal getmatches()->filter({ _,v -> v.group =~ 'UserSearchHi.*' })->map('execute("cal matchdelete(v:val.id)")')
+    exe current_win.'wincmd w'
+endf
+
+aug quickhl
+    au!
+    au ColorScheme * cal s:quickhl.hlini()
+aug END
+
+let s:quickhlset = s:quickhl.set
+let s:quickhlclear = s:quickhl.clear
+noremap <silent><Plug>(qikhl-toggle) :<C-u>cal <SID>quickhlset()<CR>
+noremap <silent><Plug>(qikhl-clear) :<C-u>cal <SID>quickhlclear()<CR>
+" }}}
+
+" ===================================================================
+" MattesGroeger/vim-bookmarks
+" ===================================================================
+" {{{
+" TODO リファクタ
+sign define mk text=⚑ texthl=DarkBlue
+
+let s:mk = #{winid: 0, tle: 'marks', allwinid: 0, atle: 'marks-allfiles',
+    \ path: $HOME.'/.vim/.mk',
+    \ list: { -> sign_getplaced(bufname('%'), #{group: 'mkg'})[0].signs },
+    \ next: { _,v -> v.lnum > line('.') }, prev: { _,v -> v.lnum < line('.') },
+    \ }
+
+fu! s:mk.read() abort
+    retu glob(self.path)->empty() ? {} : readfile(self.path)->join('')->js_decode() ?? {}
+endf
+
+fu! s:mk.save() abort
+    let alldata = self.read()
+    let alldata[expand('%:p')] = self.list()
+    cal writefile([js_encode(alldata)], self.path)
+endf
+
+fu! s:mk.load() abort
+    let alldata = self.read()
+    if !has_key(alldata, expand('%:p'))
+        retu
+    endif
+    for v in alldata[expand('%:p')]
+        cal sign_place(v.id, v.group, v.name, bufname('%'), #{lnum: v.lnum})
+    endfor
+endf
+
+" TODO mk mark マーク増える問題
+fu! s:mk.toggle() abort
+    let lmk = sign_getplaced(bufname('%'), #{group: 'mkg', lnum: line('.')})[0].signs
+    if empty(lmk)
+        cal EchoI('mark')
+        cal sign_place(0, 'mkg', 'mk', bufname('%'), #{lnum: line('.')})
+    else
+        cal EchoI('remove mark')
+        cal sign_unplace('mkg', #{buffer: bufname('%'), id: lmk[0].id})
+    endif
+    cal self.save()
+endf
+
+" echo async because jump with scroll need time
+fu! s:mk.jump(next) abort
+    let list = self.list()
+    if empty(list)
+        cal EchoE('no marks')
+        retu
+    endif
+    let cnt = len(list)
+    let Vector = a:next ? self.next : self.prev
+    let can = deepcopy(list)->filter(Vector)->sort({ x, y -> x.lnum - y.lnum })
+    if empty(can)
+        cal EchoW('no next marks')
+        retu
+    endif
+    cal sign_jump((a:next ? can[0] : can[-1]).id, 'mkg', bufname('%'))
+    cal timer_start(100, { -> EchoI(printf('mark jump [%s/%s]', a:next ? cnt - len(can) + 1 : len(can), cnt)) })
+endf
+
+fu! s:mk.clthis() abort
+    cal sign_unplace('mkg', #{buffer: bufname('%')})
+    cal self.save()
+    cal EchoI('clear mark in this file')
+endf
+
+fu! s:mk.clall() abort
+    if confirm('clear mark in all files ?', "&Yes\n&No\n&Cancel") != 1
+        cal EchoW('cancel', 0)
+        retu
+    endif
+    cal sign_unplace('mkg')
+    cal writefile([], self.path)
+    cal EchoI('clear ALL marks', 0)
+endf
+
+fu! s:mk.listcb() abort
+    let list = self.list()
+    if empty(list)
+        cal EchoE('no marks')
+        retu
+    endif
+    cal s:fzsearch.popup(#{
+        \ title: 'Marks in Current Buffer',
+        \ list: sort(list, { x,y -> x.lnum - y.lnum })->map({ _,v -> v.lnum.': '.getline(v.lnum)}),
+        \ list_filetype: &filetype,
+        \ preview_type: 'this',
+        \ enter_prefix: 0,
+        \ })
+endf
+
+aug mk_st
+    au!
+    au BufEnter * cal s:mk.load()
+    au BufWritePost * cal s:mk.save()
+aug END
+
+let s:mktoggle = s:mk.toggle
+let s:mknext = function(s:mk.jump, [1])
+let s:mkprev = function(s:mk.jump, [0])
+let s:mkclthis = s:mk.clthis
+let s:mkclall = s:mk.clall
+let s:mklist = s:mk.listcb
+
+noremap <silent><Plug>(mk-toggle) :<C-u>cal <SID>mktoggle()<CR>
+noremap <silent><Plug>(mk-next) :<C-u>cal <SID>mknext()<CR>
+noremap <silent><Plug>(mk-prev) :<C-u>cal <SID>mkprev()<CR>
+noremap <silent><Plug>(mk-clthis) :<C-u>cal <SID>mkclthis()<CR>
+noremap <silent><Plug>(mk-clall) :<C-u>cal <SID>mkclall()<CR>
+noremap <silent><Plug>(mk-list) :<C-u>cal <SID>mklist()<CR>
+" }}}
+
+" ===================================================================
+" junegunn/goyo.vim
+" ===================================================================
+" {{{
+" TODO リファクタ
+let s:zen_mode = #{flg: 0, vert_split: []}
+fu! s:zenModeToggle() abort
+    if s:zen_mode.flg
+        let s:zen_mode.flg = 0
+        set number cursorline cursorcolumn laststatus=2 showtabline=2
+        tabc
+        exe 'hi VertSplit '.join(s:zen_mode.vert_split[2:], ' ')
+        retu
+    endif
+    let s:zen_mode.flg = 1
+    tab split
+    norm zR
+    set nonumber norelativenumber nocursorline nocursorcolumn laststatus=0 showtabline=0
+    vert to new
+    setl buftype=nofile bufhidden=wipe nomodifiable nobuflisted noswapfile nonu noru winfixheight
+    vert res 40
+    exe winnr('#').'wincmd w'
+    vert bo new
+    setl buftype=nofile bufhidden=wipe nomodifiable nobuflisted noswapfile nonu noru winfixheight
+    vert res 40
+    exe winnr('#').'wincmd w'
+    "['NonText', 'FoldColumn', 'ColorColumn', 'VertSplit', 'StatusLine', 'StatusLineNC', 'SignColumn']
+    let s:zen_mode.vert_split = split(execute('hi VertSplit'),' ')->filter({ _,v -> !empty(v) })
+    exe 'hi VertSplit ctermfg=black ctermbg=NONE cterm=NONE'
+    setl number relativenumber
+endf
+
+noremap <silent><Plug>(zen-mode) :<C-u>cal <SID>zenModeToggle()<CR>
+" }}}
+
+" ===================================================================
 " mhinz/vim-startify
 " ===================================================================
-" TODO 作成
 " {{{
+" TODO 作成
 
 " TODO startify
 
@@ -2113,8 +2115,8 @@ noremap <silent><Plug>(emotion) :<C-u>cal <SID>emotion()<CR>
 
 " }}}
 
-" TODO リファクタ
 " ##################      PLUG MANAGE       ################### {{{
+" TODO リファクタ
 let s:plug = #{colors: [ 'onedark.vim', 'hybrid_material.vim', 'molokai.vim' ]}
 
 fu! s:plug.color_install() abort
@@ -2202,8 +2204,8 @@ com! PlugInstall cal s:plug.install()
 com! PlugUnInstall cal s:plug.uninstall()
 " }}}
 
-" TODO リファクタ
 " ##################        TRAINING        ################### {{{
+" TODO リファクタ
 command! Popupclear cal popup_clear()
 command! -nargs=? TrainingWheelsProtocol cal TrainingWheelsProtocol(<f-args>)
 
@@ -2937,8 +2939,8 @@ endif
 " #############################################################
 " ##################        STARTING        ###################
 " #############################################################
-" TODO つくったりなおしたり
 " {{{
+" TODO つくったりなおしたり
 
 aug base_color
     au!
