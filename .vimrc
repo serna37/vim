@@ -249,6 +249,7 @@ fu! s:runcat.start(...) abort
     " TODO run cat animation maskいじくりたい
     " TODO User_greenfg_blackbg statuslineでの color
     let self.winid = popup_create(self.cat[0], #{line: 1, border: [0,0,0,0], mask: [[1,-1,1,1]], zindex: 1})
+    " TODO 正規表現、文字か空白かでいけそう
     "cal setwinvar(self.winid, '&wincolor', 'User_greenfg_blackbg')
     "cal matchaddpos('DarkRed', self.cheatpos_red, 16, -1, #{window: self.cheatid})
     "cal matchaddpos('DarkBlue', self.cheatpos_blue, 16, -1, #{window: self.cheatid})
@@ -523,7 +524,6 @@ let s:idemenu = #{
         \ '[Format]         applay format for this file',
         \ '[ReName*]        rename current word recursively',
         \ '[ALL PUSH]       commit & push all changes',
-        \ '[QuickFix-Grep*] Open Preview Popup from quickfix - from fzfpreview Ctrl+Q',
         \ '[Snippet*]       edit snippets',
         \ '[Run]            run current program',
         \ '[Run Server]     run current program',
@@ -580,28 +580,17 @@ fu! s:idemenu_exe(_, idx) abort
         exe 'top terminal ++rows=10 ++shell git add . && git commit -m "'.w.'" && git push'
     elseif a:idx == 4
         if exists(':CocCommand')
-            echow 'sorry tmp deactivated'
-            retu
-            exe 'CocCommand fzf-preview.QuickFix'
-        else
-            " TODO getqflist() 結果をfzsearch使えばいけるぞ"
-            cal EchoE('Sorry, [QuickFix-Grep*] needs coc.nvim.')
-            cal popup_close(s:idemenu.cheatid)
-            retu 1
-        endif
-    elseif a:idx == 5
-        if exists(':CocCommand')
             exe 'CocCommand snippets.editSnippets'
         else
             cal EchoE('Sorry, [Snippet*] needs coc.nvim.')
             cal popup_close(s:idemenu.cheatid)
             retu 1
         endif
-    elseif a:idx == 6
+    elseif a:idx == 5
         cal s:quickrun.exe()
-    elseif a:idx == 7
+    elseif a:idx == 6
         cal s:quickrun.server()
-    elseif a:idx == 8
+    elseif a:idx == 7
         if exists(':Vimspector')
             cal vimspector#Launch()
         else
@@ -609,7 +598,7 @@ fu! s:idemenu_exe(_, idx) abort
             cal popup_close(s:idemenu.cheatid)
             retu 1
         endif
-    elseif a:idx == 9
+    elseif a:idx == 8
         exe 'top terminal ++rows=10 ++shell eval '.getline('.')
     endif
     cal popup_close(s:idemenu.cheatid)
@@ -2056,11 +2045,8 @@ aug END
 let s:livereplace = #{flg: 0, matchid: 0}
 
 fu! s:livereplace.enter() abort
-    " TODO vがビジュアル最初、.が最終だが、どっちも最初がはいっちゃう
-    let self.vs = line('v')
-    let self.ve = line('.')
-        echow self.vs
-        echow self.ve
+    let self.vs = getpos("'<")
+    let self.ve = getpos("'>")
 endf
 
 fu! s:livereplace.preview() abort
@@ -2103,18 +2089,11 @@ fu! s:livereplace.change() abort
             cal self.preview_reset()
             let self.flg = 1
         endif
-        " TODO 範囲置換が動かない
-        " TODO visualが解除されているから。
-        " TODO 行数覚えて、行範囲で置換してみるがどうだ
         let subst = join(cmd[0:2], '/').'/g'
         " visual mode
-        " TODO vがビジュアル最初、.が最終だが、どっちも最初がはいっちゃう
-        echow self.vs
-        echow self.ve
-        if self.vs != self.ve
-            let subst = self.vs.','.self.ve.join(cmd[1:2], '/').'/g'
+        if self.vs[1] && self.ve[1]
+            let subst = self.vs[1].','.self.ve[1].'s/'.join(cmd[1:2], '/').'/g'
         endif
-        echow subst
         exe subst
         let self.matchid = matchadd('User_blackfg_redbg_bold', cmd[2])
     endif
