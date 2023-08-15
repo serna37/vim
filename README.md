@@ -20,7 +20,7 @@ alse see [Install_Plugins](#install_plugins)
 |command / package|purpose|use in vim if include|
 |--|--|--|
 |[lazygit](https://github.com/jesseduffield/lazygit)|GUI git operations<br>※please use on termianl window|<ul><li>[ ] </ul>|
-|[bat](https://github.com/sharkdp/bat)|syntaxed preview in coc fzf (references/outline)|
+|[bat](https://github.com/sharkdp/bat)|syntaxed preview in coc fzf (references/outline)|<ul><li>[x] </ul>|
 |[powerline/fonts](https://github.com/powerline/fonts)|font|<ul><li>[x] </ul>|
 |[ryanoasis/nerd-fonts](https://github.com/ryanoasis/nerd-fonts)|font|<ul><li>[x] </ul>|
 |[ryanoasis/vim-devicons](https://github.com/ryanoasis/vim-devicons)|icon|<ul><li>[x] </ul>|
