@@ -525,12 +525,11 @@ let s:idemenu = #{
         \ '[ALL PUSH]       commit & push all changes',
         \ '[QuickFix-Grep*] Open Preview Popup from quickfix - from fzfpreview Ctrl+Q',
         \ '[Snippet*]       edit snippets',
-        \ '[Run*]           run current program',
+        \ '[Run]            run current program',
+        \ '[Run Server]     run current program',
         \ '[Debug*]         debug current program',
         \ '[Run as Shell]   run current row as shell command',
     \ ],
-    \ menupos_red1: [[1,1,17],[2,1,17],[3,1,17],[4,1,17],[5,1,17],[6,1,17]],
-    \ menupos_red2: [[7,1,17],[8,1,17]],
     \ cheatid: 0, cheattitle: ' LSP KeyMaps ',
     \ cheat: [
         \ ' (Space d) [Definition]     Go to Definition ',
@@ -540,28 +539,24 @@ let s:idemenu = #{
         \ ' (Space ,) [Next Diagnosis] jump next diagnosis ',
         \ ' (Space .) [Prev Diagnosis] jump prev diagnosis ',
     \ ],
-    \ cheatpos_red: [[1,1,28],[2,1,28],[3,1,28],[4,1,28],[5,1,28],[6,1,28]],
-    \ cheatpos_blue: [[1,1,10],[2,1,10],[3,1,10],[4,1,10],[5,1,10],[6,1,10]],
     \ }
 
-" TODO OneDark statuslineでの緑をidemenuで使ってる
 fu! s:idemenu.open() abort
     let self.menuid = popup_menu(self.menu, #{title: self.menutitle,
         \ border: [], borderchars: ['─','│','─','│','╭','╮','╯','╰'],
         \ callback: 's:idemenu_exe',
         \ })
-        ""\ filter: function(self.choose, [{'idx': 0, 'files': self.menu }]),
     cal setwinvar(self.menuid, '&wincolor', 'User_greenfg_blackbg')
-    cal matchaddpos('DarkRed', self.menupos_red1, 16, -1, #{window: self.menuid})
-    cal matchaddpos('DarkRed', self.menupos_red2, 16, -1, #{window: self.menuid})
+    cal matchadd('DarkRed', '\[.*\]', 16, -1, #{window: self.menuid})
     let self.cheatid = popup_create(self.cheat, #{title: self.cheattitle, line: &lines-5})
     cal setwinvar(self.cheatid, '&wincolor', 'User_greenfg_blackbg')
-    cal matchaddpos('DarkRed', self.cheatpos_red, 16, -1, #{window: self.cheatid})
-    cal matchaddpos('DarkBlue', self.cheatpos_blue, 16, -1, #{window: self.cheatid})
+    cal matchadd('DarkRed', '\[.*\]', 16, -1, #{window: self.cheatid})
+    cal matchadd('DarkBlue', '(.*)', 16, -1, #{window: self.cheatid})
 endf
 
 fu! s:idemenu_exe(_, idx) abort
     if a:idx == 1
+        " TODO 選択部分のみをしたい
         if exists(':Coc')
             cal CocActionAsync('format')
         else
@@ -603,17 +598,10 @@ fu! s:idemenu_exe(_, idx) abort
             retu 1
         endif
     elseif a:idx == 6
-        " TODO quickrun 再現予定
-        if exists(':QuickRun')
-            exe 'QuickRun -hook/time/enable 1'
-            echow 'sorry tmp deactivated'
-            retu
-        else
-            cal EchoE('Sorry, [Run*] needs vim-quickrun.')
-            cal popup_close(s:idemenu.cheatid)
-            retu 1
-        endif
+        cal s:quickrun.exe()
     elseif a:idx == 7
+        cal s:quickrun.server()
+    elseif a:idx == 8
         if exists(':Vimspector')
             cal vimspector#Launch()
         else
@@ -621,7 +609,7 @@ fu! s:idemenu_exe(_, idx) abort
             cal popup_close(s:idemenu.cheatid)
             retu 1
         endif
-    elseif a:idx == 8
+    elseif a:idx == 9
         exe 'top terminal ++rows=10 ++shell eval '.getline('.')
     endif
     cal popup_close(s:idemenu.cheatid)
@@ -2033,7 +2021,7 @@ fu! s:start.exe() abort
     cal append('$', self.cheat_sheet_win)
     hi BTR ctermfg=218 cterm=bold
     cal matchaddpos('BTR', range(2,21)->map({_,v->[v]}), 999)
-    cal matchadd('Title', '[─│╰╯╭╮]', 20)
+    cal matchadd('User_greenfg_blackbg', '[─│╰╯╭╮]', 20)
     cal matchadd('DarkOrange', '\(Window\|Search\|Motion\|Command\)')
     cal matchadd('DarkBlue', '│.\{-,25}|', 19)
     cal matchadd('DarkRed', '(.*)', 18)
@@ -2080,10 +2068,7 @@ aug END
 " thinca/vim-quickrun
 " ===================================================================
 " {{{
-" TODO 動作確認中
-
-" TODO quick run
-
+" TODO リファクタ、試しながら直す
 " java11 can execute `java File.java`
 let s:quickrun = #{
     \ exe_dict: #{
@@ -2122,13 +2107,6 @@ fu! s:quickrun.server() abort
         retu
     endif
     exe 'bo terminal ++rows=10 ++shell '.cmd
-endf
-
-fu! TestQrunExe() abort
-    cal s:quickrun.exe()
-endf
-fu! TestQrunServer() abort
-    cal s:quickrun.server()
 endf
 " }}}
 
