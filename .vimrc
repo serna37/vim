@@ -432,8 +432,7 @@ noremap <silent><Plug>(anchor) :<C-u>cal <SID>anchor()<CR>
 " Fuzzy search current file {{{
 fu! s:fuzzySearch() abort
     " quickfix fuzzySearch
-    " TODO 現在のウィンドウがquickfixかどうかの判定
-    " TODO 無名バッファでもここはいっちゃう
+    " empty buffer -> no data
     if expand('%')->empty()
         cal s:fzsearch.popup(#{
             \ title: 'QuickFix',
@@ -878,7 +877,7 @@ noremap <silent><Plug>(buf-close) :<C-u>cal <SID>closeBuf()<CR>
 " endf
 
 let s:fzsearch = #{bwid: 0, ewid: 0, rwid: 0, pwid: 0, tid: 0, res: [],
-    \ ffdict: #{vimrc: 'vim', js: 'javascript', py: 'python', md: 'markdown',
+    \ ffdict: #{vimrc: 'vim', zshrc: 'sh', js: 'javascript', py: 'python', md: 'markdown',
         \ ts: 'typescript', tsx: 'typescriptreact',
         \ },
     \ }
@@ -887,7 +886,7 @@ let s:fzsearch.allow_exts = glob($VIMRUNTIME.'/ftplugin/*.vim')->split('\n')
             \ ->map({_,v->matchstr(v,'[^/]\+\.vim')->split('\.')[0]})
 
 fu! s:fzsearch.popup(v) abort
-    if empty(a:v.list)
+    if empty(a:v.list) || (len(a:v.list) == 1 && empty(a:v.list[0]))
         cal EchoE('no data')
         retu
     endif
@@ -1085,7 +1084,7 @@ fu! s:fzsearch.pvupd() abort
     let ext = get(self.ffdict, ext, ext)
     cal setbufvar(win, '&filetype', ext)
     " line
-    let sep = split(self.res[0], '|')
+    let sep = split(self.res[self.ridx], '|')
     let lnm = len(sep) < 2 ? 1 : split(sep[1], ' ')[0]
     cal popup_setoptions(self.pwid, #{firstline: (lnm-10 > 0 ? lnm-10 : 1)})
     cal win_execute(self.pwid, 'exe '.lnm)
