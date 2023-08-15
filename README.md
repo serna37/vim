@@ -1,8 +1,5 @@
 # Demo (only vimrc)
-WIP
-
-# Demo (plugin mode)
-WIP
+![demo](sample/demo.gif)
 
 # Dependencies
 - vim 8.2~
