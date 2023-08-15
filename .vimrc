@@ -431,12 +431,26 @@ noremap <silent><Plug>(anchor) :<C-u>cal <SID>anchor()<CR>
 
 " Fuzzy search current file {{{
 fu! s:fuzzySearch() abort
+    " quickfix fuzzySearch
+    if expand('%')->empty()
+        cal s:fzsearch.popup(#{
+            \ title: 'QuickFix',
+            \ list: getline(1, line('$')),
+            \ list_filetype: &filetype,
+            \ preview_type: 'this',
+            \ enter_prefix: 0,
+            \ qftype: 'qf',
+            \ })
+        retu
+    endif
+    " buffer fuzzySearch
     cal s:fzsearch.popup(#{
         \ title: 'Current Buffer',
         \ list: getline(1, line('$'))->map({ i,v -> i+1.': '.v }),
         \ list_filetype: &filetype,
         \ preview_type: 'this',
         \ enter_prefix: 0,
+        \ qftype: 'this',
         \ })
 endf
 
@@ -883,6 +897,7 @@ fu! s:fzsearch.popup(v) abort
     let self.ridx = 0
     let self.pr = a:v.enter_prefix ?? '>>'
     let self.pv_upd = a:v.preview_type == 'file'
+    let self.qftype = a:v.qftype
 
     let self.bwid = popup_create([], #{title: ' '.a:v.title.' ',
         \ zindex: 50, mapping: 0, scrollbar: 0,
@@ -892,17 +907,6 @@ fu! s:fzsearch.popup(v) abort
         \ line: &lines/4-2, col: &columns/8+1,
         \ })
 
-    " TODO fzf tabだと選択、C-qでquickfixlistに、だけど モード切り替えどうするか
-    " TODO fzf tab選択時の描画どうする？
-    " TODO fzf 選択解除めんどいなぁ
-    " TODO fzf 全量いっきにquickfixじゃだめか
-    " TODO fzf tab選択機能つけるならC-a欲しい
-    " TODO fzf quickfix
-    " 全体grep結果は、ファイル名と行番をもつリストだ
-    " 全体マーク結果も、ファイル名と行番のリスト
-    " previewやconfirmでの解釈を変える必要がある
-    " file this でないカテゴリを追加だ
-    " preview_type の使い方を変えるところから。
     let self.ewid = popup_create(self.pr, #{title: ' Fuzzy Search | ClearText: <C-w> ',
         \ zindex: 100, mapping: 0,
         \ border: [], borderchars: ['─','│','─','│','╭','╮','╯','╰'],
@@ -911,9 +915,8 @@ fu! s:fzsearch.popup(v) abort
         \ line: &lines*3/4+2, col: &columns/7+1,
         \ filter: function(self.fil, [#{wd: []}]),
         \ })
-        ""\ filter: function(self.fil, [#{lst: a:v.list, wd: [], ft: a:v.func_tab}]),
 
-    let self.rwid = popup_menu(self.res, #{title: ' Choose: <C-n/p> <CR> ',
+    let self.rwid = popup_menu(self.res, #{title: ' Choose: <C-n/p> <CR> | QuickFix: <C-q> ',
         \ zindex: 99, mapping: 0, scrollbar: 1,
         \ border: [], borderchars: ['─','│','─','│','╭','╮','╯','╰'],
         \ minwidth: &columns/3, maxwidth: &columns/3,
@@ -962,13 +965,38 @@ fu! s:fzsearch_confirm(wid, idx) abort
         retu
     endif
     let result = s:fzsearch.res[a:idx-1]
-    if s:fzsearch.pv_upd
+    if s:fzsearch.qftype == 'file'
         exe 'e '.result
-    else
+    elseif s:fzsearch.qftype == 'this'
         let l = split(result, ':')[0]
         cal EchoI('jump to '.l)
         exe l
+    elseif s:fzsearch.qftype == 'qf'
+        let fnm = split(result, '|')[0]
+        let lnm = split(split(result, '|')[1], ' ')[0]
+        cal feedkeys("\<C-w>k:e ".fnm." | ".lnm."\<CR>")
     endif
+    cal s:fzsearch.finalize()
+endf
+
+" create quickfix
+fu! s:fzsearch.quickfix() abort
+    let tmp = &errorformat
+    let resource = self.res
+    let ef = '%f: %l: %m'
+
+    if self.qftype == 'this'
+        let fnm = expand('%')
+        let resource = deepcopy(self.res)->map({_,v->fnm.': '.v})
+    elseif self.qftype == 'file'
+        let resource = deepcopy(self.res)->map({_,v->v.': 1: open'})
+    elseif self.qftype == 'qf'
+        let resource = deepcopy(self.res)->map({_,v->split(v,'|')[0].': '.split(split(v,'|')[1], ' ')[0].': '.join(split(v,'|')[2:], '')})
+    endif
+
+    let &errorformat = ef
+    cgetexpr resource | cw
+    let &errorformat = tmp
     cal s:fzsearch.finalize()
 endf
 
@@ -1077,13 +1105,10 @@ fu! s:fzsearch.fil(ctx, wid, key) abort
         cal popup_setoptions(self.rwid, #{zindex: 98})
         cal feedkeys(a:key)
         retu 1
-    ""elseif a:key is# "\<Tab>"
-        " TODO うけつけねぇ
-        ""cal a:ctx.ft()
-        " TODO 文字列で関数名を入力さておき、ここではfunctionとかで実行しよう
-        " たぶんfuncredが悪い"
-        ""echom 'asdasdasdas'
-        ""retu 1
+    elseif a:key is# "\<C-q>"
+        cal self.quickfix()
+        cal feedkeys("\<Esc>")
+        retu 1
     " TODO fzf copy shold D-v only or Shift Insert. C-v want split
     elseif a:key is# "\<C-v>" || a:key is# "\<D-v>"
         for i in range(0, strlen(@+)-1)
@@ -1176,6 +1201,7 @@ fu! s:fzf_histories()
         \ list_filetype: 0,
         \ preview_type: 'file',
         \ enter_prefix: '['.substitute(getcwd(), $HOME, '~', 'g').']>>',
+        \ qftype: 'file',
         \ })
 endf
 
@@ -1187,6 +1213,7 @@ fu! s:fzf_buffers()
         \ list_filetype: 0,
         \ preview_type: 'file',
         \ enter_prefix: '['.substitute(getcwd(), $HOME, '~', 'g').']>>',
+        \ qftype: 'file',
         \ })
 endf
 " =====================
@@ -1247,6 +1274,7 @@ fu! s:fzf.files() abort
         \ list_filetype: 0,
         \ preview_type: 'file',
         \ enter_prefix: '['.substitute(pwd, $HOME, '~', 'g').']>>',
+        \ qftype: 'file',
         \ })
 endf
 
@@ -1868,6 +1896,7 @@ fu! s:mk.listcb() abort
         \ list_filetype: &filetype,
         \ preview_type: 'this',
         \ enter_prefix: 0,
+        \ qftype: 'this',
         \ })
 endf
 
