@@ -583,6 +583,8 @@ fu! s:idemenu_exe(_, idx) abort
         exe 'top terminal ++rows=10 ++shell git add . && git commit -m "'.w.'" && git push'
     elseif a:idx == 4
         if exists(':CocCommand')
+            echow 'sorry tmp deactivated'
+            retu
             exe 'CocCommand fzf-preview.QuickFix'
         else
             " TODO getqflist() 結果をfzsearch使えばいけるぞ"
@@ -602,6 +604,8 @@ fu! s:idemenu_exe(_, idx) abort
         " TODO quickrun 再現予定
         if exists(':QuickRun')
             exe 'QuickRun -hook/time/enable 1'
+            echow 'sorry tmp deactivated'
+            retu
         else
             cal EchoE('Sorry, [Run*] needs vim-quickrun.')
             cal popup_close(s:idemenu.cheatid)
