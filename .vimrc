@@ -432,6 +432,7 @@ noremap <silent><Plug>(anchor) :<C-u>cal <SID>anchor()<CR>
 " Fuzzy search current file {{{
 fu! s:fuzzySearch() abort
     " quickfix fuzzySearch
+    " TODO 現在のウィンドウがquickfixかどうかの判定
     " TODO 無名バッファでもここはいっちゃう
     if expand('%')->empty()
         cal s:fzsearch.popup(#{
@@ -897,7 +898,6 @@ fu! s:fzsearch.popup(v) abort
     let self.ridx = 0
     let self.pr = a:v.enter_prefix ?? '>>'
     let self.type = a:v.type
-    " TODO preview typeとqf typeおんなじなのでまとめる
 
     let self.bwid = popup_create([], #{title: ' '.a:v.title.' ',
         \ zindex: 50, mapping: 0, scrollbar: 0,
@@ -960,12 +960,17 @@ fu! s:fzsearch.popup(v) abort
     let ext = ext !~ '^[a-zA-Z0-9]\+$' ? '' : ext
     let ext = get(self.ffdict, ext, ext)
     cal setbufvar(winbufnr(self.pwid), '&filetype', self.type =~ 'f' ? ext : &filetype)
+
+    " first line
+    let lnm = 1
     if self.type == 'flm'
         let lnm = split(split(self.res[0], '|')[1], ' ')[0]
-        cal popup_setoptions(self.pwid, #{firstline: lnm})
-    else
-        cal popup_setoptions(self.pwid, #{firstline: split(self.res[0], ':')[0]})
+    elseif self.type == 'lm'
+        let lnm = split(self.res[0], ':')[0]
     endif
+    " cursor line top from 10row
+    cal popup_setoptions(self.pwid, #{firstline: (lnm-10 > 0 ? lnm-10 : 1)})
+    cal win_execute(self.pwid, 'exe '.lnm)
 endf
 
 " on confirm
@@ -1032,10 +1037,9 @@ fu! s:fzsearch.scroll(wid, vector) abort
         retu
     endif
     cal timer_stop(self.tid)
-    " TODO fzf preview scroll 上に余白欲しい
     let vec = a:vector ? "\<C-n>" : "\<C-p>"
     let self.tid = timer_start(10, { -> popup_filter_menu(a:wid, vec) }, #{repeat: -1})
-    let delay = a:wid == self.pwid ? 500 : 300
+    let delay = 600
     cal timer_start(delay, self.scstop)
 endf
 
@@ -1052,11 +1056,11 @@ fu! s:fzsearch.pvupd() abort
         retu
     endif
     if self.type == 'lm'
-        cal popup_setoptions(self.pwid, #{firstline: split(self.res[self.ridx], ':')[0]})
+        let lnm = split(self.res[self.ridx], ':')[0]
+        cal popup_setoptions(self.pwid, #{firstline: (lnm-10 > 0 ? lnm-10 : 1)})
+        cal win_execute(self.pwid, 'exe '.lnm)
         retu
     endif
-
-    " TODO preview typeとqf typeおんなじなのでまとめる
 
     " del
     sil! cal deletebufline(win, 1, getbufinfo(win)[0].linecount)
@@ -1082,10 +1086,8 @@ fu! s:fzsearch.pvupd() abort
     let lnm = self.type == 'flm'
                 \ ? split(split(self.res[self.ridx], '|')[1], ' ')[0]
                 \ : 1
-    cal popup_setoptions(self.pwid, #{firstline: lnm})
-
-    " TODO fzf preview scroll 上に余白ほしい
-    " TODO fzf preview カーソル位置が行数と合わないのでなんか変
+    cal popup_setoptions(self.pwid, #{firstline: (lnm-10 > 0 ? lnm-10 : 1)})
+    cal win_execute(self.pwid, 'exe '.lnm)
 endf
 
 " search result update
@@ -1901,16 +1903,34 @@ fu! s:mk.clall() abort
 endf
 
 fu! s:mk.listcb() abort
-    let list = self.list()
-    if empty(list)
+    let alldata = self.read()
+    " { filename: [{lnum id name priority group}] }
+    " filename|lnum|msg
+
+    let resource = []
+    let pwd = getcwd().'/'
+    for fpath in keys(alldata)
+        let read = []
+        try
+            let read = readfile(fpath)
+        catch
+        endtry
+        if !empty(read)
+            for d in alldata[fpath]
+                let relfpath = substitute(fpath, pwd, '', 'g')
+                cal add(resource, relfpath.'|'.d.lnum.'|'.read[d.lnum-1])
+            endfor
+        endif
+    endfor
+
+    if empty(resource)
         cal EchoE('no marks')
         retu
     endif
-    " TODO mk ファイル跨ぐように、全部みる
     cal s:fzsearch.popup(#{
-        \ title: 'Marks in Current Buffer',
-        \ list: sort(list, { x,y -> x.lnum - y.lnum })->map({ _,v -> v.lnum.': '.getline(v.lnum)}),
-        \ type: 'lm',
+        \ title: 'Marks',
+        \ list: resource,
+        \ type: 'flm',
         \ enter_prefix: 0,
         \ })
 endf
