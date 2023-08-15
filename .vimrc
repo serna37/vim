@@ -1567,7 +1567,7 @@ fu! s:emotion.char_enter(winid, key) abort
         " go out e-motion
         cal popup_close(self.popid)
         let p = getpos('.')
-        " close previeew
+        " close preview
         b #
         cal cursor(p[1],p[2])
         cal self.hl_del(['EmotionFin', 'EmotionWip', 'EmotionBase'])
@@ -2053,15 +2053,91 @@ aug END
 " markonm/traces.vim
 " ===================================================================
 " {{{
-" TODO 作成
+let s:livereplace = #{flg: 0, matchid: 0}
 
-" TODO 置換プレビュー
+fu! s:livereplace.enter() abort
+    " TODO vがビジュアル最初、.が最終だが、どっちも最初がはいっちゃう
+    let self.vs = line('v')
+    let self.ve = line('.')
+        echow self.vs
+        echow self.ve
+endf
 
+fu! s:livereplace.preview() abort
+    " memory current buf
+    let self.ctx = getline('0', '$')
+    let self.p = getpos('.')
+    let ff = &filetype
+    " create preview
+    sil! exe 'e live_replace'
+    setl buftype=nofile bufhidden=wipe nobuflisted modifiable
+    exe 'setl filetype='.ff
+endf
 
+" reset replace
+fu! s:livereplace.preview_reset() abort
+    cal setline(1, self.ctx)
+    cal cursor(self.p[1],self.p[2])
+endf
 
+fu! s:livereplace.change() abort
+    " only substitute command
+    let cmdline = getcmdline()
+    if cmdline !~ "^'<,'>s/" && cmdline !~ "^%s/" && cmdline !~ "^.*s/"
+        retu
+    endif
 
+    " reset replace
+    if self.flg
+        cal self.preview_reset()
+        cal clearmatches()
+    endif
 
+    " live replace
+    let cmd = split(cmdline, '/')
+    if len(cmd) >= 3
+        " create preview window
+        if !self.flg
+            echow 'live replace preview'
+            cal self.preview()
+            cal self.preview_reset()
+            let self.flg = 1
+        endif
+        " TODO 範囲置換が動かない
+        " TODO visualが解除されているから。
+        " TODO 行数覚えて、行範囲で置換してみるがどうだ
+        let subst = join(cmd[0:2], '/').'/g'
+        " visual mode
+        " TODO vがビジュアル最初、.が最終だが、どっちも最初がはいっちゃう
+        echow self.vs
+        echow self.ve
+        if self.vs != self.ve
+            let subst = self.vs.','.self.ve.join(cmd[1:2], '/').'/g'
+        endif
+        echow subst
+        exe subst
+        let self.matchid = matchadd('User_blackfg_redbg_bold', cmd[2])
+    endif
+endf
 
+" leave preview window
+fu! s:livereplace.leave() abort
+    if !self.flg
+        retu
+    endif
+    let self.flg = 0
+    b #
+    if getmatches()->filter({_,v->get(v, 'id', '') == self.matchid})->len()
+        cal matchdelete(self.matchid)
+    endif
+endf
+
+aug live_replace
+    au!
+    au CmdlineEnter : cal s:livereplace.enter()
+    au CmdlineChanged : cal s:livereplace.change()
+    au CmdlineLeave  : cal s:livereplace.leave()
+aug END
 " }}}
 
 " ===================================================================
