@@ -107,4 +107,3 @@ this `vimrc` including these functions.
 - Completion
 - PlugInstall / PlugUnInstall
 - Training Wheels Protocol
-
