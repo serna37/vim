@@ -737,7 +737,8 @@ fu! s:gitinfo() abort
         let g:gitinf = 'no repo '
         retu
     endif
-    " TODO gitstatus結果を使いまわした方が早い？
+    " TODO gitstatus結果を使いまわした方が早い？ -> いいだろべつに
+    " TODO ls-filesに変える
     let cmd = "cd ".expand('%:h')." && git status --short | awk -F ' ' '{print($1)}' | grep -c "
     let a = trim(system(cmd."'A'"))
     let aa = a !='0'?'+'.a :''
@@ -2081,7 +2082,7 @@ aug END
 let s:plug = #{}
 let s:plug.repos = [
     \ 'thinca/vim-quickrun',
-    \ 'mattn/vim-chatgpt',
+    \ 'CoderCookE/vim-chatgpt',
     \ 'github/copilot.vim',
     \ 'puremourning/vimspector',
     \ ]
@@ -2140,6 +2141,7 @@ com! PlugUnInstall cal s:plug.uninstall()
 
 " ##################        TRAINING        ################### {{{
 " TODO リファクタ
+" TODO コマンド引数の補完つくる
 command! Popupclear cal popup_clear()
 command! -nargs=? TrainingWheelsProtocol cal TrainingWheelsProtocol(<f-args>)
 
@@ -2747,11 +2749,14 @@ let g:vimspector_enable_mappings = 'VISUAL_STUDIO'
 set rtp+=~/.vim/pack/plugins/start/fzf
 set rtp+=/opt/homebrew/opt/fzf
 
+" chat gpt
+let g:chat_gpt_max_tokens=4000
+
 " }}}
 
 " ##################      PLUGIN KEYMAP     ################### {{{
 " coc
-if exists(':CocCommand')
+if !glob('~/.vim/pack/plugins/start/coc.nvim')->empty()
     " explorer
     nnoremap <silent><Leader>e :CocCommand explorer --width 30<CR>
 
@@ -2770,7 +2775,6 @@ if exists(':CocCommand')
     nnoremap <Leader>? :cal CocAction('doHover')<CR>
     nnoremap <Leader>, <plug>(coc-diagnostic-next)
     nnoremap <Leader>. <plug>(coc-diagnostic-prev)
-    " TODO comfortable scrollと競合
     nnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : Scroll(1, 10)
     nnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : Scroll(0, 10)
 endif

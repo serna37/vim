@@ -17,6 +17,8 @@ also see [wiki-plugins-list](https://github.com/serna37/vim/wiki/Plugins)
 |[coc.nvim](https://github.com/neoclide/coc.nvim)|<ul><li>[node.js](https://github.com/nodejs/node)<li>yarn: `npm install -g yarn`|
 |language server with coc|see [here](https://github.com/neoclide/coc.nvim/wiki/Language-servers)|
 |[vimspector](https://github.com/puremourning/vimspector)|Vim 8.2 Huge build compiled with Python 3.10 or later<br>※also see [here](https://github.com/puremourning/vimspector#dependencies)|
+|[github/copilot.vim](https://github.com/github/copilot.vim)|[GitHub Copilot](https://github.com/github-copilot/signup)|
+|[CoderCookE/vim-chatgpt](https://github.com/CoderCookE/vim-chatgpt)|https://platform.openai.com/account/api-keys|
 
 # Recommendation commands / packages
 |command / package|purpose|use in vim if include|
@@ -73,6 +75,7 @@ also see [wiki-debug](https://github.com/serna37/vim/wiki/Debug)
 - [neoclide/coc.nvim](https://github.com/neoclide/coc.nvim)
 - [puremourning/vimspector](https://github.com/puremourning/vimspector)
 - [github/copilot.vim](https://github.com/github/copilot.vim)
+- [CoderCookE/vim-chatgpt](https://github.com/CoderCookE/vim-chatgpt)
 
 # Inspired Plugins (no install)
 this `vimrc` including functions inspired these plugins.
