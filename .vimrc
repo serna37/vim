@@ -751,6 +751,9 @@ endf
 
 fu! g:SetStatusLine() abort
     let mode = get(g:modes, mode(), ['#User_blackfg_redbg_bold#', '#User_redfg_blackbg#', 'SP'])
+    if &filetype == 'Bocchi_The_Rock'
+        let mode = ['#User_blackfg_greenbg_bold#', '#User_greenfg_blackbg#', 'BTR_start_menu']
+    endif
     retu '%'.mode[0].' '.mode[2].' '.'%'.mode[1].g:right_arrow.'%#User_blackfg_graybg#'.g:right_arrow
         \ .'%#User_greenfg_graybg# %<%f%m%r%h%w %#User_grayfg_blackbg#'.g:right_arrow
         \ .'%#User_greenfg_blackbg# %{g:gitinf}%*'.g:right_arrow
@@ -1464,6 +1467,8 @@ fu! s:emotion.exe() abort
     " create preview window
     sil! e 'emotion'
     setl buftype=nofile bufhidden=wipe nobuflisted
+    " fill blank
+    cal setline(1, range(1, self.sl)->map({->''}))
     cal self.previewini()
     " disable diagnostic
     if exists('*CocAction')
@@ -1473,14 +1478,12 @@ fu! s:emotion.exe() abort
     cal matchadd('EmotionBase', '.', 98)
     cal self.draw(self.keypos)
     cal popup_close(self.popid)
-    " TODO emotion popup color
     let self.popid = popup_create('e-motion', #{line: &lines, col: &columns*-1, mapping: 0, filter: self.char_enter})
+    cal setwinvar(self.popid, '&wincolor', 'DarkBlue')
     echo ''
 endf
 
 fu! s:emotion.previewini() abort
-    " fill blank
-    cal setline(1, range(1, self.sl)->map({->''}))
     " restore contents
     cal setline(self.sl, self.ctx)
     " restore cursor position
@@ -1560,15 +1563,14 @@ fu! s:emotion.char_enter(winid, key) abort
         " go out e-motion
         cal popup_close(self.popid)
         let p = getpos('.')
-        u
+        " close previeew
+        b #
         cal cursor(p[1],p[2])
         cal self.hl_del(['EmotionFin', 'EmotionWip', 'EmotionBase'])
-        " TODO ハイライトの優先度でよくね？
-        " restore f-scope
+        " restore diagnostic
         if exists('*CocAction')
             cal CocAction('diagnosticToggle')
         endif
-        ""cal s:fmode.takeover()
         cal EchoE('e-motion: go out')
         retu 1
     endif
@@ -1587,22 +1589,17 @@ fu! s:emotion.char_enter(winid, key) abort
         cal popup_close(self.popid)
         " close previeew
         b #
+        norm! zR
         cal cursor(self.keypos[0].row, self.keypos[0].col[0].pos)
         cal self.hl_del(['EmotionFin', 'EmotionWip', 'EmotionBase'])
-        " restore f-scope
-        " TODO ハイライトの優先度でよくね？
+        " restore diagnostic
         if exists('*CocAction')
             cal CocAction('diagnosticToggle')
         endif
-        ""cal s:fmode.takeover()
         cal EchoI('e-motion: finish')
         retu 1
     endif
     " redraw
-    let p = getpos('.')
-    u
-    cal cursor(p[1],p[2])
-    echo ''
     cal self.draw(self.keypos)
     retu 1
 endf
@@ -1993,16 +1990,21 @@ let s:start.cheat_sheet_win = [
     \]
 
 fu! s:start.exe() abort
-    " TODO ファイル指定でvim開いた時は出さない
+    let fopen = execute('ls')->split('\n')->map({_,v -> split(v, '"')[1]})
+            \ ->filter({_,v -> v != '[No Name]' && v != '[無名]'})->len()
+    if fopen
+        cal self.move()
+        retu
+    endif
     " preview window
-    sil! e '_start_menu_'
-    setl buftype=nofile bufhidden=wipe
+    sil! e '_start_menu_cheat_cheet_'
+    setl buftype=nofile bufhidden=wipe modifiable
     setl nonumber norelativenumber nocursorline nocursorcolumn signcolumn=no
+    let &filetype = 'Bocchi_The_Rock'
     nmap <buffer>i \<Esc>
     nmap <buffer>I \<Esc>
     nmap <buffer>a \<Esc>
     nmap <buffer>A \<Esc>
-    " TODO emotion preview window にしたら使用可能
     nmap <buffer>s \<Esc>
 
     " draw
@@ -2018,8 +2020,24 @@ fu! s:start.exe() abort
 
     " fix
     setl nomodifiable nomodified
-    " TODO 抜けた時にハイライト消す
 endf
+
+fu! s:start.move() abort
+    cal clearmatches()
+    cal s:fmode.activate()
+
+    " deactivate
+    aug start_vim
+        au!
+    aug END
+endf
+
+" only first call
+aug start_vim
+    au!
+    au VimEnter * cal s:start.exe()
+    au BufLeave * cal s:start.move()
+aug END
 " }}}
 
 " ===================================================================
@@ -2761,7 +2779,6 @@ endif
 " ##################        STARTING        ###################
 " #############################################################
 " {{{
-" TODO つくったりなおしたり
 
 aug base_color
     au!
@@ -2793,7 +2810,7 @@ let s:colors = {
       \ "background": get(s:overrides, "background", { "gui": "#282C34", "cterm": "235", "cterm16": "NONE" }),
       \ "comment_grey": get(s:overrides, "comment_grey", { "gui": "#5C6370", "cterm": "59", "cterm16": "7" }),
       \ "gutter_fg_grey": get(s:overrides, "gutter_fg_grey", { "gui": "#4B5263", "cterm": "238", "cterm16": "8" }),
-      \ "cursor_grey": get(s:overrides, "cursor_grey", { "gui": "#2C323C", "cterm": "236", "cterm16": "0" }),
+      \ "cursor_grey": get(s:overrides, "cursor_grey", { "gui": "#2C323C", "cterm": "242", "cterm16": "0" }),
       \ "visual_grey": get(s:overrides, "visual_grey", { "gui": "#3E4452", "cterm": "237", "cterm16": "8" }),
       \ "menu_grey": get(s:overrides, "menu_grey", { "gui": "#3E4452", "cterm": "237", "cterm16": "7" }),
       \ "special_grey": get(s:overrides, "special_grey", { "gui": "#3B4048", "cterm": "238", "cterm16": "7" }),
@@ -3389,9 +3406,6 @@ hi link gitcommitUnmergedArrow gitcommitUnmergedFile
 
 
 " }}}
-
-cal s:fmode.activate()
-cal s:start.exe()
 
 " }}}
 
