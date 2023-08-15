@@ -432,14 +432,13 @@ noremap <silent><Plug>(anchor) :<C-u>cal <SID>anchor()<CR>
 " Fuzzy search current file {{{
 fu! s:fuzzySearch() abort
     " quickfix fuzzySearch
+    " TODO 無名バッファでもここはいっちゃう
     if expand('%')->empty()
         cal s:fzsearch.popup(#{
             \ title: 'QuickFix',
             \ list: getline(1, line('$')),
-            \ list_filetype: &filetype,
-            \ preview_type: 'this',
+            \ type: 'flm',
             \ enter_prefix: 0,
-            \ qftype: 'qf',
             \ })
         retu
     endif
@@ -447,10 +446,8 @@ fu! s:fuzzySearch() abort
     cal s:fzsearch.popup(#{
         \ title: 'Current Buffer',
         \ list: getline(1, line('$'))->map({ i,v -> i+1.': '.v }),
-        \ list_filetype: &filetype,
-        \ preview_type: 'this',
+        \ type: 'lm',
         \ enter_prefix: 0,
-        \ qftype: 'this',
         \ })
 endf
 
@@ -864,9 +861,8 @@ noremap <silent><Plug>(buf-close) :<C-u>cal <SID>closeBuf()<CR>
 " usage
 " let arguments_def = #{
 "     \ title: popup title as String,
-"     \ list: search targets as List (preview_type=file? filepath this? no: value),
-"     \ list_filetype: syntax highlight filetype as String (0 ignore),
-"     \ preview_type: file or this (list elem = filepath or lnum: char),
+"     \ list: search targets as List,
+"     \ type: format in list. f, lm, flm (file, line, msg),
 "     \ enter_prefix: enter zone prefix text as String (0 to default value),
 "     \ }
 " and call like this.
@@ -890,14 +886,18 @@ let s:fzsearch.allow_exts = glob($VIMRUNTIME.'/ftplugin/*.vim')->split('\n')
             \ ->map({_,v->matchstr(v,'[^/]\+\.vim')->split('\.')[0]})
 
 fu! s:fzsearch.popup(v) abort
+    if empty(a:v.list)
+        cal EchoE('no data')
+        retu
+    endif
     let self.list = a:v.list
     let self.wd = ''
     let self.max = 50
     let self.res = a:v.list[0:self.max]
     let self.ridx = 0
     let self.pr = a:v.enter_prefix ?? '>>'
-    let self.pv_upd = a:v.preview_type == 'file'
-    let self.qftype = a:v.qftype
+    let self.type = a:v.type
+    " TODO preview typeとqf typeおんなじなのでまとめる
 
     let self.bwid = popup_create([], #{title: ' '.a:v.title.' ',
         \ zindex: 50, mapping: 0, scrollbar: 0,
@@ -925,16 +925,26 @@ fu! s:fzsearch.popup(v) abort
         \ callback: 's:fzsearch_confirm',
         \ filter: function(self.jk, [0]),
         \ })
-    if !a:v.list_filetype
-        cal setbufvar(winbufnr(self.rwid), '&filetype', a:v.list_filetype)
+    if self.type == 'lm'
+        cal setbufvar(winbufnr(self.rwid), '&filetype', &filetype)
+    elseif self.type == 'flm'
+        cal setbufvar(winbufnr(self.rwid), '&filetype', 'vim')
     endif
 
-    let path = a:v.preview_type == 'this' ? bufname('%') : substitute(self.res[0], '\~', $HOME, 'g')
+    " get preview file
+    let path = bufname('%')
+    if self.type =~ 'flm'
+        let path = split(self.res[0], '|')[0]
+    elseif self.type =~ 'f'
+        let path = substitute(self.res[0], '\~', $HOME, 'g')
+    endif
     let read = ['Cannot open file.', 'please check this file path.', path]
     try
         let read = readfile(path)
     catch
     endtry
+
+    " preview
     let self.pwid = popup_menu(read, #{title: ' File Preview | Scroll: <C-d/u> ',
         \ zindex: 98, mapping: 0, scrollbar: 1,
         \ border: [], borderchars: ['─','│','─','│','╭','╮','╯','╰'],
@@ -944,16 +954,17 @@ fu! s:fzsearch.popup(v) abort
         \ firstline: 1,
         \ filter: function(self.pv, [0]),
         \ })
+
+    " get preview ext for syntax highlight
     let ext = matchstr(path, '[^\.]\+$')
     let ext = ext !~ '^[a-zA-Z0-9]\+$' ? '' : ext
-    if has_key(self.ffdict, ext)
-        let ext = self.ffdict[ext]
-    elseif match(self.allow_exts, ext) == -1
-        let ext = ''
-    endif
-    cal setbufvar(winbufnr(self.pwid), '&filetype', self.pv_upd ? ext : &filetype)
-    if empty(self.res)
-        cal popup_setoptions(self.pwid, #{firstline: split(self.res[self.ridx], ':')[0]})
+    let ext = get(self.ffdict, ext, ext)
+    cal setbufvar(winbufnr(self.pwid), '&filetype', self.type =~ 'f' ? ext : &filetype)
+    if self.type == 'flm'
+        let lnm = split(split(self.res[0], '|')[1], ' ')[0]
+        cal popup_setoptions(self.pwid, #{firstline: lnm})
+    else
+        cal popup_setoptions(self.pwid, #{firstline: split(self.res[0], ':')[0]})
     endif
 endf
 
@@ -965,13 +976,14 @@ fu! s:fzsearch_confirm(wid, idx) abort
         retu
     endif
     let result = s:fzsearch.res[a:idx-1]
-    if s:fzsearch.qftype == 'file'
+
+    if s:fzsearch.type == 'f'
         exe 'e '.result
-    elseif s:fzsearch.qftype == 'this'
+    elseif s:fzsearch.type == 'lm'
         let l = split(result, ':')[0]
         cal EchoI('jump to '.l)
         exe l
-    elseif s:fzsearch.qftype == 'qf'
+    elseif s:fzsearch.type == 'flm'
         let fnm = split(result, '|')[0]
         let lnm = split(split(result, '|')[1], ' ')[0]
         cal feedkeys("\<C-w>k:e ".fnm." | ".lnm."\<CR>")
@@ -985,13 +997,19 @@ fu! s:fzsearch.quickfix() abort
     let resource = self.res
     let ef = '%f: %l: %m'
 
-    if self.qftype == 'this'
+    if self.type == 'lm'
         let fnm = expand('%')
         let resource = deepcopy(self.res)->map({_,v->fnm.': '.v})
-    elseif self.qftype == 'file'
+    elseif self.type == 'f'
         let resource = deepcopy(self.res)->map({_,v->v.': 1: open'})
-    elseif self.qftype == 'qf'
-        let resource = deepcopy(self.res)->map({_,v->split(v,'|')[0].': '.split(split(v,'|')[1], ' ')[0].': '.join(split(v,'|')[2:], '')})
+    elseif self.type == 'flm'
+        " sample
+        " filename|100 col 10-15|message
+        " want-> filename, 100, message
+        let resource = deepcopy(self.res)->map({_,v
+                    \ ->split(v,'|')[0].': '
+                    \ .split(split(v,'|')[1], ' ')[0].': '
+                    \ .join(split(v,'|')[2:], '')})
     endif
 
     let &errorformat = ef
@@ -1029,41 +1047,45 @@ endf
 " preview draw update
 fu! s:fzsearch.pvupd() abort
     let win = winbufnr(self.pwid)
-    if self.pv_upd
-        " del
-        cal deletebufline(win, 1, getbufinfo(win)[0].linecount)
-        echo ''
-        " put
-        if empty(self.res)
-            retu
-        endif
-        let path = substitute(self.res[self.ridx], '\~', $HOME, 'g')
-        let read = ['Cannot open file.', 'please check this file path.', path]
-        try
-            let read = readfile(path)
-        catch
-        endtry
-        cal setbufline(win, 1, read)
-        " syntax
-        let ext = matchstr(path, '[^\.]\+$')
-        let ext = ext !~ '^[a-zA-Z0-9]\+$' ? '' : ext
-        if has_key(self.ffdict, ext)
-            let ext = self.ffdict[ext]
-        elseif match(self.allow_exts, ext) == -1
-            let ext = ''
-        endif
-        cal setbufvar(win, '&filetype', ext)
-        " line
-        cal popup_setoptions(self.pwid, #{firstline: 1})
+
+    if empty(self.res) && self.type == 'lm'
+        retu
+    endif
+    if self.type == 'lm'
+        cal popup_setoptions(self.pwid, #{firstline: split(self.res[self.ridx], ':')[0]})
         retu
     endif
 
+    " TODO preview typeとqf typeおんなじなのでまとめる
+
+    " del
+    sil! cal deletebufline(win, 1, getbufinfo(win)[0].linecount)
+    " put
     if empty(self.res)
         retu
     endif
+    let path = self.type == 'flm'
+                \ ? split(self.res[self.ridx], '|')[0]
+                \ : substitute(self.res[self.ridx], '\~', $HOME, 'g')
+    let read = ['Cannot open file.', 'please check this file path.', path]
+    try
+        let read = readfile(path)
+    catch
+    endtry
+    cal setbufline(win, 1, read)
+    " syntax
+    let ext = matchstr(path, '[^\.]\+$')
+    let ext = ext !~ '^[a-zA-Z0-9]\+$' ? '' : ext
+    let ext = get(self.ffdict, ext, ext)
+    cal setbufvar(win, '&filetype', ext)
+    " line
+    let lnm = self.type == 'flm'
+                \ ? split(split(self.res[self.ridx], '|')[1], ' ')[0]
+                \ : 1
+    cal popup_setoptions(self.pwid, #{firstline: lnm})
+
     " TODO fzf preview scroll 上に余白ほしい
     " TODO fzf preview カーソル位置が行数と合わないのでなんか変
-    cal popup_setoptions(self.pwid, #{firstline: split(self.res[self.ridx], ':')[0]})
 endf
 
 " search result update
@@ -1198,10 +1220,8 @@ fu! s:fzf_histories()
     cal s:fzsearch.popup(#{
         \ title: 'Histories',
         \ list: execute('ol')->split('\n')->map({_,v -> split(v, ': ')[1]}),
-        \ list_filetype: 0,
-        \ preview_type: 'file',
+        \ type: 'f',
         \ enter_prefix: '['.substitute(getcwd(), $HOME, '~', 'g').']>>',
-        \ qftype: 'file',
         \ })
 endf
 
@@ -1210,10 +1230,8 @@ fu! s:fzf_buffers()
         \ title: 'Buffers',
         \ list: execute('ls')->split('\n')->map({_,v -> split(v, '"')[1]})
             \ ->filter({_,v -> v != '[No Name]' && v != '[無名]'}),
-        \ list_filetype: 0,
-        \ preview_type: 'file',
+        \ type: 'f',
         \ enter_prefix: '['.substitute(getcwd(), $HOME, '~', 'g').']>>',
-        \ qftype: 'file',
         \ })
 endf
 " =====================
@@ -1271,10 +1289,8 @@ fu! s:fzf.files() abort
     cal s:fzsearch.popup(#{
         \ title: self.is_git ? 'Project Files' : 'Files',
         \ list: self.is_git ? self.gcache : self.cache,
-        \ list_filetype: 0,
-        \ preview_type: 'file',
+        \ type: 'f',
         \ enter_prefix: '['.substitute(pwd, $HOME, '~', 'g').']>>',
-        \ qftype: 'file',
         \ })
 endf
 
@@ -1890,13 +1906,12 @@ fu! s:mk.listcb() abort
         cal EchoE('no marks')
         retu
     endif
+    " TODO mk ファイル跨ぐように、全部みる
     cal s:fzsearch.popup(#{
         \ title: 'Marks in Current Buffer',
         \ list: sort(list, { x,y -> x.lnum - y.lnum })->map({ _,v -> v.lnum.': '.getline(v.lnum)}),
-        \ list_filetype: &filetype,
-        \ preview_type: 'this',
+        \ type: 'lm',
         \ enter_prefix: 0,
-        \ qftype: 'this',
         \ })
 endf
 
@@ -1995,7 +2010,7 @@ let s:start.cheat_sheet_win = [
     \'       │ C-w v / s  | (window split)(vertical / horizontal) │           │ Space h    | (fzf)(histories)                   │',
     \'       │ ←↑↓→       | (window)(resize)                      │           │ Space b    | (fzf)(buffers)                     │',
     \'       │ C-hjkl     | (window)(forcus)                      │           │ Space m    | (marks)                            │',
-    \'       │ Space t    | (terminal)                            │           │ Space s    | (fuzzy search current file)        │',
+    \'       │ Space t    | (terminal)                            │           │ Space s    | (fuzzy search in file / quickfix)  │',
     \'       │ Space z    | (Zen Mode)                            │           │ Space*2 s  | (grep current file)                │',
     \'       ╰────────────────────────────────────────────────────╯           │ Space g    | (grep free interactive)            │',
     \'                                                                        │ Space q    | (clear search highlight)           │',
