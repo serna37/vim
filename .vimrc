@@ -219,7 +219,7 @@ set regexpengine=0 " chose regexp engin
 " fold
 set foldmethod=marker " fold marker
 set foldlevel=0 " fold max depth
-set foldlevelstart=1 " fold depth on start view
+set foldlevelstart=5 " fold depth on start view
 set foldcolumn=1 " fold preview
 " }}}
 " }}}
@@ -1056,15 +1056,8 @@ fu! s:fzsearch.list_upd() abort
     cal setbufline(winbufnr(self.rwid), 1, self.res)
     " highlight match char
     cal clearmatches(self.rwid)
-    " [] で囲えば良い
-    " TODO fzf vim マッチ正規表現
-    " ドットはエスケープ
-    for i in range(0, strlen(self.wd)-1)
-        let char = strpart(self.wd, i, 1)
-        if char != '.'
-            cal matchadd('DarkRed', char, 16, -1, #{window: self.rwid})
-        endif
-    endfor
+    let char = printf('[%s]', escape(self.wd, '\.'))
+    cal matchadd('DarkRed', char, 16, -1, #{window: self.rwid})
     " upd preview
     cal self.pvupd()
 endf
@@ -2078,17 +2071,14 @@ aug END
 " ##################      PLUG MANAGE       ################### {{{
 " repo
 " neoclide/coc.nvim has special args
-" TODO delete some
 let s:plug = #{}
 let s:plug.repos = [
-    \ 'thinca/vim-quickrun',
-    \ 'CoderCookE/vim-chatgpt',
-    \ 'github/copilot.vim',
     \ 'puremourning/vimspector',
+    \ 'github/copilot.vim',
+    \ 'CoderCookE/vim-chatgpt',
     \ ]
 
 " coc extentions
-    ""\ 'coc-fzf-preview', 'coc-explorer', 'coc-lists', 'coc-snippets',
 let s:plug.coc_extentions = [
     \ 'coc-explorer', 'coc-snippets',
     \ 'coc-sh', 'coc-vimlsp', 'coc-json', 'coc-sql', 'coc-html', 'coc-css',
