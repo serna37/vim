@@ -9,8 +9,7 @@ WIP
 
 # Plugin's Dependencies
 if install plugins by `:PlugInstall` command, need here.<br>
-alse see TODO READMEの下に用意
-also see [wiki-plugins-list](https://github.com/serna37/vim/wiki/Plugins)
+alse see [Install_Plugins](#Install_Plugins)
 
 |plugins|dependencies|
 |--|--|
@@ -65,12 +64,16 @@ other commands / keymaps details are in cheat sheet.<br>
 ※ Needs [GitHub Copilot](https://github.com/github-copilot/signup)
 
 # How to use
-see [wiki-cheat-sheet](https://github.com/serna37/vim/wiki/Cheat-Sheet)<br>
-TODO startifyに書いてある胸を記載<br>
+When you start vim with no args like
+```
+vim
+```
+You can see cheat sheet on start menu. This is here.
+![cheat_sheet.png](sample/cheat_sheet.png)
 
 also see [wiki-debug](https://github.com/serna37/vim/wiki/Debug)
 
-# Install Plugins
+# Install_Plugins
 `:PlugInstall` command install these plugins.
 - [neoclide/coc.nvim](https://github.com/neoclide/coc.nvim)
 - [puremourning/vimspector](https://github.com/puremourning/vimspector)
