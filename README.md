@@ -101,7 +101,6 @@ this `vimrc` including these functions.
 - Grep Current File
 - Grep Recursive Interactive
 - IDE menu
-- Cheat Sheet
 - Completion
 - PlugInstall / PlugUnInstall
 - Training Wheels Protocol

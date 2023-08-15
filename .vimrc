@@ -625,158 +625,6 @@ let s:idemenuopen = s:idemenu.open
 noremap <silent><Plug>(ide-menu) :<C-u>cal <SID>idemenuopen()<CR>
 " }}}
 
-" cheat sheet {{{
-
-" TODO cheat sheet startifyのあとでリファクタ
-" IDE menuにある程度キーマップ入れても良いかもね
-" PlugInstallとか、使わんものはコマンド
-" 通常vim操作は書かない
-" その他の割り当ててる関数とかをまとめる
-" ただのキーマップで住んでるものは書かない
-" INSERT C-h とかはかかんで良い
-" Tabもいらん
-" ページ切り替えとかもいらん、その辺はstartifyに書く
-" window系もいらん
-"
-" IDE menuで書くもの -> いや多いな,,, 整理しよう
-" emotion
-" emotion search
-" current grep
-" full grep
-" fzf his buffer
-" explorer line jumped changed
-" mark
-" ハイライト消す
-" visualでのブロック移動
-
-
-" cursor hold
-" motion cheat sheet on popup
-
-augroup cheat_sheet_hover
-    au!
-    autocmd CursorHold * silent cal s:CheatSheet()
-    autocmd CursorMoved * silent cal s:CheatSheetClose()
-    autocmd CursorMovedI * silent cal s:CheatSheetClose()
-augroup END
-
-" TODO fix cheatsheet color
-let s:my_vim_cheet_sheet = [
-      \' --[window]---------------------------------------------- ',
-      \' (C-n/p)(Space x)   [buffer tab][next/prev/close] ',
-      \' (←↑↓→)(C-hjkl)     [window][resize/forcus] ',
-      \' (Space t)(Space z) [terminal][Zen Mode] ',
-      \' --[motion]---------------------------------------------- ',
-      \' (Space v)      [IDE Action Menu] ',
-      \' (Tab S-Tab)    [jump][5rows] ',
-      \' (s)(Space s)   [easymotion incremental(Tab)] ',
-      \' (Space w)      [f-scope toggle] ',
-      \' (mm/mn/mp/mc)  [mark(toggle)/next/prev/clear] ',
-      \' INSERT(C-hjkl) [cursor move] ',
-      \' VISUAL(C-jk)   [blok up/down] ',
-      \' --[search]---------------------------------------------- ',
-      \' (Space fhb)    [fzf][files/histories/buffers] ',
-      \' (Space ejclm)  [explorer/jumped/changed/line/marks] ',
-      \' (Space g)(Space*2 s)  [grep][buffer grep incremental] ',
-      \' (Space q)      [clear search highlight] ',
-      \' --[command]--------------------------------------------- ',
-      \' (:PlugUnInstall)          [plugins uninstall] ',
-      \' (:TrainingWheelsProtocol) [training default vim]',
-      \' (:RunCat :RunCatStop) [running cat]',
-      \' -------------------------------------------------------- ',
-      \' (Space*3)      [ON/OFF Cheat Sheet] ',
-      \]
-
-" no plugin version
-if glob('~/.vim/pack/plugins/start') == ''
-    let s:my_vim_cheet_sheet = [
-        \' --[window]---------------------------------------------- ',
-        \' (C-n/p)(Space x)   [buffer tab][next/prev/close] ',
-        \' (←↑↓→)(C-hjkl)  [window][resize/forcus] ',
-        \' (Space t)(Space z) [terminal][Zen Mode] ',
-        \' --[motion]---------------------------------------------- ',
-        \' (Space v)      [IDE Action Menu] some are dosabled ',
-        \' (Tab S-Tab)    [jump][5rows] ',
-        \' (Space w)      [f-scope toggle] ',
-        \' (mm/mn/mp/mc)  [mark(toggle)/next/prev/clear] ',
-        \' INSERT(C-hjkl) [cursor move] ',
-        \' VISUAL(C-jk)   [blok up/down] ',
-        \' --[search]---------------------------------------------- ',
-        \' (Space fhb)   [fzf-mimic][files/histories/buffers] ',
-        \' (Space em)  [explorer(netrw)/marks] ',
-        \' (Space g)(Space*2 s)   [grep][buffer grep] ',
-        \' (Space q)   [clear search highlight] ',
-        \' --[command]--------------------------------------------- ',
-        \' (:PlugInstall)      [plugins install] ',
-        \' (:TrainingWheelsProtocol) [training default vim]',
-        \' (:RunCat :RunCatStop) [running cat]',
-        \' -------------------------------------------------------- ',
-        \' (Space*3)      [ON/OFF Cheat Sheet] ',
-        \]
-endif
-
-let s:cheat_sheet_open_flg = 0
-let s:cheatwinid = 0
-let s:cheat_sheet_timer_id = 0
-fu! s:CheatSheetPopup(timer)
-    let s:cheatwinid = popup_create(s:my_vim_cheet_sheet, #{ title: ' Action Cheet Sheet ', border: [], zindex: 1, line: "cursor+1", col: "cursor" })
-endf
-
-fu! s:CheatSheet()
-    if s:show_cheat_sheet_flg == 0
-        cal timer_stop(s:cheat_sheet_timer_id)
-        retu
-    endif
-    if s:cheat_sheet_open_flg == 0
-        let s:cheat_sheet_open_flg = 1
-        cal timer_stop(s:cheat_sheet_timer_id)
-        let s:cheat_sheet_timer_id = timer_start(10000, function("s:CheatSheetPopup"))
-    endif
-endf
-fu! s:CheatSheetClose()
-    if s:show_cheat_sheet_flg == 0
-        cal timer_stop(s:cheat_sheet_timer_id)
-        retu
-    endif
-    let s:cheat_sheet_open_flg = 0
-    cal popup_close(s:cheatwinid)
-    cal timer_stop(s:cheat_sheet_timer_id)
-endf
-
-" TODO startifyとかにあわせ、いろいろ変える
-nnoremap <silent><Leader><Leader><Leader> :cal <SID>PopupFever()<CR>:cal <SID>ToggleCheatHover()<CR>
-let s:show_cheat_sheet_flg = 0
-fu! s:CheatAlert(tid)
-    execute("echohl WarningMsg | echo '[INFO] Space * 3 to enable cheat sheet !!' | echohl None")
-endf
-if has('vim_starting')
-    cal timer_start(200, function("s:CheatAlert"))
-endif
-let s:recheatwinid = 0
-fu! s:PopupFever()
-    cal s:runcat.start()
-    let s:recheatwinid = popup_create(s:my_vim_cheet_sheet, #{ title: ' Action Cheet Sheet ', border: [], line: &columns/4 })
-    let s:logowinid = popup_create(g:btr_logo, #{ border: [] })
-endf
-fu! s:PopupFeverStop()
-    cal s:runcat.stop()
-    cal popup_close(s:recheatwinid )
-    cal popup_close(s:logowinid)
-endf
-fu! s:ToggleCheatHover()
-    let msg = 'Disable Cheat Sheet Hover'
-    if s:show_cheat_sheet_flg == 1
-        let s:show_cheat_sheet_flg = 0
-    else
-        let msg = 'Enable Cheat Sheet Hover'
-        let s:show_cheat_sheet_flg = 1
-    endif
-    let s:checkwinid = popup_notification(msg, #{ border: [], line: &columns/4-&columns/37, close: "button" })
-    cal timer_start(3000, { -> s:PopupFeverStop()})
-endf
-
-" }}}
-
 " completion {{{
 " TODO リファクタ
 " TODO ~の後ろで正規表現やりに行っちゃう。=は大丈夫
@@ -1202,6 +1050,9 @@ fu! s:fzsearch.list_upd() abort
     cal setbufline(winbufnr(self.rwid), 1, self.res)
     " highlight match char
     cal clearmatches(self.rwid)
+    " [] で囲えば良い
+    " TODO fzf vim マッチ正規表現
+    " ドットはエスケープ
     for i in range(0, strlen(self.wd)-1)
         let char = strpart(self.wd, i, 1)
         if char != '.'
@@ -1566,8 +1417,11 @@ fu! s:emotion.exe() abort
     let wininfo = []
     let tarcnt = 0
     let rn = line('w0')
-    let crn = line('.')
-    for l in getline('w0', 'w$')
+    let self.cl = line('.')
+    let self.cc = col('.')
+    let self.sl = line('w0')
+    let self.ctx = getline('w0', 'w$')
+    for l in self.ctx
         " loop row without 'including MultiByte' and 'empty', get head chars
         " 日本語は1文字でマルチバイト3文字分だが、カーソル幅は2なのでめんどい、日本語を含む行は弾く
         if l !~ '^[ -~|\t]\+$'
@@ -1599,7 +1453,7 @@ fu! s:emotion.exe() abort
     let keyOrder = range(1, self.klen)->map({->0})
     " sort near current line, create 'self_keypos' map like this
     " [{'row': 1000, 'col': [{'key': 'ssw', 'pos': 7}, ... ]}, ... ]
-    for r in sort(deepcopy(wininfo), { x,y -> abs(x.row-crn) - abs(y.row-crn) })
+    for r in sort(deepcopy(wininfo), { x,y -> abs(x.row-self.cl) - abs(y.row-self.cl) })
         let tmp = []
         for col in r.col
             cal add(tmp, #{key: copy(keyOrder)->map({i,v->self.keys[v]})->join(''), pos: col})
@@ -1607,16 +1461,32 @@ fu! s:emotion.exe() abort
         endfor
         cal add(self.keypos, #{row: r.row, col: tmp})
     endfor
-    " draw , disable syntax diagnostic if exists
+    " create preview window
+    sil! e 'emotion'
+    setl buftype=nofile bufhidden=wipe nobuflisted
+    cal self.previewini()
+    " disable diagnostic
     if exists('*CocAction')
         cal CocAction('diagnosticToggle')
     endif
-    cal range(line('w0'), line('w$'))->map({ _,v -> matchaddpos('EmotionBase', [v], 98) })
+    " draw
+    cal matchadd('EmotionBase', '.', 98)
     cal self.draw(self.keypos)
     cal popup_close(self.popid)
     " TODO emotion popup color
     let self.popid = popup_create('e-motion', #{line: &lines, col: &columns*-1, mapping: 0, filter: self.char_enter})
     echo ''
+endf
+
+fu! s:emotion.previewini() abort
+    " fill blank
+    cal setline(1, range(1, self.sl)->map({->''}))
+    " restore contents
+    cal setline(self.sl, self.ctx)
+    " restore cursor position
+    cal cursor(self.sl+5, self.cc)
+    norm! zt
+    cal cursor(self.cl, self.cc)
 endf
 
 " function: increment N order
@@ -1651,6 +1521,7 @@ endf
 " 日本語は1文字でマルチバイト3文字分だが、カーソル幅は2なのでめんどいから弾いてある
 " posの次文字がマルチバイトだと、strokeが2回以上残ってる時、変に文字を書き換えてカラム数変わる
 fu! s:emotion.draw(keypos) abort
+    cal self.previewini()
     cal self.hl_del(['EmotionFin', 'EmotionWip'])
     let hlpos_wip = []
     let hlpos_fin = []
@@ -1714,7 +1585,8 @@ fu! s:emotion.char_enter(winid, key) abort
     " if last match -> end e-motion
     if len(self.keypos) == 1 && len(self.keypos[0].col) == 1
         cal popup_close(self.popid)
-        u
+        " close previeew
+        b #
         cal cursor(self.keypos[0].row, self.keypos[0].col[0].pos)
         cal self.hl_del(['EmotionFin', 'EmotionWip', 'EmotionBase'])
         " restore f-scope
@@ -2047,11 +1919,11 @@ fu! s:zenModeToggle() abort
     norm zR
     set nonumber norelativenumber nocursorline nocursorcolumn laststatus=0 showtabline=0
     vert to new
-    setl buftype=nofile bufhidden=wipe nomodifiable nobuflisted noswapfile nonu noru winfixheight
+    setl buftype=nofile bufhidden=wipe nomodifiable nobuflisted nonu noru winfixheight
     vert res 40
     exe winnr('#').'wincmd w'
     vert bo new
-    setl buftype=nofile bufhidden=wipe nomodifiable nobuflisted noswapfile nonu noru winfixheight
+    setl buftype=nofile bufhidden=wipe nomodifiable nobuflisted nonu noru winfixheight
     vert res 40
     exe winnr('#').'wincmd w'
     "['NonText', 'FoldColumn', 'ColorColumn', 'VertSplit', 'StatusLine', 'StatusLineNC', 'SignColumn']
@@ -2067,15 +1939,87 @@ noremap <silent><Plug>(zen-mode) :<C-u>cal <SID>zenModeToggle()<CR>
 " mhinz/vim-startify
 " ===================================================================
 " {{{
-" TODO 作成
+let s:start = #{}
 
-" TODO startify
+" ぼっちざろっく{{{
+let s:start.btr_logo = [
+    \'                                                                                                                                              dN',
+    \'                                                                                                              ..                             JMF',
+    \'                                                                                                         ..gMMMM%                           JMF',
+    \'                                                                                                       .MM9^ .MF                           (MF',
+    \'                                                                                              .(,      ("   .M#                  .g,      .MF',
+    \'                                        .,  dN                                             gg,,M@          .M#                  .M#!      (M>',
+    \'                                        JM} M#             .MNgg.                     .g,  ?M[ 7B         .MMg+gg,.           .MM"        ."',
+    \'                                ...gNMN,.Mb MN           .gMM9!                      .(MN,  .=           .MMM9=  ?MN,         (WN,      .MM ',
+    \'                   jN-      ..gMMN#!     (Mp(M}       .+MMYMF                    ..kMMWM%               ,M#^       dN.          .WNJ,   JM',
+    \'                   MM     .MM9^  dN,                 dNB^ (M%                   ?M"!  ,M\        .,               .M#   .&MMMN,    ?"   M#',
+    \'                   MN            .MN#^                    dM:  ..(J-,                 ,B         .TM             .M#   ,M@  .MF',
+    \'                   MN.       ..MMBMN_                     dN_.MM@"!?MN.   TMm     .a,                           (M@         MM^',
+    \'                   MN.     .MM"  JMb....       ..        dMMM=     .Mb            ?HNgJ..,                   .MM^',
+    \'                   dM{          -MMM#7"T""   .dN#TMo       ?      .MM^                 ?!                 +gM#=',
+    \'                   (M]         .MN(N#       .M@  .MF              .MM^                                      ~',
+    \'                   .MN          ?"""             MM!            .MMD',
+    \'                    ?N[                                         7"',
+    \'                     TMe',
+    \'                      ?MN,',
+    \'                        TMNg,'
+    \]
+"}}}
 
+let s:start.cheat_sheet_win = [
+    \'       ╭── Window ──────────────────────────────────────────╮           ╭── Search ───────────────────────────────────────╮',
+    \'       │ C-n / p    | (buffer tab)(next / prev)             │           │ Space e    | (explorer)                         │',
+    \'       │ Space x    | (buffer tab)(close)                   │           │ Space f    | (fzf)(files / projectfiles auto)   │',
+    \'       │ C-w v / s  | (window split)(vertical / horizontal) │           │ Space h    | (fzf)(histories)                   │',
+    \'       │ ←↑↓→       | (window)(resize)                      │           │ Space b    | (fzf)(buffers)                     │',
+    \'       │ C-hjkl     | (window)(forcus)                      │           │ Space m    | (marks)                            │',
+    \'       │ Space t    | (terminal)                            │           │ Space s    | (fuzzy search current file)        │',
+    \'       │ Space z    | (Zen Mode)                            │           │ Space*2 s  | (grep current file)                │',
+    \'       ╰────────────────────────────────────────────────────╯           │ Space g    | (grep free interactive)            │',
+    \'                                                                        │ Space q    | (clear search highlight)           │',
+    \'                                                                        ╰─────────────────────────────────────────────────╯',
+    \'',
+    \'       ╭── Motion ───────────────────────────────────────────╮          ╭── Command ──────────────────────────────────────────╮',
+    \'       │ Space v       | (IDE Action Menu)                   │          │ :PlugInstall            | (plugins install)         │',
+    \'       │ Space w       | (f-scope toggle)                    │          │ :PlugUnInstall          | (plugins uninstall)       │',
+    \'       │ Tab S-Tab     | (jump 5rows)                        │          │ :RunCat [option]        | (running cat)             │',
+    \'       │ s             | (easymotion)                        │          │ :RunCatStop             | (running cat stop)        │',
+    \'       │ mm            | (mark toggle)                       │          │ :TrainingWheelsProtocol | [option] (training vim)   │',
+    \'       │ mn / mp       | (mark next / prev)                  │          ╰─────────────────────────────────────────────────────╯',
+    \'       │ mc / mx       | (mark clear file / delete all file) │',
+    \'       │ INSERT C-hjkl | (cursor move)                       │',
+    \'       │ VISUAL C-jk   | (blok up / down)                    │',
+    \'       ╰─────────────────────────────────────────────────────╯',
+    \]
 
+fu! s:start.exe() abort
+    " TODO ファイル指定でvim開いた時は出さない
+    " preview window
+    sil! e '_start_menu_'
+    setl buftype=nofile bufhidden=wipe
+    setl nonumber norelativenumber nocursorline nocursorcolumn signcolumn=no
+    nmap <buffer>i \<Esc>
+    nmap <buffer>I \<Esc>
+    nmap <buffer>a \<Esc>
+    nmap <buffer>A \<Esc>
+    " TODO emotion preview window にしたら使用可能
+    nmap <buffer>s \<Esc>
 
+    " draw
+    cal append('$', self.btr_logo)
+    cal append('$', ['',''])
+    cal append('$', self.cheat_sheet_win)
+    hi BTR ctermfg=218 cterm=bold
+    cal matchaddpos('BTR', range(2,21)->map({_,v->[v]}), 999)
+    cal matchadd('Title', '[─│╰╯╭╮]', 20)
+    cal matchadd('DarkOrange', '\(Window\|Search\|Motion\|Command\)')
+    cal matchadd('DarkBlue', '│.\{-,25}|', 19)
+    cal matchadd('DarkRed', '(.*)', 18)
 
-
-
+    " fix
+    setl nomodifiable nomodified
+    " TODO 抜けた時にハイライト消す
+endf
 " }}}
 
 " ===================================================================
@@ -2116,9 +2060,10 @@ noremap <silent><Plug>(zen-mode) :<C-u>cal <SID>zenModeToggle()<CR>
 " TODO delete some
 let s:plug = #{}
 let s:plug.repos = [
-    \ 'mhinz/vim-startify',
     \ 'thinca/vim-quickrun',
-    \ 'github/copilot.vim', 'puremourning/vimspector',
+    \ 'mattn/vim-chatgpt',
+    \ 'github/copilot.vim',
+    \ 'puremourning/vimspector',
     \ ]
 
 " coc extentions
@@ -2202,7 +2147,6 @@ let s:training_popup_tips_win_tid = 0
 
 fu! TrainingWheelsPopupsActivate()
     cal TrainingWheelsPratticeFileCreate()
-    let s:show_cheat_sheet_flg = 0 " my cheat sheet disable
     cal TrainingWheelsPopupsAllClose()
     let s:training_info_idx = 0
     highlight TrainingNotification ctermfg=green guifg=green
@@ -2257,7 +2201,6 @@ fu! TrainingWheelsPopupsActivateQuick()
         retu
     endif
 
-    let s:show_cheat_sheet_flg = 0 " my cheat sheet disable
     cal popup_notification([' Traning Wheels Activated. ',' :TrainingWheelsProtocol 0  to DeActivate. '],#{border:[]})
     let s:training_info_idx = len(s:training_info_txt)
     cal TrainingWheelsPopupsAllClose()
@@ -2282,7 +2225,6 @@ fu! TrainingWheelsPopupsDeActivate()
         retu
     endif
 
-    let s:show_cheat_sheet_flg = 1 " my cheat sheet enable
     augroup training_tips_popup
         au!
     augroup END
@@ -2785,36 +2727,6 @@ let g:vimspector_enable_mappings = 'VISUAL_STUDIO'
 set rtp+=~/.vim/pack/plugins/start/fzf
 set rtp+=/opt/homebrew/opt/fzf
 
-" startify
-" ぼっちざろっく{{{
-let g:btr_logo = [
-    \'                                                                                                                           dN',
-    \'                                                                                           ..                             JMF',
-    \'                                                                                      ..gMMMM%                           JMF',
-    \'                                                                                    .MM9^ .MF                           (MF',
-    \'                                                                           .(,      ("   .M#                  .g,      .MF',
-    \'                     .,  dN                                             gg,,M@          .M#                  .M#!      (M>',
-    \'                     JM} M#             .MNgg.                     .g,  ?M[ 7B         .MMg+gg,.           .MM"        ."',
-    \'             ...gNMN,.Mb MN           .gMM9!                      .(MN,  .=           .MMM9=  ?MN,         (WN,      .MM ',
-    \'jN-      ..gMMN#!     (Mp(M}       .+MMYMF                    ..kMMWM%               ,M#^       dN.          .WNJ,   JM',
-    \'MM     .MM9^  dN,                 dNB^ (M%                   ?M"!  ,M\        .,               .M#   .&MMMN,    ?"   M#',
-    \'MN            .MN#^                    dM:  ..(J-,                 ,B         .TM             .M#   ,M@  .MF',
-    \'MN.       ..MMBMN_                     dN_.MM@"!?MN.   TMm     .a,                           (M@         MM^',
-    \'MN.     .MM"  JMb....       ..        dMMM=     .Mb            ?HNgJ..,                   .MM^',
-    \'dM{          -MMM#7"T""   .dN#TMo       ?      .MM^                 ?!                 +gM#=',
-    \'(M]         .MN(N#       .M@  .MF              .MM^                                      ~',
-    \'.MN          ?"""             MM!            .MMD                        ',
-    \' ?N[                                         7"                                ',
-    \'  TMe                                                                          ',
-    \'   ?MN,                                                                      ',
-    \'     TMNg,                                                                     '
-    \]
-
-"}}}
-
-" TODO delete
-let g:startify_custom_header = g:btr_logo
-
 " }}}
 
 " ##################      PLUGIN KEYMAP     ################### {{{
@@ -2856,8 +2768,6 @@ aug base_color
     au ColorScheme * hi Normal ctermbg=235
 aug END
 colorscheme torte
-cal s:fmode.activate()
-
 " ===================================================================
 " joshdick/onedark.vim
 " ===================================================================
@@ -3479,6 +3389,9 @@ hi link gitcommitUnmergedArrow gitcommitUnmergedFile
 
 
 " }}}
+
+cal s:fmode.activate()
+cal s:start.exe()
 
 " }}}
 
