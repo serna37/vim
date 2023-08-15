@@ -500,7 +500,7 @@ fu! s:grep() abort
         retu
     endif
 
-    let target = InputW('[target] TabCompletion>>', './*', 'file')
+    let target = InputW('[target] TabCompletion>>', '.*', 'file')
     cal EchoW('<<', 0)
     if empty(target)
         echo 'cancel'
@@ -964,7 +964,8 @@ fu! s:fzsearch.popup(v) abort
     " first line
     let lnm = 1
     if self.type == 'flm'
-        let lnm = split(split(self.res[0], '|')[1], ' ')[0]
+        let sep = split(self.res[0], '|')
+        let lnm = len(sep) < 2 ? 1 : split(sep[1], ' ')[0]
     elseif self.type == 'lm'
         let lnm = split(self.res[0], ':')[0]
     endif
@@ -989,8 +990,9 @@ fu! s:fzsearch_confirm(wid, idx) abort
         cal EchoI('jump to '.l)
         exe l
     elseif s:fzsearch.type == 'flm'
-        let fnm = split(result, '|')[0]
-        let lnm = split(split(result, '|')[1], ' ')[0]
+        let sep = split(result, '|')
+        let fnm = substitute(sep[0], $HOME, '~', 'g')
+        let lnm = len(sep) < 2 ? 1 : split(sep[1], ' ')[0]
         cal feedkeys("\<C-w>k:e ".fnm." | ".lnm."\<CR>")
     endif
     cal s:fzsearch.finalize()
@@ -1083,9 +1085,8 @@ fu! s:fzsearch.pvupd() abort
     let ext = get(self.ffdict, ext, ext)
     cal setbufvar(win, '&filetype', ext)
     " line
-    let lnm = self.type == 'flm'
-                \ ? split(split(self.res[self.ridx], '|')[1], ' ')[0]
-                \ : 1
+    let sep = split(self.res[0], '|')
+    let lnm = len(sep) < 2 ? 1 : split(sep[1], ' ')[0]
     cal popup_setoptions(self.pwid, #{firstline: (lnm-10 > 0 ? lnm-10 : 1)})
     cal win_execute(self.pwid, 'exe '.lnm)
 endf
