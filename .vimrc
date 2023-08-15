@@ -200,6 +200,7 @@ let g:netrw_liststyle = 3
 let g:netrw_altv = 1
 let g:netrw_winsize = 70
 nnoremap <Leader>e <Plug>(explorer-toggle)
+nnoremap <silent><Leader>e :echow 'sorry tmp deactivated.'<CR>
 " fzf-imitation
 nnoremap <leader>f <Plug>(fzf-smartfiles)
 nnoremap <leader>h <Plug>(fzf-histories)
@@ -751,6 +752,7 @@ endf
 
 fu! g:SetStatusLine() abort
     let mode = get(g:modes, mode(), ['#User_blackfg_redbg_bold#', '#User_redfg_blackbg#', 'SP'])
+    " start menu BTR
     if &filetype == 'Bocchi_The_Rock'
         let mode = ['#User_blackfg_greenbg_bold#', '#User_greenfg_blackbg#', 'BTR_start_menu']
     endif
@@ -1997,7 +1999,7 @@ fu! s:start.exe() abort
         retu
     endif
     " preview window
-    sil! e '_start_menu_cheat_cheet_'
+    sil! exe 'e _cheat_cheet_'
     setl buftype=nofile bufhidden=wipe modifiable
     setl nonumber norelativenumber nocursorline nocursorcolumn signcolumn=no
     let &filetype = 'Bocchi_The_Rock'
@@ -2810,7 +2812,8 @@ let s:colors = {
       \ "background": get(s:overrides, "background", { "gui": "#282C34", "cterm": "235", "cterm16": "NONE" }),
       \ "comment_grey": get(s:overrides, "comment_grey", { "gui": "#5C6370", "cterm": "59", "cterm16": "7" }),
       \ "gutter_fg_grey": get(s:overrides, "gutter_fg_grey", { "gui": "#4B5263", "cterm": "238", "cterm16": "8" }),
-      \ "cursor_grey": get(s:overrides, "cursor_grey", { "gui": "#2C323C", "cterm": "242", "cterm16": "0" }),
+      \ "cursor_grey": get(s:overrides, "cursor_grey", { "gui": "#2C323C", "cterm": "236", "cterm16": "0" }),
+      \ "status_grey": get(s:overrides, "status_grey", { "gui": "#2C323C", "cterm": "242", "cterm16": "0" }),
       \ "visual_grey": get(s:overrides, "visual_grey", { "gui": "#3E4452", "cterm": "237", "cterm16": "8" }),
       \ "menu_grey": get(s:overrides, "menu_grey", { "gui": "#3E4452", "cterm": "237", "cterm16": "7" }),
       \ "special_grey": get(s:overrides, "special_grey", { "gui": "#3B4048", "cterm": "238", "cterm16": "7" }),
@@ -2921,6 +2924,7 @@ let s:background = s:colors.background
 let s:comment_grey = s:colors.comment_grey
 let s:gutter_fg_grey = s:colors.gutter_fg_grey
 let s:cursor_grey = s:colors.cursor_grey
+let s:status_grey = s:colors.status_grey
 let s:visual_grey = s:colors.visual_grey
 let s:menu_grey = s:colors.menu_grey
 let s:special_grey = s:colors.special_grey
@@ -3014,7 +3018,7 @@ call s:h("SpellBad", { "fg": s:red, "gui": "underline", "cterm": "underline" }) 
 call s:h("SpellCap", { "fg": s:dark_yellow }) " Word that should start with a capital. This will be combined with the highlighting used otherwise.
 call s:h("SpellLocal", { "fg": s:dark_yellow }) " Word that is recognized by the spellchecker as one that is used in another region. This will be combined with the highlighting used otherwise.
 call s:h("SpellRare", { "fg": s:dark_yellow }) " Word that is recognized by the spellchecker as one that is hardly ever used. spell This will be combined with the highlighting used otherwise.
-call s:h("StatusLine", { "fg": s:black, "bg": s:cursor_grey }) " status line of current window
+call s:h("StatusLine", { "fg": s:black, "bg": s:status_grey }) " status line of current window
 call s:h("StatusLineNC", { "fg": s:comment_grey }) " status lines of not-current windows Note: if this is equal to "StatusLine" Vim will use "^^^" in the status line of the current window.
 call s:h("StatusLineTerm", { "fg": s:white, "bg": s:cursor_grey }) " status line of current :terminal window
 call s:h("StatusLineTermNC", { "fg": s:comment_grey }) " status line of non-current :terminal window
