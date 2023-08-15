@@ -9,7 +9,7 @@ WIP
 
 # Plugin's Dependencies
 if install plugins by `:PlugInstall` command, need here.<br>
-alse see [Install_Plugins](#Install_Plugins)
+alse see [Install_Plugins](#install_plugins)
 
 |plugins|dependencies|
 |--|--|
