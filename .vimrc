@@ -1,4 +1,7 @@
 " vim:set foldmethod=marker:
+let mapleader = "\<SPACE>"
+
+" ==============================================================================
 " =====================         CONTENTS         ===============================
 " ============================================================================== {{{
 " alse see [https://github.com/serna37/vim/]
@@ -28,7 +31,6 @@
 "         ## STARTING .............. | functions called when vim started.
 "
 " ==============================================================================
-let mapleader = "\<SPACE>"
 " }}}
 
 " #############################################################
@@ -918,6 +920,12 @@ fu! s:fzsearch.popup(v) abort
     " TODO fzf 選択解除めんどいなぁ
     " TODO fzf 全量いっきにquickfixじゃだめか
     " TODO fzf tab選択機能つけるならC-a欲しい
+    " TODO fzf quickfix
+    " 全体grep結果は、ファイル名と行番をもつリストだ
+    " 全体マーク結果も、ファイル名と行番のリスト
+    " previewやconfirmでの解釈を変える必要がある
+    " file this でないカテゴリを追加だ
+    " preview_type の使い方を変えるところから。
     let self.ewid = popup_create(self.pr, #{title: ' Fuzzy Search | ClearText: <C-w> ',
         \ zindex: 100, mapping: 0,
         \ border: [], borderchars: ['─','│','─','│','╭','╮','╯','╰'],
@@ -969,6 +977,7 @@ fu! s:fzsearch.popup(v) abort
     endif
 endf
 
+" on confirm
 fu! s:fzsearch_confirm(wid, idx) abort
     if a:idx == -1
         cal EchoE('cancel')
@@ -986,6 +995,7 @@ fu! s:fzsearch_confirm(wid, idx) abort
     cal s:fzsearch.finalize()
 endf
 
+" finalize
 fu! s:fzsearch.finalize() abort
     let s:fzsearch.list = []
     let s:fzsearch.res = []
@@ -993,6 +1003,7 @@ fu! s:fzsearch.finalize() abort
     cal popup_clear()
 endf
 
+" preview scroll
 fu! s:fzsearch.scroll(wid, vector) abort
     if self.tid
         retu
@@ -1010,6 +1021,7 @@ fu! s:fzsearch.scstop(_) abort
     let self.tid = 0
 endf
 
+" preview draw update
 fu! s:fzsearch.pvupd() abort
     let win = winbufnr(self.pwid)
     if self.pv_upd
@@ -1049,6 +1061,7 @@ fu! s:fzsearch.pvupd() abort
     cal popup_setoptions(self.pwid, #{firstline: split(self.res[self.ridx], ':')[0]})
 endf
 
+" search result update
 fu! s:fzsearch.list_upd() abort
     " upd match result list
     let filterd = empty(self.wd) ? self.list : matchfuzzy(self.list, self.wd)
@@ -1060,12 +1073,13 @@ fu! s:fzsearch.list_upd() abort
     cal setbufline(winbufnr(self.rwid), 1, self.res)
     " highlight match char
     cal clearmatches(self.rwid)
-    let char = printf('[%s]', escape(self.wd, '\.'))
+    let char = printf('[%s]', escape(self.wd, '\[\]\-\.\*'))
     cal matchadd('DarkRed', char, 16, -1, #{window: self.rwid})
     " upd preview
     cal self.pvupd()
 endf
 
+" enter search word
 fu! s:fzsearch.fil(ctx, wid, key) abort
     if a:key is# "\<Esc>"
         cal popup_close(self.bwid)
@@ -1118,6 +1132,7 @@ fu! s:fzsearch.fil(ctx, wid, key) abort
 endf
 
 
+" choose result
 fu! s:fzsearch.jk(_, wid, key) abort
     if a:key is# "\<Esc>"
         cal popup_close(self.bwid)
@@ -1151,6 +1166,7 @@ fu! s:fzsearch.jk(_, wid, key) abort
     retu 1
 endf
 
+" scroll preview
 fu! s:fzsearch.pv(_, wid, key) abort
     if a:key is# "\<Esc>"
         cal popup_close(self.bwid)
@@ -1207,7 +1223,7 @@ noremap <silent><Plug>(fzf-buffers) :<C-u>cal <SID>fzf_buffers()<CR>
 " ===================================================================
 " {{{
 " TODO リファクタ
-let s:fzf = #{cache: [], maxdepth: 5, gcache: [],
+let s:fzf = #{cache: [], maxdepth: 4, gcache: [],
     \ not_path_arr: [
          \'"*/.**/*"',
          \'"*node_modules/*"', '"*target/*"'
@@ -1786,6 +1802,8 @@ noremap <silent><Plug>(qikhl-clear) :<C-u>cal <SID>quickhlclear()<CR>
 " ===================================================================
 " {{{
 " TODO リファクタ
+" TODO 消したらマーク消えないので行ずれる
+" TODO mi ファイルまたいだmark-list
 sign define mk text=⚑ texthl=DarkBlue
 
 let s:mk = #{winid: 0, tle: 'marks', allwinid: 0, atle: 'marks-allfiles',
@@ -1963,6 +1981,7 @@ let s:start.btr_logo = [
     \]
 "}}}
 
+" cheat sheet {{{
 let s:start.cheat_sheet_win = [
     \'       ╭── Window ──────────────────────────────────────────╮           ╭── Search ───────────────────────────────────────╮',
     \'       │ C-n / p    | (buffer tab)(next / prev)             │           │ Space e    | (explorer)                         │',
@@ -1988,6 +2007,7 @@ let s:start.cheat_sheet_win = [
     \'       │ VISUAL C-jk   | (blok up / down)                    │',
     \'       ╰─────────────────────────────────────────────────────╯',
     \]
+" }}}
 
 fu! s:start.exe() abort
     let fopen = execute('ls')->split('\n')->map({_,v -> split(v, '"')[1]})
@@ -2033,6 +2053,7 @@ fu! s:start.move() abort
 endf
 
 " only first call
+" TODO BufLeaveだと、explorer開いた時に、start menu画面でのハイライトが残ったまま。
 aug start_vim
     au!
     au VimEnter * cal s:start.exe()
@@ -2059,15 +2080,56 @@ aug END
 " thinca/vim-quickrun
 " ===================================================================
 " {{{
-" TODO 作成
+" TODO 動作確認中
 
 " TODO quick run
 
+" java11 can execute `java File.java`
+let s:quickrun = #{
+    \ exe_dict: #{
+        \ zsh: 'sh',
+        \ sh: 'sh',
+        \ python: 'python',
+        \ go: 'go run',
+        \ java: 'java',
+        \ },
+    \ svr_dict: #{
+        \ python: 'python app.py',
+        \ go: 'go run .',
+        \ typescript: 'npm run start',
+        \ typescriptreact: 'npm run start',
+        \ },
+    \ }
 
+fu! s:quickrun.exe() abort
+    let cmd = get(self.exe_dict, &filetype, '')
+    if empty(cmd)
+        cal EchoE('unsupported program.')
+        retu
+    endif
+    let cmd = cmd.' '.expand('%')
+    " TODO 再実行で開いてたら、閉じる
+    sil! exe 'vne result'
+    setl buftype=nofile bufhidden=wipe modifiable
+    setl nonumber norelativenumber nocursorline nocursorcolumn signcolumn=no
+    sil! exe 'r!time '.cmd
+endf
 
+fu! s:quickrun.server() abort
+    let cmd = get(self.svr_dict, &filetype, '')
+    if empty(cmd)
+        cal EchoE('unsupported program.')
+        retu
+    endif
+    exe 'bo terminal ++rows=10 ++shell '.cmd
+endf
 
-
-
+fu! TestQrunExe() abort
+    cal s:quickrun.exe()
+endf
+fu! TestQrunServer() abort
+    cal s:quickrun.server()
+endf
 " }}}
 
 " }}}
