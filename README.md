@@ -10,7 +10,7 @@ alse see [Install_Plugins](#install_plugins)
 
 |plugins|dependencies|
 |--|--|
-|[coc.nvim](https://github.com/neoclide/coc.nvim)|<ul><li>[node.js](https://github.com/nodejs/node)<li>yarn: `npm install -g yarn`|
+|[coc.nvim](https://github.com/neoclide/coc.nvim)|<ul><li>[node.js](https://github.com/nodejs/node)<li>yarn: `npm install -g yarn`<li>[fzf](https://github.com/junegunn/fzf)|
 |language server with coc|see [here](https://github.com/neoclide/coc.nvim/wiki/Language-servers)|
 |[vimspector](https://github.com/puremourning/vimspector)|Vim 8.2 Huge build compiled with Python 3.10 or later<br>※also see [here](https://github.com/puremourning/vimspector#dependencies)|
 |[github/copilot.vim](https://github.com/github/copilot.vim)|[GitHub Copilot](https://github.com/github-copilot/signup)|

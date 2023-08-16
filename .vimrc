@@ -2193,7 +2193,7 @@ let s:plug.repos = [
 
 " coc extentions
 let s:plug.coc_extentions = [
-    \ 'coc-explorer', 'coc-snippets',
+    \ 'coc-explorer', 'coc-fzf-preview', 'coc-snippets',
     \ 'coc-sh', 'coc-vimlsp', 'coc-json', 'coc-sql', 'coc-html', 'coc-css',
     \ 'coc-tsserver', 'coc-clangd', 'coc-go', 'coc-pyright', 'coc-java',
     \ ]
