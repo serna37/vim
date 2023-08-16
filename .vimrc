@@ -97,7 +97,6 @@ nnoremap <C-p> <Plug>(buf-next)
 " close buffer
 nnoremap <Leader>x <Plug>(buf-close)
 " terminal
-"nnoremap <silent><Leader>t :bo terminal ++rows=10<CR>
 nnoremap <silent><Leader>t :cal popup_create(term_start([&shell],#{hidden:1,term_finish:'close'}),#{border:[],minwidth:&columns*3/4,minheight:&lines*3/4})<CR>
 " terminal read only mode (i to return terminal mode)
 tnoremap <Esc> <C-w>N
@@ -233,10 +232,12 @@ set foldcolumn=1 " fold preview
 " ##################       ORIGINALS        ################### {{{
 
 " Running Cat (loading animation) {{{
-" TODO runcat delay もっと緩急
-let s:runcat = #{frame: 0, winid: 0, tid: 0, delay: 300}
+let s:runcat = #{frame: 0, winid: 0, tid: 0, delay: 300, fg: 17}
 fu! s:runcat.animation(_) abort
     cal setbufline(winbufnr(self.winid), 1, self.cat[self.frame])
+    exe 'hi RunningCat ctermfg='.self.fg
+    cal matchadd('RunningCat', '[^ ]', 16, -1, #{window: self.winid})
+    let self.fg = self.fg == 255 ? 17 : self.fg+1
     let self.frame = self.frame == 4 ? 0 : self.frame + 1
     let self.tid = timer_start(self.delay, self.animation)
 endf
@@ -246,15 +247,9 @@ fu! s:runcat.stop() abort
 endf
 fu! s:runcat.start(...) abort
     cal self.stop()
-    " TODO run cat animation maskいじくりたい
-    " TODO User_greenfg_blackbg statuslineでの color
-    let self.winid = popup_create(self.cat[0], #{line: 1, border: [0,0,0,0], mask: [[1,-1,1,1]], zindex: 1})
-    " TODO 正規表現、文字か空白かでいけそう
-    "cal setwinvar(self.winid, '&wincolor', 'User_greenfg_blackbg')
-    "cal matchaddpos('DarkRed', self.cheatpos_red, 16, -1, #{window: self.cheatid})
-    "cal matchaddpos('DarkBlue', self.cheatpos_blue, 16, -1, #{window: self.cheatid})
+    let self.winid = popup_create(self.cat[0], #{line: 1, zindex: 1})
     if a:0
-        let self.delay = 500-(a:1-1)*100
+        let self.delay = 700-(a:1-1)*140
     endif
     cal self.animation(0)
 endf
@@ -431,24 +426,15 @@ noremap <silent><Plug>(anchor) :<C-u>cal <SID>anchor()<CR>
 
 " Fuzzy search current file {{{
 fu! s:fuzzySearch() abort
+    let buf = getline(1, line('$'))
     " quickfix fuzzySearch
     " empty buffer -> no data
     if expand('%')->empty()
-        cal s:fzsearch.popup(#{
-            \ title: 'QuickFix',
-            \ list: getline(1, line('$')),
-            \ type: 'flm',
-            \ enter_prefix: 0,
-            \ })
+        cal s:fzsearch.popup(#{title: 'QuickFix', list: buf, type: 'flm', eprfx: 0})
         retu
     endif
     " buffer fuzzySearch
-    cal s:fzsearch.popup(#{
-        \ title: 'Current Buffer',
-        \ list: getline(1, line('$'))->map({ i,v -> i+1.': '.v }),
-        \ type: 'lm',
-        \ enter_prefix: 0,
-        \ })
+    cal s:fzsearch.popup(#{title: 'Current Buffer', list: map(buf, {i,v->i+1.': '.v}), type: 'lm', eprfx: 0})
 endf
 
 noremap <silent><Plug>(fuzzy-search) :<C-u>cal <SID>fuzzySearch()<CR>
@@ -530,7 +516,7 @@ noremap <silent><Plug>(grep) :<C-u>cal <SID>grep()<CR>
 
 " IDE menu {{{
 let s:idemenu = #{
-    \ menuid: 0, menutitle: ' IDE MENU (j / k) Enter choose | * require plugin ',
+    \ menuid: 0, mttl: ' IDE MENU (j / k) Enter choose | * require plugin ',
     \ menu: [
         \ '[Format]         applay format for this file',
         \ '[ReName*]        rename current word recursively',
@@ -553,10 +539,8 @@ let s:idemenu = #{
     \ }
 
 fu! s:idemenu.open() abort
-    let self.menuid = popup_menu(self.menu, #{title: self.menutitle,
-        \ border: [], borderchars: ['─','│','─','│','╭','╮','╯','╰'],
-        \ callback: 's:idemenu_exe',
-        \ })
+    let self.menuid = popup_menu(self.menu, #{title: self.mttl, border: [], borderchars: ['─','│','─','│','╭','╮','╯','╰'],
+        \ callback: 's:idemenu_exe'})
     cal setwinvar(self.menuid, '&wincolor', 'User_greenfg_blackbg')
     cal matchadd('DarkRed', '\[.*\]', 16, -1, #{window: self.menuid})
     let self.cheatid = popup_create(self.cheat, #{title: self.cheattitle, line: &lines-5})
@@ -567,7 +551,7 @@ endf
 
 fu! s:idemenu_exe(_, idx) abort
     if a:idx == 1
-        " TODO 選択部分のみをしたい
+        " TODO ide menu format 選択部分のみをしたい
         if exists(':Coc')
             cal CocActionAsync('format')
         else
@@ -621,8 +605,8 @@ noremap <silent><Plug>(ide-menu) :<C-u>cal <SID>idemenuopen()<CR>
 " }}}
 
 " completion {{{
-" TODO リファクタ
-" TODO ~の後ろで正規表現やりに行っちゃう。=は大丈夫
+" TODO completion リファクタ
+" TODO completion ~の後ろで正規表現やりに行っちゃう。=は大丈夫
 ""let s:completion = #{exclude: [" ()[]{}<>'`".'"'], confirmed: 0, done: {-> execute('let s:completion.confirmed = 1')}}
 let s:completion = #{exclude: [" ~()[]{}<>'`".'"'], opened: 0, confirmed: 0}
 
@@ -650,7 +634,7 @@ fu! s:completion.done() abort
     let self.opened = 0
 endf
 
-" TODO <BS>のあとに補完だしたくない
+" TODO completion <BS>のあとに補完だしたくない
 if glob('~/.vim/pack/plugins/start/coc.nvim') == ''
     au TextChangedI,TextChangedP * cal s:completion.exe()
     au CompleteDone * cal s:completion.done()
@@ -665,7 +649,7 @@ endif
 " jiangmiao/auto-pairs
 " ===================================================================
 " {{{
-" TODO リファクタ
+" TODO auto pair リファクタ
 let s:pairs_start = ["(", "[", "{", "<", "'", '"', "`"]
 let s:pairs_end = [")", "]", "}", ">", "'", '"', "`"]
 fu! AutoPairsDelete()
@@ -686,19 +670,17 @@ inoremap < <><LEFT>
 inoremap ' ''<LEFT>
 inoremap " ""<LEFT>
 inoremap ` ``<LEFT>
-" TODO ~の後ろで正規表現やりに行っちゃう。=は大丈夫
+" TODO auto pair ~の後ろで正規表現やりに行っちゃう。=は大丈夫
 inoremap <silent><expr><BS> AutoPairsDelete()
 ""inoremap <silent><BS> <C-r>=AutoPairsDelete()
 
-" TODO 直前に押したキーが(なら、()と入力しても良いってしたい
+" TODO auto pair 直前に押したキーが(なら、()と入力しても良いってしたい
 " }}}
 
 " ===================================================================
 " vim-airline/vim-airline
 " ===================================================================
 " {{{
-" TODO リファクタ
-
 let g:right_arrow = ''
 let g:left_arrow = ''
 let powerline_chk_mac = system('fc-list | grep powerline | wc -l')->trim()
@@ -731,8 +713,8 @@ fu! s:gitinfo() abort
         let g:gitinf = 'no repo '
         retu
     endif
-    " TODO gitstatus結果を使いまわした方が早い？ -> いいだろべつに
-    " TODO ls-filesに変える
+    " TODO airline gitstatus結果を使いまわした方が早い？ -> いいだろべつに
+    " TODO airline ls-filesに変える
     let cmd = "cd ".expand('%:h')." && git status --short | awk -F ' ' '{print($1)}' | grep -c "
     let a = trim(system(cmd."'A'"))
     let aa = a !='0'?'+'.a :''
@@ -763,7 +745,7 @@ set stl=%!g:SetStatusLine()
 
 " tabline
 fu! s:buffers_label() abort
-    " TODO リファクタ
+    " airline TODO リファクタ
     let b = ''
     for v in split(execute('ls'), '\n')->map({ _,v -> split(v, ' ')})
         let x = copy(v)->filter({ _,v -> !empty(v) })
@@ -857,24 +839,15 @@ noremap <silent><Plug>(buf-close) :<C-u>cal <SID>closeBuf()<CR>
 " junegunn/fzf.vim
 " ===================================================================
 " {{{
-" TODO リファクタ、修正等
 " usage
 " let arguments_def = #{
 "     \ title: popup title as String,
 "     \ list: search targets as List,
 "     \ type: format in list. f, lm, flm (file, line, msg),
-"     \ enter_prefix: enter zone prefix text as String (0 to default value),
+"     \ eprfx: enter zone prefix text as String (0 to default value),
 "     \ }
 " and call like this.
 " cal s:fzsearch.popup(arguments_def)
-"
-" callback function sample
-" fu! s:simple_echo(wid, idx)
-"     if a:idx == -1
-"         retu
-"     endif
-"     echom s:fzsearch.res[a:idx-1]
-" endf
 
 let s:fzsearch = #{bwid: 0, ewid: 0, rwid: 0, pwid: 0, tid: 0, res: [],
     \ ffdict: #{vimrc: 'vim', zshrc: 'sh', js: 'javascript', py: 'python', md: 'markdown',
@@ -890,13 +863,14 @@ fu! s:fzsearch.popup(v) abort
         cal EchoE('no data')
         retu
     endif
+
     let self.list = a:v.list
+    let self.type = a:v.type
+    let self.pr = a:v.eprfx ?? '>>'
     let self.wd = ''
+    let self.ridx = 0
     let self.max = 50
     let self.res = a:v.list[0:self.max]
-    let self.ridx = 0
-    let self.pr = a:v.enter_prefix ?? '>>'
-    let self.type = a:v.type
 
     let self.bwid = popup_create([], #{title: ' '.a:v.title.' ',
         \ zindex: 50, mapping: 0, scrollbar: 0,
@@ -924,6 +898,8 @@ fu! s:fzsearch.popup(v) abort
         \ callback: 's:fzsearch_confirm',
         \ filter: function(self.jk, [0]),
         \ })
+
+    " result list syntax
     if self.type == 'lm'
         cal setbufvar(winbufnr(self.rwid), '&filetype', &filetype)
     elseif self.type == 'flm'
@@ -1133,7 +1109,7 @@ fu! s:fzsearch.fil(ctx, wid, key) abort
         cal self.quickfix()
         cal feedkeys("\<Esc>")
         retu 1
-    " TODO fzf copy shold D-v only or Shift Insert. C-v want split
+    " TODO fzf.vim copy shold D-v only or Shift Insert. C-v want split
     elseif a:key is# "\<C-v>" || a:key is# "\<D-v>"
         for i in range(0, strlen(@+)-1)
             cal add(a:ctx.wd, strpart(@+, i, 1))
@@ -1156,7 +1132,6 @@ fu! s:fzsearch.fil(ctx, wid, key) abort
     cal self.list_upd()
     retu a:key is# "x" || a:key is# "\<Space>" ? 1 : popup_filter_menu(a:wid, a:key)
 endf
-
 
 " choose result
 fu! s:fzsearch.jk(_, wid, key) abort
@@ -1219,22 +1194,14 @@ endf
 
 " =====================
 fu! s:fzf_histories()
-    cal s:fzsearch.popup(#{
-        \ title: 'Histories',
-        \ list: execute('ol')->split('\n')->map({_,v -> split(v, ': ')[1]}),
-        \ type: 'f',
-        \ enter_prefix: '['.substitute(getcwd(), $HOME, '~', 'g').']>>',
-        \ })
+    cal s:fzsearch.popup(#{title: 'Histories', list: execute('ol')->split('\n')->map({_,v -> split(v, ': ')[1]}),
+        \ type: 'f', eprfx: '['.substitute(getcwd(), $HOME, '~', 'g').']>>'})
 endf
 
 fu! s:fzf_buffers()
-    cal s:fzsearch.popup(#{
-        \ title: 'Buffers',
-        \ list: execute('ls')->split('\n')->map({_,v -> split(v, '"')[1]})
+    cal s:fzsearch.popup(#{title: 'Buffers', list: execute('ls')->split('\n')->map({_,v -> split(v, '"')[1]})
             \ ->filter({_,v -> v != '[No Name]' && v != '[無名]'}),
-        \ type: 'f',
-        \ enter_prefix: '['.substitute(getcwd(), $HOME, '~', 'g').']>>',
-        \ })
+        \ type: 'f', eprfx: '['.substitute(getcwd(), $HOME, '~', 'g').']>>'})
 endf
 " =====================
 
@@ -1246,7 +1213,6 @@ noremap <silent><Plug>(fzf-buffers) :<C-u>cal <SID>fzf_buffers()<CR>
 " junegunn/fzf
 " ===================================================================
 " {{{
-" TODO リファクタ
 let s:fzf = #{cache: [], maxdepth: 4, gcache: [],
     \ not_path_arr: [
          \'"*/.**/*"',
@@ -1257,11 +1223,11 @@ let s:fzf = #{cache: [], maxdepth: 4, gcache: [],
     \ ],
 \}
 
-" TODO delete
+" TODO fzf delete
 fu! TestFzfMaxDepth(n) abort
     let s:fzf.maxdepth = a:n
 endf
-" TODO maxdepth かえるコマンド作るか
+" TODO fzf maxdepth かえるコマンド作るか
 
 let s:fzf.postfix = ' -type f -not -path '.join(s:fzf.not_path_arr, ' -not -path ')
 let s:fzf.searched = getcwd()
@@ -1288,19 +1254,14 @@ fu! s:fzf.files() abort
         endif
     endif
 
-    cal s:fzsearch.popup(#{
-        \ title: self.is_git ? 'Project Files' : 'Files',
+    cal s:fzsearch.popup(#{title: self.is_git ? 'Project Files' : 'Files',
         \ list: self.is_git ? self.gcache : self.cache,
-        \ type: 'f',
-        \ enter_prefix: '['.substitute(pwd, $HOME, '~', 'g').']>>',
-        \ })
+        \ type: 'f', eprfx: '['.substitute(pwd, $HOME, '~', 'g').']>>'})
 endf
 
 fu! s:fzf.asyncfind() abort
     cal s:runcat.start()
-    " TODO popup design
     let self.notwid = popup_notification('find files in ['.s:fzf.searched.'] and caching ...', #{zindex: 51, line: &lines, col: 5})
-
     let self.jobcnt = self.maxdepth-1
     let self.endjobcnt = 0
     for depth in range(2, self.maxdepth)
@@ -1320,7 +1281,6 @@ fu! s:fzf.asyncfind_end(ch) abort
     if self.endjobcnt == self.jobcnt
         cal s:runcat.stop()
         cal popup_close(self.notwid)
-        " TODO popup design
         cal popup_notification('find files cached !', #{zindex: 51, line: &lines, col: 5})
     endif
 endf
@@ -1333,7 +1293,7 @@ noremap <silent><Plug>(fzf-smartfiles) :<C-u>cal <SID>fzfexe()<CR>
 " preservim/nerdtree
 " ===================================================================
 " {{{
-" TODO リファクタ
+" TODO nerdtree リファクタ
 
 " TODO nerdtree
 augroup netrw_motion
@@ -1355,7 +1315,7 @@ fu! NetrwOpenJudge()
     endif
 endf
 
-" TODO mapじゃなくしたいね
+" TODO nerdtree mapじゃなくしたいね
 fu! NetrwOpen()
     cal feedkeys("\<C-l>:q\<CR>\<Space>e")
 endf
@@ -1445,7 +1405,6 @@ endf
 " easymotion/vim-easymotion
 " ===================================================================
 " {{{
-" TODO リファクタ
 " m, g read some function doesn't work just as I want
 let s:emotion = #{keypos: [], klen: 1, keys: ['s', 'w', 'a', 'd', 'j', 'k', 'h', 'l'], popid: 0}
 
@@ -1663,7 +1622,6 @@ noremap <silent><Plug>(emotion) :<C-u>cal <SID>emotion()<CR>
 " unblevable/quick-scope
 " ===================================================================
 " {{{
-" TODO リファクタ
 let s:fmode = #{flg: 1}
 
 fu! s:fmode.set() abort
@@ -1756,8 +1714,6 @@ noremap <silent><Plug>(f-scope) :<C-u>cal <SID>fmodetoggle()<CR>
 " t9md/vim-quickhl
 " ===================================================================
 " {{{
-" TODO リファクタ
-" TODO 整理
 let s:quickhl = #{hlidx: 0, reseted: 0}
 let s:quickhl.hl= [
     \ "cterm=bold ctermfg=16 ctermbg=153 gui=bold guifg=#ffffff guibg=#0a7383",
@@ -1824,9 +1780,6 @@ noremap <silent><Plug>(qikhl-clear) :<C-u>cal <SID>quickhlclear()<CR>
 " MattesGroeger/vim-bookmarks
 " ===================================================================
 " {{{
-" TODO リファクタ
-" TODO 消したらマーク消えないので行ずれる
-" TODO mi ファイルまたいだmark-list
 sign define mk text=⚑ texthl=DarkBlue
 
 let s:mk = #{winid: 0, tle: 'marks', allwinid: 0, atle: 'marks-allfiles',
@@ -1927,12 +1880,7 @@ fu! s:mk.listcb() abort
         cal EchoE('no marks')
         retu
     endif
-    cal s:fzsearch.popup(#{
-        \ title: 'Marks',
-        \ list: resource,
-        \ type: 'flm',
-        \ enter_prefix: 0,
-        \ })
+    cal s:fzsearch.popup(#{title: 'Marks', list: resource, type: 'flm', eprfx: 0})
 endf
 
 aug mk_st
@@ -1960,34 +1908,36 @@ noremap <silent><Plug>(mk-list) :<C-u>cal <SID>mklist()<CR>
 " junegunn/goyo.vim
 " ===================================================================
 " {{{
-" TODO リファクタ
 let s:zen_mode = #{flg: 0, vert_split: []}
-fu! s:zenModeToggle() abort
-    if s:zen_mode.flg
-        let s:zen_mode.flg = 0
+fu! s:zen_mode.toggle() abort
+    if self.flg
+        let self.flg = 0
         set number cursorline cursorcolumn laststatus=2 showtabline=2
         tabc
-        exe 'hi VertSplit '.join(s:zen_mode.vert_split[2:], ' ')
+        exe 'hi VertSplit '.join(self.vert_split[2:], ' ')
         retu
     endif
-    let s:zen_mode.flg = 1
+    let self.flg = 1
     tab split
     norm zR
     set nonumber norelativenumber nocursorline nocursorcolumn laststatus=0 showtabline=0
     vert to new
-    setl buftype=nofile bufhidden=wipe nomodifiable nobuflisted nonu noru winfixheight
-    vert res 40
-    exe winnr('#').'wincmd w'
+    cal self.silent()
     vert bo new
-    setl buftype=nofile bufhidden=wipe nomodifiable nobuflisted nonu noru winfixheight
-    vert res 40
-    exe winnr('#').'wincmd w'
+    cal self.silent()
     "['NonText', 'FoldColumn', 'ColorColumn', 'VertSplit', 'StatusLine', 'StatusLineNC', 'SignColumn']
-    let s:zen_mode.vert_split = split(execute('hi VertSplit'),' ')->filter({ _,v -> !empty(v) })
+    let self.vert_split = execute('hi VertSplit')->split(' ')->filter({ _,v -> !empty(v) })
     exe 'hi VertSplit ctermfg=black ctermbg=NONE cterm=NONE'
     setl number relativenumber
 endf
 
+fu! s:zen_mode.silent() abort
+    setl buftype=nofile bufhidden=wipe nomodifiable nobuflisted nonu noru winfixheight
+    vert res 40
+    exe winnr('#').'wincmd w'
+endf
+
+let s:zenModeToggle = s:zen_mode.toggle
 noremap <silent><Plug>(zen-mode) :<C-u>cal <SID>zenModeToggle()<CR>
 " }}}
 
@@ -2094,7 +2044,7 @@ fu! s:start.move() abort
 endf
 
 " only first call
-" TODO BufLeaveだと、explorer開いた時に、start menu画面でのハイライトが残ったまま。
+" TODO startify BufLeaveだと、explorer開いた時に、start menu画面でのハイライトが残ったまま。
 aug start_vim
     au!
     au VimEnter * cal s:start.exe()
@@ -2187,7 +2137,7 @@ aug END
 " thinca/vim-quickrun
 " ===================================================================
 " {{{
-" TODO リファクタ、試しながら直す
+" TODO quick run リファクタ、試しながら直す
 " java11 can execute `java File.java`
 let s:quickrun = #{
     \ exe_dict: #{
@@ -2212,7 +2162,7 @@ fu! s:quickrun.exe() abort
         retu
     endif
     let cmd = cmd.' '.expand('%')
-    " TODO 再実行で開いてたら、閉じる
+    " TODO quick run 再実行で開いてたら、閉じる
     sil! exe 'vne result'
     setl buftype=nofile bufhidden=wipe modifiable
     setl nonumber norelativenumber nocursorline nocursorcolumn signcolumn=no
@@ -2293,8 +2243,8 @@ com! PlugUnInstall cal s:plug.uninstall()
 " }}}
 
 " ##################        TRAINING        ################### {{{
-" TODO リファクタ
-" TODO コマンド引数の補完つくる
+" TODO training リファクタ
+" TODO training コマンド引数の補完つくる
 command! Popupclear cal popup_clear()
 command! -nargs=? TrainingWheelsProtocol cal TrainingWheelsProtocol(<f-args>)
 
@@ -2867,7 +2817,7 @@ let g:training_wheels_practice_file = []
 
 " create practice file
 fu! TrainingWheelsPratticeFileCreate()
-    " TODO get practice.md
+    " TODO training get practice.md
     " if すでにあるなら開くだけ
     " if vimレポ落としてるならコピー
     let repo = 'https://raw.githubusercontent.com/serna37/vim/master/practice.md'
@@ -2877,7 +2827,6 @@ endf
 
 " open practice file (only tutorial)
 fu! TrainingWheelsPracticeFileOpen(ch) abort
-    " TODO 左に開きたいし、tabeにするか
     execute('tabe ~/practice.md')
     cal cursor(26, 6)
 endf
