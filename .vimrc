@@ -420,7 +420,9 @@ fu! s:anchor.set() abort
     let self.tid = timer_start(2000, self.rm)
 endf
 
-let s:anchor = s:anchor.set
+fu! s:anchor() abort
+    cal s:anchor.set()
+endf
 noremap <silent><Plug>(anchor) :<C-u>cal <SID>anchor()<CR>
 " }}}
 
@@ -600,8 +602,10 @@ fu! s:idemenu_exe(_, idx) abort
     retu 0
 endf
 
-let s:idemenuopen = s:idemenu.open
-noremap <silent><Plug>(ide-menu) :<C-u>cal <SID>idemenuopen()<CR>
+fu! s:idemenu() abort
+    cal s:idemenu.open()
+endf
+noremap <silent><Plug>(ide-menu) :<C-u>cal <SID>idemenu()<CR>
 " }}}
 
 " completion {{{
@@ -895,7 +899,7 @@ fu! s:fzsearch.popup(v) abort
         \ minwidth: &columns/3, maxwidth: &columns/3,
         \ minheight: &lines/2, maxheight: &lines/2,
         \ pos: 'topleft', line: &lines/4, col: &columns/7,
-        \ callback: 's:fzsearch_confirm',
+        \ callback: 'Fzsearch_confirm',
         \ filter: function(self.jk, [0]),
         \ })
 
@@ -950,7 +954,7 @@ fu! s:fzsearch.popup(v) abort
 endf
 
 " on confirm
-fu! s:fzsearch_confirm(wid, idx) abort
+fu! Fzsearch_confirm(wid, idx) abort
     if a:idx == -1
         cal EchoE('cancel')
         cal s:fzsearch.finalize()
@@ -1285,7 +1289,9 @@ fu! s:fzf.asyncfind_end(ch) abort
     endif
 endf
 
-let s:fzfexe = s:fzf.files
+fu! s:fzfexe() abort
+    cal s:fzf.files()
+endf
 noremap <silent><Plug>(fzf-smartfiles) :<C-u>cal <SID>fzfexe()<CR>
 " }}}
 
@@ -1389,7 +1395,9 @@ fu! s:scroll.toggle(tid) abort
     cal s:fmode.takeover()
 endf
 
-let s:scroll = s:scroll.exe
+fu! s:scroll(v, d) abort
+    cal s:scroll.exe(a:v, a:d)
+endf
 noremap <silent><Plug>(scroll-d) :<C-u>cal <SID>scroll(1, 30)<CR>
 noremap <silent><Plug>(scroll-u) :<C-u>cal <SID>scroll(0, 30)<CR>
 noremap <silent><Plug>(scroll-f) :<C-u>cal <SID>scroll(1, 10)<CR>
@@ -1614,7 +1622,9 @@ aug emotion_hl
     au ColorScheme * hi EmotionFin ctermfg=196 cterm=bold
 aug END
 
-let s:emotion = s:emotion.exe
+fu! s:emotion() abort
+    cal s:emotion.exe()
+endf
 noremap <silent><Plug>(emotion) :<C-u>cal <SID>emotion()<CR>
 " }}}
 
@@ -1706,7 +1716,9 @@ aug fmode_colors
     au ColorScheme * hi FScopeBackSecondary ctermfg=33 cterm=underline guifg=#66D9EF guibg=#000000
 aug END
 
-let s:fmodetoggle = s:fmode.toggle
+fu! s:fmodetoggle() abort
+    cal s:fmode.toggle()
+endf
 noremap <silent><Plug>(f-scope) :<C-u>cal <SID>fmodetoggle()<CR>
 " }}}
 
@@ -1770,8 +1782,12 @@ aug quickhl
     au ColorScheme * cal s:quickhl.hlini()
 aug END
 
-let s:quickhlset = s:quickhl.set
-let s:quickhlclear = s:quickhl.clear
+fu! s:quickhlset() abort
+    cal s:quickhl.set()
+endf
+fu! s:quickhlclear() abort
+    cal s:quickhl.clear()
+endf
 noremap <silent><Plug>(qikhl-toggle) :<C-u>cal <SID>quickhlset()<CR>
 noremap <silent><Plug>(qikhl-clear) :<C-u>cal <SID>quickhlclear()<CR>
 " }}}
@@ -1889,12 +1905,24 @@ aug mk_st
     au BufWritePost * cal s:mk.save()
 aug END
 
-let s:mktoggle = s:mk.toggle
-let s:mknext = function(s:mk.jump, [1])
-let s:mkprev = function(s:mk.jump, [0])
-let s:mkclthis = s:mk.clthis
-let s:mkclall = s:mk.clall
-let s:mklist = s:mk.listcb
+fu! s:mktoggle() abort
+    cal s:mk.toggle()
+endf
+fu! s:mknext () abort
+    cal s:mk.jump(1)
+endf
+fu! s:mkprev() abort
+    cal s:mk.jump(0)
+endf
+fu! s:mkclthis () abort
+    cal s:mk.clthis()
+endf
+fu! s:mkclall () abort
+    cal s:mk.clall()
+endf
+fu! s:mklist () abort
+    cal s:mk.listcb()
+endf
 
 noremap <silent><Plug>(mk-toggle) :<C-u>cal <SID>mktoggle()<CR>
 noremap <silent><Plug>(mk-next) :<C-u>cal <SID>mknext()<CR>
@@ -1937,7 +1965,9 @@ fu! s:zen_mode.silent() abort
     exe winnr('#').'wincmd w'
 endf
 
-let s:zenModeToggle = s:zen_mode.toggle
+fu! s:zenModeToggle() abort
+    cal s:zen_mode.toggle()
+endf
 noremap <silent><Plug>(zen-mode) :<C-u>cal <SID>zenModeToggle()<CR>
 " }}}
 
