@@ -187,8 +187,10 @@ set ignorecase " ignore case search
 set smartcase " don't ignore case when enterd UPPER CASE"
 set shortmess-=S " show hit word's number at right bottom
 " no move search word with multi highlight
-nmap * *N<Plug>(qikhl-toggle)
-nmap # *N<Plug>(qikhl-toggle)
+nnoremap * *N
+nnoremap # *N
+nmap * <Plug>(qikhl-toggle)
+nmap # <Plug>(qikhl-toggle)
 nmap <silent><Leader>q <Plug>(qikhl-clear):noh<CR>
 " incremental search
 nmap s <Plug>(emotion)
@@ -542,7 +544,7 @@ let s:idemenu = #{
 
 fu! s:idemenu.open() abort
     let self.menuid = popup_menu(self.menu, #{title: self.mttl, border: [], borderchars: ['─','│','─','│','╭','╮','╯','╰'],
-        \ callback: 's:idemenu_exe'})
+        \ callback: 'Idemenu_exe'})
     cal setwinvar(self.menuid, '&wincolor', 'User_greenfg_blackbg')
     cal matchadd('DarkRed', '\[.*\]', 16, -1, #{window: self.menuid})
     let self.cheatid = popup_create(self.cheat, #{title: self.cheattitle, line: &lines-5})
@@ -551,7 +553,7 @@ fu! s:idemenu.open() abort
     cal matchadd('DarkBlue', '(.*)', 16, -1, #{window: self.cheatid})
 endf
 
-fu! s:idemenu_exe(_, idx) abort
+fu! Idemenu_exe(_, idx) abort
     if a:idx == 1
         " TODO ide menu format 選択部分のみをしたい
         if exists(':Coc')
@@ -973,6 +975,7 @@ fu! Fzsearch_confirm(wid, idx) abort
         let fnm = substitute(sep[0], $HOME, '~', 'g')
         let lnm = len(sep) < 2 ? 1 : split(sep[1], ' ')[0]
         cal feedkeys("\<C-w>k:e ".fnm." | ".lnm."\<CR>")
+        cal EchoI('jump to '.lnm)
     endif
     cal s:fzsearch.finalize()
 endf
