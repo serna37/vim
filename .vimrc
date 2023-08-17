@@ -247,9 +247,7 @@ endf
 fu! s:runcat.start(...) abort
     cal self.stop()
     let self.winid = popup_create(self.cat[0], #{line: 1, zindex: 1})
-    if a:0
-        let self.delay = 700-(a:1-1)*140
-    endif
+    let self.delay = a:0 ? 700-(a:1-1)*140 : self.delay
     cal self.animation(0)
 endf
 fu! s:runcat_gear_list(A, L, P) abort
