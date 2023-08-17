@@ -92,16 +92,16 @@ nnoremap <Right> 4<C-w>>
 nnoremap <Up> 4<C-w>-
 nnoremap <Down> 4<C-w>+
 " move buffer
-nnoremap <C-n> <Plug>(buf-prev)
-nnoremap <C-p> <Plug>(buf-next)
+nmap <C-n> <Plug>(buf-prev)
+nmap <C-p> <Plug>(buf-next)
 " close buffer
-nnoremap <Leader>x <Plug>(buf-close)
+nmap <Leader>x <Plug>(buf-close)
 " terminal
 nnoremap <silent><Leader>t :cal popup_create(term_start([&shell],#{hidden:1,term_finish:'close'}),#{border:[],minwidth:&columns*3/4,minheight:&lines*3/4})<CR>
 " terminal read only mode (i to return terminal mode)
 tnoremap <Esc> <C-w>N
 " zen
-nnoremap <Leader>z <Plug>(zen-mode)
+nmap <Leader>z <Plug>(zen-mode)
 " }}}
 
 " ##################         MOTION         ################### {{{
@@ -110,24 +110,24 @@ nnoremap j gj
 nnoremap k gk
 vnoremap <Tab> 5gj
 vnoremap <S-Tab> 5gk
-nnoremap <Tab> 5j<Plug>(anchor)
-nnoremap <S-Tab> 5k<Plug>(anchor)
+nmap <Tab> 5j<Plug>(anchor)
+nmap <S-Tab> 5k<Plug>(anchor)
 " comfortable scroll
-nnoremap <C-u> <Plug>(scroll-u)
-nnoremap <C-d> <Plug>(scroll-d)
-nnoremap <C-b> <Plug>(scroll-b)
-nnoremap <C-f> <Plug>(scroll-f)
+nmap <C-u> <Plug>(scroll-u)
+nmap <C-d> <Plug>(scroll-d)
+nmap <C-b> <Plug>(scroll-b)
+nmap <C-f> <Plug>(scroll-f)
 " f-scope toggle
-nnoremap <Leader>w <Plug>(f-scope)
+nmap <Leader>w <Plug>(f-scope)
 " mark
-nnoremap mm <Plug>(mk-toggle)
-nnoremap mp <Plug>(mk-prev)
-nnoremap mn <Plug>(mk-next)
-nnoremap mc <Plug>(mk-clthis)
-nnoremap mx <Plug>(mk-clall)
-nnoremap <Leader>m <Plug>(mk-list)
+nmap mm <Plug>(mk-toggle)
+nmap mp <Plug>(mk-prev)
+nmap mn <Plug>(mk-next)
+nmap mc <Plug>(mk-clthis)
+nmap mx <Plug>(mk-clall)
+nmap <Leader>m <Plug>(mk-list)
 " IDE action menu
-nnoremap <Leader>v <Plug>(ide-menu)
+nmap <Leader>v <Plug>(ide-menu)
 " }}}
 
 " ##################         EDIT           ################### {{{
@@ -187,12 +187,12 @@ set ignorecase " ignore case search
 set smartcase " don't ignore case when enterd UPPER CASE"
 set shortmess-=S " show hit word's number at right bottom
 " no move search word with multi highlight
-nnoremap * *N<Plug>(qikhl-toggle)
-nnoremap # *N<Plug>(qikhl-toggle)
-nnoremap <silent><Leader>q <Plug>(qikhl-clear):noh<CR>
+nmap * *N<Plug>(qikhl-toggle)
+nmap # *N<Plug>(qikhl-toggle)
+nmap <silent><Leader>q <Plug>(qikhl-clear):noh<CR>
 " incremental search
-nnoremap s <Plug>(emotion)
-nnoremap <Leader>s <Plug>(fuzzy-search)
+nmap s <Plug>(emotion)
+nmap <Leader>s <Plug>(fuzzy-search)
 " grep result -> quickfix
 au QuickFixCmdPost *grep* cwindow
 " explorer
@@ -200,16 +200,16 @@ filetype plugin indent on
 let g:netrw_liststyle = 3
 let g:netrw_altv = 1
 let g:netrw_winsize = 70
-nnoremap <Leader>e <Plug>(explorer-toggle)
-nnoremap <silent><Leader>e :echow 'sorry tmp deactivated.'<CR>
+"nmap <Leader>e <Plug>(explorer-toggle)
+nmap <silent><Leader>e :echo 'sorry tmp deactivated.'<CR>
 " fzf-imitation
-nnoremap <leader>f <Plug>(fzf-smartfiles)
-nnoremap <leader>h <Plug>(fzf-histories)
-nnoremap <leader>b <Plug>(fzf-buffers)
+nmap <leader>f <Plug>(fzf-smartfiles)
+nmap <leader>h <Plug>(fzf-histories)
+nmap <leader>b <Plug>(fzf-buffers)
 " grep
-nnoremap <Leader>g <Plug>(grep)
+nmap <Leader>g <Plug>(grep)
 " vimgrep current file
-nnoremap <Leader><Leader>s <Plug>(grep-current)
+nmap <Leader><Leader>s <Plug>(grep-current)
 " }}}
 
 " ##################         OTHERS         ################### {{{
@@ -1309,9 +1309,9 @@ endf
 fu! NetrwOpenJudge()
     " XXX windows gitbashだとmapしたら上手く動かない
     " キー入力監視に変えるか？
-    nnoremap <buffer><CR> <Plug>NetrwLocalBrowseCheck
+    nmap <buffer><CR> <Plug>NetrwLocalBrowseCheck
     if getline('.')[len(getline('.'))-1] != '/'
-        nnoremap <buffer><CR> <Plug>NetrwLocalBrowseCheck:cal NetrwOpen()<CR>
+        nmap <buffer><CR> <Plug>NetrwLocalBrowseCheck:cal NetrwOpen()<CR>
     endif
 endf
 
@@ -2098,7 +2098,7 @@ fu! s:livereplace.change() abort
     if len(cmd) >= 3
         " create preview window
         if !self.flg
-            echow 'live replace preview'
+            cal popup_notification('live replace preview', #{line: &lines})
             cal self.preview()
             cal self.preview_reset()
             let self.flg = 1
@@ -2871,12 +2871,12 @@ if !glob('~/.vim/pack/plugins/start/coc.nvim')->empty()
     inoremap <silent><expr> <S-Tab> coc#pum#visible() ? coc#pum#prev(1) : "\<S-Tab>"
 
     " IDE
-    nnoremap <Leader>d <Plug>(coc-definition)
+    nmap <Leader>d <Plug>(coc-definition)
     nnoremap <Leader>r :CocCommand fzf-preview.CocReferences<CR>
     nnoremap <Leader>o :CocCommand fzf-preview.CocOutline<CR>
     nnoremap <Leader>? :cal CocAction('doHover')<CR>
-    nnoremap <Leader>, <plug>(coc-diagnostic-next)
-    nnoremap <Leader>. <plug>(coc-diagnostic-prev)
+    nmap <Leader>, <plug>(coc-diagnostic-next)
+    nmap <Leader>. <plug>(coc-diagnostic-prev)
     nnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : Scroll(1, 10)
     nnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : Scroll(0, 10)
 endif
