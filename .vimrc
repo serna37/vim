@@ -1367,6 +1367,7 @@ noremap <silent><Plug>(explorer-toggle) :<C-u>cal <SID>NetrwToggle()<CR>
 " while scroll, deactivate f-scope
 let s:scroll = #{tid: 0, curL: '', curC: '', till: 600}
 
+" TODO scroll sometimes so heavy. mainly C-f timer wrong?
 fu! s:scroll.exe(vector, delta) abort
     if self.tid
         retu
@@ -1480,7 +1481,7 @@ fu! s:emotion.exe() abort
     sil! e 'emotion'
     setl buftype=nofile bufhidden=wipe nobuflisted
     " fill blank
-    cal setline(1, range(1, self.sl)->map({->''}))
+    cal setline(1, range(1, self.sl))
     cal self.previewini()
     " disable diagnostic
     if exists('*CocAction')
@@ -2146,8 +2147,12 @@ fu! s:livereplace.change() abort
         if self.vs[1] && self.ve[1]
             let subst = self.vs[1].','.self.ve[1].'s/'.join(cmd[1:2], '/').'/g'
         endif
+        " TODO live replace want no move. matchadd is move
+        let p = getpos('.')
         exe subst
         let self.matchid = matchadd('User_blackfg_redbg_bold', cmd[2])
+        " matchaddposにする？
+        cal cursor(p[1],p[2])
     endif
 endf
 
