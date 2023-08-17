@@ -2058,7 +2058,9 @@ fu! s:start.exe() abort
     cal append('$', ['',''])
     cal append('$', self.cheat_sheet_win)
     hi BTR ctermfg=218 cterm=bold
-    cal matchaddpos('BTR', range(2,21)->map({_,v->[v]}), 999)
+    cal matchaddpos('BTR', range(2,9)->map({_,v->[v]}), 999)
+    cal matchaddpos('BTR', range(10,17)->map({_,v->[v]}), 999)
+    cal matchaddpos('BTR', range(18,21)->map({_,v->[v]}), 999)
     cal matchadd('User_greenfg_blackbg', '[─│╰╯╭╮]', 20)
     cal matchadd('DarkOrange', '\(Window\|Search\|Motion\|Command\)')
     cal matchadd('DarkBlue', '│.\{-,25}|', 19)
