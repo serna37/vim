@@ -187,10 +187,7 @@ set ignorecase " ignore case search
 set smartcase " don't ignore case when enterd UPPER CASE"
 set shortmess-=S " show hit word's number at right bottom
 " no move search word with multi highlight
-nnoremap * *N
-nnoremap # *N
-nmap * <Plug>(qikhl-toggle)
-nmap # <Plug>(qikhl-toggle)
+nmap # *N<Plug>(qikhl-toggle)
 nmap <silent><Leader>q <Plug>(qikhl-clear):noh<CR>
 " incremental search
 nmap s <Plug>(emotion)
@@ -974,8 +971,13 @@ fu! Fzsearch_confirm(wid, idx) abort
         let sep = split(result, '|')
         let fnm = substitute(sep[0], $HOME, '~', 'g')
         let lnm = len(sep) < 2 ? 1 : split(sep[1], ' ')[0]
-        cal feedkeys("\<C-w>k:e ".fnm." | ".lnm."\<CR>")
-        cal EchoI('jump to '.lnm)
+        " if quickfix window
+        if expand('%')->empty()
+            wincmd w
+        endif
+        exe 'e '.fnm
+        exe lnm
+        cal EchoI('jump to '.fnm.' line:'.lnm)
     endif
     cal s:fzsearch.finalize()
 endf
@@ -2042,7 +2044,7 @@ fu! s:start.exe() abort
     endif
     " preview window
     sil! exe 'e _cheat_cheet_'
-    setl buftype=nofile bufhidden=wipe modifiable
+    setl buftype=nofile bufhidden=wipe nobuflisted modifiable
     setl nonumber norelativenumber nocursorline nocursorcolumn signcolumn=no
     let &filetype = 'Bocchi_The_Rock'
     nmap <buffer>i \<Esc>
