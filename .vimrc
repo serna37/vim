@@ -1240,7 +1240,7 @@ endf
 
 let s:fzf.postfix = ' -type f -not -path '.join(s:fzf.not_path_arr, ' -not -path ')
 let s:fzf.searched = getcwd()
-let s:fzf.get_gitls = {-> system('git ls-files -co')->split('\n')->filter({_,v->!empty(v)}) }
+let s:fzf.get_gitls = {-> system('git ls-files -c')->split('\n')->filter({_,v->!empty(v)}) }
 let s:fzf.get_file_d1 = {-> system('find . -mindepth 1 -maxdepth 1'.s:fzf.postfix)->split('\n')->filter({_,v->!empty(v)}) }
 let s:fzf.get_file = { v -> 'find . -mindepth '.v.' -maxdepth '.v.s:fzf.postfix }
 
@@ -1257,6 +1257,7 @@ fu! s:fzf.files() abort
 
         if self.is_git
             let self.gcache = self.get_gitls()
+            cal EchoI('cache: git ls-files -c')
         else
             let self.cache = self.get_file_d1()
             cal self.asyncfind()
