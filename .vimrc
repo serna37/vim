@@ -238,34 +238,7 @@ endf
 " }}}
 
 " Running Cat (loading animation) {{{
-let s:runcat = #{frame: 0, winid: 0, tid: 0, delay: 300, fg: 239, fgmax: 255, fgmin: 17}
-
-
-""let RuncatRecursive = { f -> execute('let self.tid = timer_start(self.delay, f)')}
-""let RunCatAnimation = function({}, [RuncatRecursive])
-
-" TODO general increment
-let TestIncrement = {var, max, ini, inc -> printf('let %s = %s == %d ? %d : %s+%d', var, var, max, ini. var, inc)->execute()}
-let s:runcat.catdraw = { -> [
-            \ setbufline(winbufnr(self.winid), 1, self.cat[self.frame]),
-            \ execute('hi RunningCat ctermfg='.self.fg),
-            \ matchadd('RunningCat', '[^ ]', 16, -1, #{window: self.winid}),
-            \ ]}
-" TODO これはダメなはず
-let s:runcat.catincrement = { -> [
-            \ execute('let self.fg = self.fg == self.fgmax ? self.fgmin : self.fg+1'),
-            \ execute('let self.frame = self.frame == len(self.cat)-1 ? 0 : self.frame+1'),
-            \ ]}
-let s:runcat.cat_draw = { f -> {[
-            \ execute('let self.tid = timer_start(self.delay, {->f(f)})')
-            \ ]}}
-let Test_cat_draw = { f -> [
-            \ execute('echom "test"', ''),
-            \ execute('let tid = timer_start(1000, {->f(f)})'),
-            \ ]}
-" recursive
-"cal Test_cat_draw(Test_cat_draw)
-
+let s:runcat = #{frame: 0, winid: 0, tid: 0, delay: 100, fg: 239, fgmax: 255, fgmin: 17}
 fu! s:runcat.animation(_) abort
     cal setbufline(winbufnr(self.winid), 1, self.cat[self.frame])
     exe 'hi RunningCat ctermfg='.self.fg
