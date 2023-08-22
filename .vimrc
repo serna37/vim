@@ -346,9 +346,6 @@ com! -bar RunCatStop cal s:runcat.stop()
 " }}}
 
 " color echo/echon, input {{{
-" TODO script local
-" TODO common func
-
 fu! s:echo_n(hi, flg, msg) abort
     exe 'echohl '.a:hi
     exe printf('echo%s "%s"', a:flg, a:msg)
@@ -359,60 +356,22 @@ let s:echoE = { msg, ... -> s:echo_n('DarkRed', a:0 ? 'n' : '', msg) }
 let s:echoW = { msg, ... -> s:echo_n('DarkOrange', a:0 ? 'n' : '', msg) }
 let s:echoI = { msg, ... -> s:echo_n('DarkBlue', a:0 ? 'n' : '', msg) }
 
-" wip
-
-
-fu! s:_input(hi, msg, def, comp) abort
+fu! s:_input(hi, msg, arr)abort
     exe 'echohl '.a:hi
-    if !a:0
+    if len(a:arr)->empty()
         let w = input(a:msg)
-    elseif a:0 == 1
-        let w = input(a:msg, a:1)
-    elseif a:0 == 2
-        let w = input(a:msg, a:1, a:2)
+    elseif len(a:arr) == 1
+        let w = input(a:msg, a:arr[0])
+    elseif len(a:arr) == 2
+        let w = input(a:msg, a:arr[0], a:arr[1])
     endif
     echohl None
     retu w
+endf
 
-endf
-
-
-fu! InputE(msg, ...) abort
-    echohl DarkRed
-    if !a:0
-        let w = input(a:msg)
-    elseif a:0 == 1
-        let w = input(a:msg, a:1)
-    elseif a:0 == 2
-        let w = input(a:msg, a:1, a:2)
-    endif
-    echohl None
-    retu w
-endf
-fu! InputW(msg, ...) abort
-    echohl DarkOrange
-    if !a:0
-        let w = input(a:msg)
-    elseif a:0 == 1
-        let w = input(a:msg, a:1)
-    elseif a:0 == 2
-        let w = input(a:msg, a:1, a:2)
-    endif
-    echohl None
-    retu w
-endf
-fu! InputI(msg, ...) abort
-    echohl DarkBlue
-    if !a:0
-        let w = input(a:msg)
-    elseif a:0 == 1
-        let w = input(a:msg, a:1)
-    elseif a:0 == 2
-        let w = input(a:msg, a:1, a:2)
-    endif
-    echohl None
-    retu w
-endf
+let s:inputE = { msg, ... -> s:_input('DarkRed', msg, a:000) }
+let s:inputW = { msg, ... -> s:_input('DarkOrange', msg, a:000) }
+let s:inputI = { msg, ... -> s:_input('DarkBlue', msg, a:000) }
 
 aug logging_char_color
     au!
@@ -462,7 +421,7 @@ noremap <silent><Plug>(fuzzy-search) :<C-u>cal <SID>fuzzySearch()<CR>
 " Grep current file {{{
 fu! s:grepCurrent() abort
     cal s:echoI('grep from this file. (empty to cancel)')
-    let word = InputI('[word]>>', expand('<cword>'))
+    let word = s:inputI('[word]>>', expand('<cword>'))
     cal s:echoI('<<', 0)
     if empty(word)
         cal s:echoE('cancel')
@@ -490,21 +449,21 @@ fu! s:grep() abort
     cal s:echoW(' [target]', 0)
     echo '=========== empty to cancel ==================='
     echo 'pwd:'.substitute(getcwd(), $HOME, '~', 'g')
-    let word = InputE('[word]>>', expand('<cword>'))
+    let word = s:inputE('[word]>>', expand('<cword>'))
     cal s:echoE('<<', 0)
     if empty(word)
         echo 'cancel'
         retu
     endif
 
-    let ext = InputI('[ext]>>', '*')
+    let ext = s:inputI('[ext]>>', '*')
     cal s:echoI('<<', 0)
     if empty(ext)
         echo 'cancel'
         retu
     endif
 
-    let target = InputW('[target] TabCompletion>>', '.*', 'file')
+    let target = s:inputW('[target] TabCompletion>>', '.*', 'file')
     cal s:echoW('<<', 0)
     if empty(target)
         echo 'cancel'
@@ -585,7 +544,7 @@ fu! Idemenu_exe(_, idx) abort
             retu 1
         endif
     elseif a:idx == 3
-        let w = InputI('commit message>>')
+        let w = s:inputI('commit message>>')
         if empty(w)
             cal s:echoE('cancel')
             cal popup_close(s:idemenu.cheatid)
