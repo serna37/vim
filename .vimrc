@@ -97,6 +97,7 @@ nmap <C-p> <Plug>(buf-next)
 " close buffer
 nmap <Leader>x <Plug>(buf-close)
 " terminal
+" TODO popup terminal Esc, arrow keys and so on
 nnoremap <silent><Leader>t :cal popup_create(term_start([&shell],#{hidden:1,term_finish:'close'}),#{border:[],minwidth:&columns*3/4,minheight:&lines*3/4})<CR>
 " terminal read only mode (i to return terminal mode)
 tnoremap <Esc> <C-w>N
@@ -230,14 +231,47 @@ set foldcolumn=1 " fold preview
 " {{{
 " ##################       ORIGINALS        ################### {{{
 
+" popup terminal {{{
+fu! s:popup_terminal() abort
+    ""cal popup_create(term_start([&shell],#{hidden:1,term_finish:'close'}),#{border:[],minwidth:&columns*3/4,minheight:&lines*3/4})
+endf
+" }}}
+
 " Running Cat (loading animation) {{{
-let s:runcat = #{frame: 0, winid: 0, tid: 0, delay: 300, fg: 17}
+let s:runcat = #{frame: 0, winid: 0, tid: 0, delay: 300, fg: 239, fgmax: 255, fgmin: 17}
+
+
+""let RuncatRecursive = { f -> execute('let self.tid = timer_start(self.delay, f)')}
+""let RunCatAnimation = function({}, [RuncatRecursive])
+
+" TODO general increment
+let TestIncrement = {var, max, ini, inc -> printf('let %s = %s == %d ? %d : %s+%d', var, var, max, ini. var, inc)->execute()}
+let s:runcat.catdraw = { -> [
+            \ setbufline(winbufnr(self.winid), 1, self.cat[self.frame]),
+            \ execute('hi RunningCat ctermfg='.self.fg),
+            \ matchadd('RunningCat', '[^ ]', 16, -1, #{window: self.winid}),
+            \ ]}
+" TODO これはダメなはず
+let s:runcat.catincrement = { -> [
+            \ execute('let self.fg = self.fg == self.fgmax ? self.fgmin : self.fg+1'),
+            \ execute('let self.frame = self.frame == len(self.cat)-1 ? 0 : self.frame+1'),
+            \ ]}
+let s:runcat.cat_draw = { f -> {[
+            \ execute('let self.tid = timer_start(self.delay, {->f(f)})')
+            \ ]}}
+let Test_cat_draw = { f -> [
+            \ execute('echom "test"', ''),
+            \ execute('let tid = timer_start(1000, {->f(f)})'),
+            \ ]}
+" recursive
+"cal Test_cat_draw(Test_cat_draw)
+
 fu! s:runcat.animation(_) abort
     cal setbufline(winbufnr(self.winid), 1, self.cat[self.frame])
     exe 'hi RunningCat ctermfg='.self.fg
     cal matchadd('RunningCat', '[^ ]', 16, -1, #{window: self.winid})
-    let self.fg = self.fg == 255 ? 17 : self.fg+1
-    let self.frame = self.frame == 4 ? 0 : self.frame + 1
+    let self.fg = self.fg == self.fgmax ? self.fgmin : self.fg+1
+    let self.frame = self.frame == len(self.cat)-1 ? 0 : self.frame+1
     let self.tid = timer_start(self.delay, self.animation)
 endf
 fu! s:runcat.stop() abort
@@ -246,8 +280,8 @@ fu! s:runcat.stop() abort
 endf
 fu! s:runcat.start(...) abort
     cal self.stop()
-    let self.winid = popup_create(self.cat[0], #{line: 1, zindex: 1})
     let self.delay = a:0 ? 700-(a:1-1)*140 : self.delay
+    let self.winid = popup_create(self.cat[0], #{line: 1, zindex: 1})
     cal self.animation(0)
 endf
 fu! s:runcat_gear_list(A, L, P) abort
@@ -339,23 +373,36 @@ com! -bar RunCatStop cal s:runcat.stop()
 " }}}
 
 " color echo/echon, input {{{
-fu! EchoE(msg, ...) abort
-    echohl DarkRed
-    exe printf('echo%s "%s"', a:0 ? 'n' : '', a:msg)
+" TODO script local
+" TODO common func
+
+fu! s:echo_n(hi, flg, msg) abort
+    exe 'echohl '.a:hi
+    exe printf('echo%s "%s"', a:flg, a:msg)
     echohl None
 endf
 
-fu! EchoW(msg, ...) abort
-    echohl DarkOrange
-    exe printf('echo%s "%s"', a:0 ? 'n' : '', a:msg)
+let s:echoE = { msg, ... -> s:echo_n('DarkRed', a:0 ? 'n' : '', msg) }
+let s:echoW = { msg, ... -> s:echo_n('DarkOrange', a:0 ? 'n' : '', msg) }
+let s:echoI = { msg, ... -> s:echo_n('DarkBlue', a:0 ? 'n' : '', msg) }
+
+" wip
+
+
+fu! s:_input(hi, msg, def, comp) abort
+    exe 'echohl '.a:hi
+    if !a:0
+        let w = input(a:msg)
+    elseif a:0 == 1
+        let w = input(a:msg, a:1)
+    elseif a:0 == 2
+        let w = input(a:msg, a:1, a:2)
+    endif
     echohl None
+    retu w
+
 endf
 
-fu! EchoI(msg, ...) abort
-    echohl DarkBlue
-    exe printf('echo%s "%s"', a:0 ? 'n' : '', a:msg)
-    echohl None
-endf
 
 fu! InputE(msg, ...) abort
     echohl DarkRed
@@ -441,21 +488,21 @@ noremap <silent><Plug>(fuzzy-search) :<C-u>cal <SID>fuzzySearch()<CR>
 
 " Grep current file {{{
 fu! s:grepCurrent() abort
-    cal EchoI('grep from this file. (empty to cancel)')
+    cal s:echoI('grep from this file. (empty to cancel)')
     let word = InputI('[word]>>', expand('<cword>'))
-    cal EchoI('<<', 0)
+    cal s:echoI('<<', 0)
     if empty(word)
-        cal EchoE('cancel')
+        cal s:echoE('cancel')
         retu
     endif
-    cal EchoW(printf('grep word[%s] processing in [%s] ...', word, expand('%:t')))
+    cal s:echoW(printf('grep word[%s] processing in [%s] ...', word, expand('%:t')))
     try
         exe 'vimgrep /'.word.'/gj %'
         cw
     catch
-        cal EchoE('grep no hit')
+        cal s:echoE('grep no hit')
     finally
-        cal EchoI('grep complete!')
+        cal s:echoI('grep complete!')
     endtry
 endf
 
@@ -465,27 +512,27 @@ noremap <silent><Plug>(grep-current) :<C-u>cal <SID>grepCurrent()<CR>
 " Grep {{{
 fu! s:grep() abort
     echo 'grep by'
-    cal EchoE(' [word]', 0)
-    cal EchoI(' [ext]', 0)
-    cal EchoW(' [target]', 0)
+    cal s:echoE(' [word]', 0)
+    cal s:echoI(' [ext]', 0)
+    cal s:echoW(' [target]', 0)
     echo '=========== empty to cancel ==================='
     echo 'pwd:'.substitute(getcwd(), $HOME, '~', 'g')
     let word = InputE('[word]>>', expand('<cword>'))
-    cal EchoE('<<', 0)
+    cal s:echoE('<<', 0)
     if empty(word)
         echo 'cancel'
         retu
     endif
 
     let ext = InputI('[ext]>>', '*')
-    cal EchoI('<<', 0)
+    cal s:echoI('<<', 0)
     if empty(ext)
         echo 'cancel'
         retu
     endif
 
     let target = InputW('[target] TabCompletion>>', '.*', 'file')
-    cal EchoW('<<', 0)
+    cal s:echoW('<<', 0)
     if empty(target)
         echo 'cancel'
         retu
@@ -493,21 +540,21 @@ fu! s:grep() abort
 
     echo '==============================================='
     echo 'grep'
-    cal EchoE(' word['.word.']', 0)
-    cal EchoI(' ext['.ext.']', 0)
+    cal s:echoE(' word['.word.']', 0)
+    cal s:echoI(' ext['.ext.']', 0)
     echon ' processing in'
-    cal EchoW(' target['.target.']', 0)
+    cal s:echoW(' target['.target.']', 0)
     echon ' ...'
     echo ''
     let result = system('grep -rin --include="*.'.ext.'" "'.word.'" '.target)
     if empty(result)
-        cal EchoE('grep no hit')
-        cal EchoI('grep complete!')
+        cal s:echoE('grep no hit')
+        cal s:echoI('grep complete!')
         retu
     endif
     cgetexpr result
     cw
-    cal EchoI('grep complete!')
+    cal s:echoI('grep complete!')
 endf
 
 noremap <silent><Plug>(grep) :<C-u>cal <SID>grep()<CR>
@@ -560,14 +607,14 @@ fu! Idemenu_exe(_, idx) abort
         if exists(':Coc')
             cal CocActionAsync('rename')
         else
-            cal EchoE('Sorry, [ReName*] needs coc.nvim.')
+            cal s:echoE('Sorry, [ReName*] needs coc.nvim.')
             cal popup_close(s:idemenu.cheatid)
             retu 1
         endif
     elseif a:idx == 3
         let w = InputI('commit message>>')
         if empty(w)
-            cal EchoE('cancel')
+            cal s:echoE('cancel')
             cal popup_close(s:idemenu.cheatid)
             retu 1
         endif
@@ -576,7 +623,7 @@ fu! Idemenu_exe(_, idx) abort
         if exists(':CocCommand')
             exe 'CocCommand snippets.editSnippets'
         else
-            cal EchoE('Sorry, [Snippet*] needs coc.nvim.')
+            cal s:echoE('Sorry, [Snippet*] needs coc.nvim.')
             cal popup_close(s:idemenu.cheatid)
             retu 1
         endif
@@ -588,7 +635,7 @@ fu! Idemenu_exe(_, idx) abort
         if exists(':Vimspector')
             cal vimspector#Launch()
         else
-            cal EchoE('Sorry, [Debug*] needs vimspector.')
+            cal s:echoE('Sorry, [Debug*] needs vimspector.')
             cal popup_close(s:idemenu.cheatid)
             retu 1
         endif
@@ -687,8 +734,8 @@ let g:left_arrow = ''
 let powerline_chk_mac = system('fc-list | grep powerline | wc -l')->trim()
 let powerline_chk_win = system('cd /C/Windows/Fonts && ls | grep powerline | wc -l')->trim()
 if !powerline_chk_mac+0 && !powerline_chk_win+0
-    let g:right_arrow = '▶︎'
-    let g:left_arrow = '◀︎'
+    let g:right_arrow = ' '
+    let g:left_arrow = ' '
 endif
 
 let g:modes = {
@@ -716,6 +763,8 @@ fu! s:gitinfo() abort
     endif
     " TODO airline gitstatus結果を使いまわした方が早い？ -> いいだろべつに
     " TODO airline ls-filesに変える
+    " TODO airline async refresh
+    " TODO airline once get system cmd, trim it on vimscript
     let cmd = "cd ".expand('%:h')." && git status --short | awk -F ' ' '{print($1)}' | grep -c "
     let a = trim(system(cmd."'A'"))
     let aa = a !='0'?'+'.a :''
@@ -861,7 +910,7 @@ let s:fzsearch.allow_exts = glob($VIMRUNTIME.'/ftplugin/*.vim')->split('\n')
 
 fu! s:fzsearch.popup(v) abort
     if empty(a:v.list) || (len(a:v.list) == 1 && empty(a:v.list[0]))
-        cal EchoE('no data')
+        cal s:echoE('no data')
         retu
     endif
 
@@ -953,7 +1002,7 @@ endf
 " on confirm
 fu! Fzsearch_confirm(wid, idx) abort
     if a:idx == -1
-        cal EchoE('cancel')
+        cal s:echoE('cancel')
         cal s:fzsearch.finalize()
         retu
     endif
@@ -963,7 +1012,7 @@ fu! Fzsearch_confirm(wid, idx) abort
         exe 'e '.result
     elseif s:fzsearch.type == 'lm'
         let l = split(result, ':')[0]
-        cal EchoI('jump to '.l)
+        cal s:echoI('jump to '.l)
         exe l
     elseif s:fzsearch.type == 'flm'
         let sep = split(result, '|')
@@ -975,7 +1024,7 @@ fu! Fzsearch_confirm(wid, idx) abort
         endif
         exe 'e '.fnm
         exe lnm
-        cal EchoI('jump to '.fnm.' line:'.lnm)
+        cal s:echoI('jump to '.fnm.' line:'.lnm)
     endif
     cal s:fzsearch.finalize()
 endf
@@ -1117,6 +1166,7 @@ fu! s:fzsearch.fil(ctx, wid, key) abort
         cal feedkeys("\<Esc>")
         retu 1
     " TODO fzf.vim copy shold D-v only or Shift Insert. C-v want split
+    " TODO fzf.vim add feature: refresh cache (or re search)
     elseif a:key is# "\<C-v>" || a:key is# "\<D-v>"
         for i in range(0, strlen(@+)-1)
             cal add(a:ctx.wd, strpart(@+, i, 1))
@@ -1254,8 +1304,9 @@ fu! s:fzf.files() abort
         let self.searched = pwd
 
         if self.is_git
+            " TODO fzf no need cache?
             let self.gcache = self.get_gitls()
-            cal EchoI('cache: git ls-files -c')
+            cal s:echoI('cache: git ls-files -c')
         else
             let self.cache = self.get_file_d1()
             cal self.asyncfind()
@@ -1582,7 +1633,7 @@ fu! s:emotion.char_enter(winid, key) abort
         if exists('*CocAction')
             cal CocAction('diagnosticToggle')
         endif
-        cal EchoE('e-motion: go out')
+        cal s:echoE('e-motion: go out')
         retu 1
     endif
     " upd emotion.keypos
@@ -1607,7 +1658,7 @@ fu! s:emotion.char_enter(winid, key) abort
         if exists('*CocAction')
             cal CocAction('diagnosticToggle')
         endif
-        cal EchoI('e-motion: finish')
+        cal s:echoI('e-motion: finish')
         retu 1
     endif
     " redraw
@@ -1833,10 +1884,11 @@ endf
 fu! s:mk.toggle() abort
     let lmk = sign_getplaced(bufname('%'), #{group: 'mkg', lnum: line('.')})[0].signs
     if empty(lmk)
-        cal EchoI('mark')
+        cal s:echoI('mark')
         cal sign_place(0, 'mkg', 'mk', bufname('%'), #{lnum: line('.')})
     else
-        cal EchoI('remove mark')
+        " TODO mk mark When delete line by dd, remove mk?
+        cal s:echoI('remove mark')
         cal sign_unplace('mkg', #{buffer: bufname('%'), id: lmk[0].id})
     endif
     cal self.save()
@@ -1846,34 +1898,34 @@ endf
 fu! s:mk.jump(next) abort
     let list = self.list()
     if empty(list)
-        cal EchoE('no marks')
+        cal s:echoE('no marks')
         retu
     endif
     let cnt = len(list)
     let Vector = a:next ? self.next : self.prev
     let can = deepcopy(list)->filter(Vector)->sort({ x, y -> x.lnum - y.lnum })
     if empty(can)
-        cal EchoW('no next marks')
+        cal s:echoW('no next marks')
         retu
     endif
     cal sign_jump((a:next ? can[0] : can[-1]).id, 'mkg', bufname('%'))
-    cal timer_start(100, { -> EchoI(printf('mark jump [%s/%s]', a:next ? cnt - len(can) + 1 : len(can), cnt)) })
+    cal timer_start(100, { -> s:echoI(printf('mark jump [%s/%s]', a:next ? cnt - len(can) + 1 : len(can), cnt)) })
 endf
 
 fu! s:mk.clthis() abort
     cal sign_unplace('mkg', #{buffer: bufname('%')})
     cal self.save()
-    cal EchoI('clear mark in this file')
+    cal s:echoI('clear mark in this file')
 endf
 
 fu! s:mk.clall() abort
     if confirm('clear mark in all files ?', "&Yes\n&No\n&Cancel") != 1
-        cal EchoW('cancel', 0)
+        cal s:echoW('cancel', 0)
         retu
     endif
     cal sign_unplace('mkg')
     cal writefile([], self.path)
-    cal EchoI('clear ALL marks', 0)
+    cal s:echoI('clear ALL marks', 0)
 endf
 
 fu! s:mk.listcb() abort
@@ -1898,7 +1950,7 @@ fu! s:mk.listcb() abort
     endfor
 
     if empty(resource)
-        cal EchoE('no marks')
+        cal s:echoE('no marks')
         retu
     endif
     cal s:fzsearch.popup(#{title: 'Marks', list: resource, type: 'flm', eprfx: 0})
@@ -2199,7 +2251,7 @@ let s:quickrun = #{
 fu! s:quickrun.exe() abort
     let cmd = get(self.exe_dict, &filetype, '')
     if empty(cmd)
-        cal EchoE('unsupported program.')
+        cal s:echoE('unsupported program.')
         retu
     endif
     let cmd = cmd.' '.expand('%')
@@ -2213,7 +2265,7 @@ endf
 fu! s:quickrun.server() abort
     let cmd = get(self.svr_dict, &filetype, '')
     if empty(cmd)
-        cal EchoE('unsupported program.')
+        cal s:echoE('unsupported program.')
         retu
     endif
     exe 'bo terminal ++rows=10 ++shell '.cmd
@@ -2253,14 +2305,14 @@ fu! s:plug.install() abort
       \ ." && git clone -b release https://github.com/neoclide/coc.nvim"
     cal s:runcat.start()
     cal job_start(["/bin/zsh","-c",cmd], #{close_cb: self.coc_setup})
-    cal EchoI('colors, plugins installing...')
+    cal s:echoI('colors, plugins installing...')
     cal popup_notification('colors, plugins installing...', #{zindex: 999, line: &lines, col: 5})
 endf
 
 " coc extentions
 fu! s:plug.coc_setup(ch) abort
     cal s:runcat.stop()
-    cal EchoE('plugins installed. coc-extentions installing. PLEASE REBOOT VIM after this.')
+    cal s:echoE('plugins installed. coc-extentions installing. PLEASE REBOOT VIM after this.')
     cal popup_notification('colors, plugins installed. coc-extentions installing. PLEASE REBOOT VIM after this.', #{zindex: 999, line: &lines, col: 5})
     exe 'source ~/.vim/pack/plugins/start/coc.nvim/plugin/coc.vim'
     exe 'CocInstall '.join(self.coc_extentions, ' ')
@@ -2270,10 +2322,10 @@ endf
 
 " uninstall
 fu! s:plug.uninstall() abort
-    cal EchoE('delete ~/.vim')
+    cal s:echoE('delete ~/.vim')
     let w = confirm('Are you sure to delete these folders ?', "&Yes\n&No\n&Cancel")
     if w != 1
-        cal EchoI('cancel')
+        cal s:echoI('cancel')
         retu
     endif
     exe "bo terminal ++shell echo 'start' && rm -rf ~/.vim && echo 'end. PLEASE REBOOT VIM'"
