@@ -1071,7 +1071,7 @@ fu! s:fzsearch.list_upd() abort
     " highlight match char
     cal clearmatches(self.rwid)
     let char = printf('[%s]', escape(self.wd, '\[\]\-\.\*'))
-    cal matchadd('DarkRed', char, 16, -1, #{window: self.rwid})
+    cal matchadd('FzMatch', char, 16, -1, #{window: self.rwid})
     " upd preview
     cal self.pvupd()
 endf
@@ -1197,6 +1197,11 @@ fu! s:fzf_buffers()
         \ type: 'f', eprfx: '['.substitute(getcwd(), $HOME, '~', 'g').']>>'})
 endf
 " =====================
+
+aug FzMatch
+    au!
+    au ColorScheme * hi FzMatch cterm=BOLD,UNDERLINE
+aug END
 
 noremap <silent><Plug>(fzf-histories) :<C-u>cal <SID>fzf_histories()<CR>
 noremap <silent><Plug>(fzf-buffers) :<C-u>cal <SID>fzf_buffers()<CR>
