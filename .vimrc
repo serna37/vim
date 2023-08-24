@@ -113,6 +113,9 @@ vnoremap <Tab> 5gj
 vnoremap <S-Tab> 5gk
 nmap <Tab> 5j<Plug>(anchor)
 nmap <S-Tab> 5k<Plug>(anchor)
+nmap H H<Plug>(anchor)
+nmap M M<Plug>(anchor)
+nmap L L<Plug>(anchor)
 " comfortable scroll
 nmap <C-u> <Plug>(scroll-u)
 nmap <C-d> <Plug>(scroll-d)
@@ -382,7 +385,7 @@ aug END
 " }}}
 
 " Tab 5row Anchor {{{
-sign define anch text=> texthl=DarkRed
+sign define anch text=-> texthl=DarkRed
 let s:anchor = #{tid: 0,
     \ getlines: { l -> l-5 > 0 ? [l-5, l, l+5] : [l, l+5] },
     \ put: { f, l -> sign_place(0, 'anchor', 'anch', f, #{lnum: l}) },
@@ -399,6 +402,7 @@ endf
 fu! s:anchor() abort
     cal s:anchor.set()
 endf
+
 noremap <silent><Plug>(anchor) :<C-u>cal <SID>anchor()<CR>
 " }}}
 
