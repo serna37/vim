@@ -82,10 +82,11 @@ nnoremap <C-h> <C-w>h
 nnoremap <C-l> <C-w>l
 nnoremap <C-k> <C-w>k
 nnoremap <C-j> <C-w>j
-tnoremap <C-h> <C-w>h
-tnoremap <C-l> <C-w>l
-tnoremap <C-k> <C-w>k
-tnoremap <C-j> <C-w>j
+set termwinkey=<C-k>
+tnoremap <C-h> <C-k>h
+tnoremap <C-l> <C-k>l
+tnoremap <C-k> <C-k>k
+tnoremap <C-j> <C-k>j
 " window resize
 nnoremap <Left> 4<C-w><
 nnoremap <Right> 4<C-w>>
@@ -100,7 +101,7 @@ nmap <Leader>x <Plug>(buf-close)
 " TODO popup terminal Esc, arrow keys and so on
 nnoremap <silent><Leader>t :cal popup_create(term_start([&shell],#{hidden:1,term_finish:'close'}),#{border:[],minwidth:&columns*3/4,minheight:&lines*3/4})<CR>
 " terminal read only mode (i to return terminal mode)
-tnoremap <Esc> <C-w>N
+tnoremap <C-w> <Esc><BS>
 " zen
 nmap <Leader>z <Plug>(zen-mode)
 " }}}
@@ -206,9 +207,9 @@ let g:netrw_winsize = 70
 "nmap <Leader>e <Plug>(explorer-toggle)
 nmap <silent><Leader>e :echo 'sorry tmp deactivated.'<CR>
 " fzf-imitation
-nmap <leader>f <Plug>(fzf-smartfiles)
-nmap <leader>h <Plug>(fzf-histories)
-nmap <leader>b <Plug>(fzf-buffers)
+nmap <Leader>f <Plug>(fzf-smartfiles)
+nmap <Leader>h <Plug>(fzf-histories)
+nmap <Leader>b <Plug>(fzf-buffers)
 " grep
 nmap <Leader>g <Plug>(grep)
 " vimgrep current file
@@ -236,7 +237,27 @@ set foldcolumn=1 " fold preview
 
 " popup terminal {{{
 fu! s:popup_terminal() abort
-    ""cal popup_create(term_start([&shell],#{hidden:1,term_finish:'close'}),#{border:[],minwidth:&columns*3/4,minheight:&lines*3/4})
+    cal popup_create(term_start([&shell],#{hidden:1,term_finish:'close'}),#{border:[],minwidth:&columns*3/4,minheight:&lines*3/4})
+    tnoremap <buffer><Esc> <C-w>N
+endf
+
+" TODO refactor
+nnoremap <Leader>t :cal <SID>popup_terminal()<CR>
+
+" TODO WIP
+" grep を IDE menuに
+" gキーをgitに
+" all push いらないか？
+
+" for lazygit
+nmap <Leader><Leader>t :cal <SID>popup_lazygit()<CR>
+fu! s:popup_lazygit() abort
+    if !executable('lazygit')
+        cal s:echoE('need cmd ''lazygit''')
+        retu
+    endif
+    cal popup_create(term_start(['lazygit'],#{hidden:1,term_finish:'close'}),#{border:[],minwidth:&columns*3/4,minheight:&lines*3/4})
+    ""cal feedkeys("\<Space>tlazygit\<CR>")
 endf
 " }}}
 
@@ -711,6 +732,7 @@ fu! s:gitinfo() abort
     " TODO airline ls-filesに変える
     " TODO airline async refresh
     " TODO airline once get system cmd, trim it on vimscript
+    " TODO terminalから戻った時とかに、表示変になるぞ
     let cmd = "cd ".expand('%:h')." && git status --short | awk -F ' ' '{print($1)}' | grep -c "
     let a = trim(system(cmd."'A'"))
     let aa = a !='0'?'+'.a :''

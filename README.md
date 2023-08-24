@@ -19,7 +19,7 @@ alse see [Install_Plugins](#install_plugins)
 # Recommendation commands / packages
 |command / package|purpose|use in vim if include|
 |--|--|--|
-|[lazygit](https://github.com/jesseduffield/lazygit)|GUI git operations<br>※please use on termianl window|<ul><li>[ ] </ul>|
+|[lazygit](https://github.com/jesseduffield/lazygit)|GUI git operations|<ul><li>[x] </ul>|
 |[bat](https://github.com/sharkdp/bat)|syntaxed preview in coc fzf (references/outline)|<ul><li>[x] </ul>|
 |[powerline/fonts](https://github.com/powerline/fonts)|font|<ul><li>[x] </ul>|
 |[ryanoasis/nerd-fonts](https://github.com/ryanoasis/nerd-fonts)|font|<ul><li>[x] </ul>|
@@ -101,6 +101,7 @@ this `vimrc` including functions inspired these plugins.
 # Original
 this `vimrc` including these functions.
 - Running Cat
+- Popup terminal/git
 - Tab Anchor
 - Fuzzy Search Current File
 - Grep Current File
