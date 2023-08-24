@@ -855,7 +855,7 @@ fu! s:fzsearch.popup(v) abort
     let self.pr = a:v.eprfx ?? '>>'
     let self.wd = ''
     let self.ridx = 0
-    let self.max = 50
+    let self.max = 30
     let self.res = a:v.list[0:self.max]
 
     let self.bwid = popup_create([], #{title: ' '.a:v.title.' ',
