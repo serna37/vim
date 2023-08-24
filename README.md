@@ -82,6 +82,7 @@ also see [wiki-debug](https://github.com/serna37/vim/wiki/Debug)
 this `vimrc` including functions inspired these plugins.
 - [simeji/winresizer](https://github.com/simeji/winresizer)
 - [jiangmiao/auto-pairs](https://github.com/jiangmiao/auto-pairs)
+- [tpope/vim-surround](https://github.com/tpope/vim-surround)
 - [vim-airline/vim-airline](https://github.com/vim-airline/vim-airline)
 - [junegunn/fzf.vim](https://github.com/junegunn/fzf.vim)
 - [junegunn/fzf](https://github.com/junegunn/fzf)

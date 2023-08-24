@@ -223,7 +223,7 @@ set regexpengine=0 " chose regexp engin
 " fold
 set foldmethod=marker " fold marker
 set foldlevel=0 " fold max depth
-set foldlevelstart=5 " fold depth on start view
+set foldlevelstart=2 " fold depth on start view
 set foldcolumn=1 " fold preview
 " }}}
 " }}}
@@ -659,6 +659,16 @@ inoremap <silent><expr><BS> AutoPairsDelete()
 ""inoremap <silent><BS> <C-r>=AutoPairsDelete()
 
 " TODO auto pair 直前に押したキーが(なら、()と入力しても良いってしたい
+" 閉じ括弧を入力した際、直前の文字を判定する関数を呼び、ペアなら無視する
+" 
+
+" }}}
+
+" ===================================================================
+" tpope/vim-surround
+" ===================================================================
+" {{{
+" TODO
 " }}}
 
 " ===================================================================
@@ -1847,6 +1857,8 @@ fu! s:mk.load() abort
 endf
 
 " TODO mk mark マーク増える問題
+" idが重複してしまっているケースで、jumpができないが、mklistからなら行数指定なので問題なかった
+" idがなんで重複するんだ
 fu! s:mk.toggle() abort
     let lmk = sign_getplaced(bufname('%'), #{group: 'mkg', lnum: line('.')})[0].signs
     if empty(lmk)
