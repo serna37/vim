@@ -1629,7 +1629,7 @@ noremap <silent><Plug>(emotion) :<C-u>cal <SID>emotion()<CR>
 " unblevable/quick-scope
 " ===================================================================
 " {{{
-let s:fmode = #{flg: 1}
+let s:fmode = #{flg: 1, posf: [], posF: []}
 
 fu! s:fmode.set() abort
     cal getmatches()->filter({ _,v -> v.group =~ 'FScope.*' })->map('execute("cal matchdelete(v:val.id)")')
@@ -1640,6 +1640,8 @@ fu! s:fmode.set() abort
     let tar2 = []
     let bak = []
     let bak2 = []
+    let self.posf  = []
+    let self.posF  = []
     let offset = 0
     while offset != -1
         let start = matchstrpos(rtxt, '\<.', offset)
@@ -1657,17 +1659,36 @@ fu! s:fmode.set() abort
         endif
     endwhile
     if !empty(tar)
+        let self.posf  = self.posf + tar
         cal matchaddpos('FScopePrimary', tar, 16)
         endif
     if !empty(tar2)
+        let self.posf  = self.posf + tar2
         cal matchaddpos('FScopeSecondary', tar2, 16)
     endif
     if !empty(bak)
+        let self.posF  = self.posF + bak
         cal matchaddpos('FScopeBackPrimary', bak, 16)
     endif
     if !empty(bak2) 
+        let self.posF  = self.posF + bak2
         cal matchaddpos('FScopeBackSecondary', bak2, 16) 
     endif
+endf
+
+fu! s:fmode.move(vec) abort
+    let pos = getpos('.')
+    let col = pos[2]
+    if a:vec is# 'f'
+        let col = map(self.posf, {_,v -> v[1]})->filter({_,v -> v > col})->min()
+    elseif a:vec is# 'F'
+        let col = map(self.posF, {_,v -> v[1]})->filter({_,v -> v < col})->max()
+    endif
+    cal cursor(pos[1], col)
+endf
+
+fu! s:fmode_move(vec) abort
+    cal s:fmode.move(a:vec)
 endf
 
 fu! s:fmode.activate() abort
@@ -1676,6 +1697,8 @@ fu! s:fmode.activate() abort
         au CursorMoved * cal s:fmode.set()
     aug End
     cal s:fmode.set()
+    nmap <silent>f :cal <SID>fmode_move('f')<CR>
+    nmap <silent>F :cal <SID>fmode_move('F')<CR>
 endf
 
 fu! s:fmode.deactivate() abort
@@ -1685,6 +1708,8 @@ fu! s:fmode.deactivate() abort
     let current_win = win_getid()
     windo cal getmatches()->filter({ _,v -> v.group =~ 'FScope.*' })->map('execute("cal matchdelete(v:val.id)")')
     cal win_gotoid(current_win)
+    unmap f
+    unmap F
 endf
 
 fu! s:fmode.toggle() abort
