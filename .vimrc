@@ -444,6 +444,7 @@ endf
 noremap <silent><Plug>(fuzzy-search) :<C-u>cal <SID>fuzzySearch()<CR>
 " }}}
 
+" TODO delete
 " Grep current file {{{
 fu! s:grepCurrent() abort
     cal s:echoI('grep from this file. (empty to cancel)')
