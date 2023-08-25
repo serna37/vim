@@ -1257,7 +1257,7 @@ endf
 
 fu! s:fzf_buffers()
     cal s:fzsearch.popup(#{title: 'Buffers', list: execute('ls')->split('\n')->map({_,v -> split(v, '"')[1]})
-            \ ->filter({_,v -> v != '[No Name]' && v != '[無名]'}),
+            \ ->filter({_,v -> v != '[No Name]' && v != '[無名]' && v !~ '!.*'}),
         \ type: 'f', eprfx: '['.substitute(getcwd(), $HOME, '~', 'g').']>>'})
 endf
 " =====================
