@@ -211,9 +211,9 @@ nmap <Leader>f <Plug>(fzf-smartfiles)
 nmap <Leader>h <Plug>(fzf-histories)
 nmap <Leader>b <Plug>(fzf-buffers)
 " grep
-nmap <Leader>g <Plug>(grep)
+nmap <Leader><Leader>s <Plug>(grep)
 " vimgrep current file
-nmap <Leader><Leader>s <Plug>(grep-current)
+"nmap <Leader><Leader>s <Plug>(grep-current)
 " }}}
 
 " ##################         OTHERS         ################### {{{
@@ -250,10 +250,11 @@ nnoremap <Leader>t :cal <SID>popup_terminal()<CR>
 " all push いらないか？
 
 " for lazygit
-nmap <Leader><Leader>t :cal <SID>popup_lazygit()<CR>
+nmap <Leader>g :cal <SID>popup_lazygit()<CR>
 fu! s:popup_lazygit() abort
     if !executable('lazygit')
         cal s:echoE('need cmd ''lazygit''')
+        cal s:popup_terminal()
         retu
     endif
     cal popup_create(term_start(['lazygit'],#{hidden:1,term_finish:'close'}),#{border:[],minwidth:&columns*3/4,minheight:&lines*3/4})
