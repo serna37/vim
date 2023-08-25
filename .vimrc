@@ -884,32 +884,37 @@ fu! s:fzsearch.popup(v) abort
 
     let self.list = a:v.list
     let self.type = a:v.type
-    let self.pr = a:v.eprfx ?? '>>'
+    let self.prr = a:v.eprfx
     let self.wd = ''
+    let self.wda = []
     let self.ridx = 0
     let self.max = 30
+    let self.mode = 'Fuzzy'
+    let self.pr = '['.self.mode.']'.(self.prr ?? '>>')
     let self.res = a:v.list[0:self.max]
 
     let self.bwid = popup_create([], #{title: ' '.a:v.title.' ',
         \ zindex: 50, mapping: 0, scrollbar: 0,
-        \ border: [], borderchars: ['─','│','─','│','╭','╮','╯','╰'],
+        \ border: [], borderchars: ['─','│','─','│','╭','╮','╯','╰'], borderhighlight: ['FzWin'],
         \ minwidth: &columns*9/12, maxwidth: &columns*9/12,
         \ minheight: &lines/2+6, maxheight: &lines/2+6,
         \ line: &lines/4-2, col: &columns/8+1,
         \ })
 
-    let self.ewid = popup_create(self.pr, #{title: ' Fuzzy Search | ClearText: <C-w> ',
+    let self.ewid = popup_create(self.pr, #{title: ' Search Mode: <C-f> | ClearText: <C-w> ',
         \ zindex: 100, mapping: 0,
-        \ border: [], borderchars: ['─','│','─','│','╭','╮','╯','╰'],
+        \ border: [], borderchars: ['─','│','─','│','╭','╮','╯','╰'], borderhighlight: ['FzEWin'],
         \ minwidth: &columns/3, maxwidth: &columns/3,
         \ minheight: 1, maxheight: 1,
         \ line: &lines*3/4+2, col: &columns/7+1,
         \ filter: function(self.fil, [#{wd: []}]),
         \ })
+    cal matchaddpos('FzEWin', [[1, 1, len(self.pr)]],  16, -1, #{window: self.ewid})
+    cal matchadd('DarkRed', '\[.*\]', 17, -1, #{window: self.ewid})
 
     let self.rwid = popup_menu(self.res, #{title: ' Choose: <C-n/p> <CR> | QuickFix: <C-q> ',
         \ zindex: 99, mapping: 0, scrollbar: 1,
-        \ border: [], borderchars: ['─','│','─','│','╭','╮','╯','╰'],
+        \ border: [], borderchars: ['─','│','─','│','╭','╮','╯','╰'], borderhighlight: ['FzWin'],
         \ minwidth: &columns/3, maxwidth: &columns/3,
         \ minheight: &lines/2, maxheight: &lines/2,
         \ pos: 'topleft', line: &lines/4, col: &columns/7,
@@ -940,7 +945,7 @@ fu! s:fzsearch.popup(v) abort
     " preview
     let self.pwid = popup_menu(read, #{title: ' File Preview | Scroll: <C-d/u> ',
         \ zindex: 98, mapping: 0, scrollbar: 1,
-        \ border: [], borderchars: ['─','│','─','│','╭','╮','╯','╰'],
+        \ border: [], borderchars: ['─','│','─','│','╭','╮','╯','╰'], borderhighlight: ['FzWin'],
         \ minwidth: &columns/3, maxwidth: &columns/3,
         \ minheight: &lines/2+3, maxheight: &lines/2+3,
         \ pos: 'topleft', line: &lines/4, col: &columns/2+1,
@@ -982,6 +987,11 @@ fu! Fzsearch_confirm(wid, idx) abort
         let l = split(result, ':')[0]
         cal s:echoI('jump to '.l)
         exe l
+        if s:fzsearch.mode == 'Simply'
+            let @/ = s:fzsearch.wd
+            norm! n
+            cal s:quickhl.set()
+        endif
     elseif s:fzsearch.type == 'flm'
         let sep = split(result, '|')
         let fnm = substitute(sep[0], $HOME, '~', 'g')
@@ -1093,7 +1103,10 @@ endf
 " search result update
 fu! s:fzsearch.list_upd() abort
     " upd match result list
-    let filterd = empty(self.wd) ? self.list : matchfuzzy(self.list, self.wd)
+    let filterd = empty(self.wd) ? self.list :
+                \ self.mode == 'Fuzzy' ? matchfuzzy(self.list, self.wd)
+                \ : copy(self.list)->filter({_,v->match(v, self.wd)!=-1})
+    ""let filterd = copy(self.list)->filter({_,v->match(v, self.wd)!=-1})
     let self.res = filterd[0:self.max]
     let self.ridx = len(self.res)-1 < self.ridx ? len(self.res)-1 : self.ridx
     cal setbufline(winbufnr(self.ewid), 1, self.pr . self.wd)
@@ -1102,10 +1115,23 @@ fu! s:fzsearch.list_upd() abort
     cal setbufline(winbufnr(self.rwid), 1, self.res)
     " highlight match char
     cal clearmatches(self.rwid)
-    let char = printf('[%s]', escape(self.wd, '\[\]\-\.\*'))
-    cal matchadd('FzMatch', char, 16, -1, #{window: self.rwid})
+    if !empty(self.wd)
+        cal matchadd('FzMatch', self.mode == 'Fuzzy'
+                    \ ? printf('[%s]', escape(self.wd, '\[\]\-\.\*'))
+                    \ : '\c'.self.wd,
+                    \ 16, -1, #{window: self.rwid})
+    endif
     " upd preview
     cal self.pvupd()
+endf
+
+fu! s:fzsearch.togglemode() abort
+    let self.mode = self.mode == 'Fuzzy' ? 'Simply' : 'Fuzzy'
+    let self.pr = '['.self.mode.']'.(self.prr ?? '>>')
+    cal clearmatches(self.ewid)
+    cal matchaddpos('FzEWin', [[1, 1, len(self.pr)]],  16, -1, #{window: self.ewid})
+    cal matchadd('DarkRed', '\[.*\]', 17, -1, #{window: self.ewid})
+    cal self.list_upd()
 endf
 
 " enter search word
@@ -1129,6 +1155,9 @@ fu! s:fzsearch.fil(ctx, wid, key) abort
         cal popup_setoptions(self.rwid, #{zindex: 98})
         cal feedkeys(a:key)
         retu 1
+    elseif a:key is# "\<C-f>"
+        cal self.togglemode()
+        retu 1
     elseif a:key is# "\<C-q>"
         cal self.quickfix()
         cal feedkeys("\<Esc>")
@@ -1137,23 +1166,24 @@ fu! s:fzsearch.fil(ctx, wid, key) abort
     " TODO fzf.vim add feature: refresh cache (or re search)
     elseif a:key is# "\<C-v>" || a:key is# "\<D-v>"
         for i in range(0, strlen(@+)-1)
-            cal add(a:ctx.wd, strpart(@+, i, 1))
+            cal add(self.wda, strpart(@+, i, 1))
         endfor
-    elseif a:key is# "\<BS>" && !empty(a:ctx.wd)
-        unlet a:ctx.wd[len(a:ctx.wd)-1]
-    elseif a:key is# "\<BS>" && len(a:ctx.wd) == 0
+    " TODO see self
+    elseif a:key is# "\<BS>" && !empty(self.wda)
+        unlet self.wda[len(self.wda)-1]
+    elseif a:key is# "\<BS>" && len(self.wda) == 0
         " noop
         retu 1
     elseif a:key is# "\<C-w>"
-        let a:ctx.wd = []
+        let self.wda = []
     elseif strtrans(a:key) == "<80><fd>`"
         " noop (for polyglot bug adhoc)
         retu 1
     else
-        cal add(a:ctx.wd, a:key)
+        cal add(self.wda, a:key)
     endif
 
-    let self.wd = join(a:ctx.wd, '')
+    let self.wd = join(self.wda, '')
     cal self.list_upd()
     retu a:key is# "x" || a:key is# "\<Space>" ? 1 : popup_filter_menu(a:wid, a:key)
 endf
@@ -1232,7 +1262,9 @@ endf
 
 aug FzMatch
     au!
-    au ColorScheme * hi FzMatch cterm=BOLD,UNDERLINE
+    au ColorScheme * hi FzMatch cterm=BOLD,UNDERLINE ctermbg=238
+    au ColorScheme * hi FzWin ctermfg=114 ctermbg=237
+    au ColorScheme * hi FzEWin ctermfg=39 ctermbg=237
 aug END
 
 noremap <silent><Plug>(fzf-histories) :<C-u>cal <SID>fzf_histories()<CR>
