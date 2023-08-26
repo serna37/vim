@@ -103,8 +103,7 @@ this `vimrc` including these functions.
 - Running Cat
 - Popup terminal/git
 - Tab Anchor
-- Fuzzy Search Current File
-- Grep Current File
+- Search Current File fzf
 - Grep Recursive Interactive
 - IDE menu
 - Completion

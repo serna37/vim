@@ -67,6 +67,8 @@ set list " show invisible char
 set listchars=tab:»-,trail:-,eol:↲,extends:»,precedes:«,nbsp:% " custom invisible char
 " row number + relativenumber
 set number relativenumber
+" always show sign column width
+set signcolumn=yes
 " cursor
 set scrolloff=5 " page top bottom offset view row
 set cursorline cursorcolumn " show cursor line/column
@@ -196,7 +198,7 @@ nmap # *N<Plug>(qikhl-toggle)
 nmap <silent><Leader>q <Plug>(qikhl-clear):noh<CR>
 " incremental search
 nmap s <Plug>(emotion)
-nmap <Leader>s <Plug>(fuzzy-search)
+nmap <Leader>s <Plug>(current-search)
 " grep result -> quickfix
 au QuickFixCmdPost *grep* cwindow
 " explorer
@@ -224,7 +226,7 @@ set regexpengine=0 " chose regexp engin
 " fold
 set foldmethod=marker " fold marker
 set foldlevel=0 " fold max depth
-set foldlevelstart=2 " fold depth on start view
+set foldlevelstart=5 " fold depth on start view
 set foldcolumn=1 " fold preview
 " }}}
 " }}}
@@ -429,19 +431,19 @@ noremap <silent><Plug>(anchor) :<C-u>cal <SID>anchor()<CR>
 " }}}
 
 " Fuzzy search current file {{{
-fu! s:fuzzySearch() abort
+fu! s:currentSearch() abort
     let buf = getline(1, line('$'))
-    " quickfix fuzzySearch
+    " quickfix currentSearch
     " empty buffer -> no data
     if expand('%')->empty()
         cal s:fzsearch.popup(#{title: 'QuickFix', list: buf, type: 'flm', eprfx: 0})
         retu
     endif
-    " buffer fuzzySearch
-    cal s:fzsearch.popup(#{title: 'Current Buffer', list: map(buf, {i,v->i+1.': '.v}), type: 'lm', eprfx: 0})
+    " buffer currentSearch
+    cal s:fzsearch.popup(#{title: 'Current', list: map(buf, {i,v->i+1.': '.v}), type: 'lm', eprfx: 0})
 endf
 
-noremap <silent><Plug>(fuzzy-search) :<C-u>cal <SID>fuzzySearch()<CR>
+noremap <silent><Plug>(current-search) :<C-u>cal <SID>currentSearch()<CR>
 " }}}
 
 " TODO delete
@@ -897,13 +899,13 @@ fu! s:fzsearch.popup(v) abort
 
     let self.bwid = popup_create([], #{title: ' '.a:v.title.' ',
         \ zindex: 50, mapping: 0, scrollbar: 0,
-        \ border: [], borderchars: ['─','│','─','│','╭','╮','╯','╰'], borderhighlight: ['FzWin'],
+        \ border: [], borderchars: ['─','│','─','│','╭','╮','╯','╰'], borderhighlight: ['FzBWin'],
         \ minwidth: &columns*9/12, maxwidth: &columns*9/12,
         \ minheight: &lines/2+6, maxheight: &lines/2+6,
         \ line: &lines/4-2, col: &columns/8+1,
         \ })
 
-    let self.ewid = popup_create(self.pr, #{title: ' Search Mode: <C-f> | ClearText: <C-w> ',
+    let self.ewid = popup_create(self.pr, #{title: ' Search Mode: <Tab> | ClearText: <C-w> ',
         \ zindex: 100, mapping: 0,
         \ border: [], borderchars: ['─','│','─','│','╭','╮','╯','╰'], borderhighlight: ['FzEWin'],
         \ minwidth: &columns/3, maxwidth: &columns/3,
@@ -1157,7 +1159,7 @@ fu! s:fzsearch.fil(ctx, wid, key) abort
         cal popup_setoptions(self.rwid, #{zindex: 98})
         cal feedkeys(a:key)
         retu 1
-    elseif a:key is# "\<C-f>"
+    elseif a:key is# "\<Tab>"
         cal self.togglemode()
         retu 1
     elseif a:key is# "\<C-q>"
@@ -1262,10 +1264,11 @@ fu! s:fzf_buffers()
 endf
 " =====================
 
-aug FzMatch
+aug FzColor
     au!
     au ColorScheme * hi FzMatch cterm=BOLD,UNDERLINE ctermbg=238
     au ColorScheme * hi FzWin ctermfg=114 ctermbg=237
+    au ColorScheme * hi FzBWin cterm=BOLD ctermfg=145 ctermbg=238
     au ColorScheme * hi FzEWin ctermfg=39 ctermbg=237
 aug END
 
@@ -1884,7 +1887,7 @@ noremap <silent><Plug>(qikhl-clear) :<C-u>cal <SID>quickhlclear()<CR>
 " MattesGroeger/vim-bookmarks
 " ===================================================================
 " {{{
-sign define mk text=⚑ texthl=DarkBlue
+sign define mk text=❤︎ texthl=DarkOrange
 
 let s:mk = #{winid: 0, tle: 'marks', allwinid: 0, atle: 'marks-allfiles',
     \ path: $HOME.'/.mk',
