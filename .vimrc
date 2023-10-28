@@ -409,7 +409,7 @@ aug END
 " }}}
 
 " Tab 5row Anchor {{{
-sign define anch text=-> texthl=DarkRed
+sign define anch text=➤ texthl=DarkRed
 let s:anchor = #{tid: 0,
     \ getlines: { l -> l-5 > 0 ? [l-5, l, l+5] : [l, l+5] },
     \ put: { f, l -> sign_place(0, 'anchor', 'anch', f, #{lnum: l}) },
@@ -888,6 +888,7 @@ fu! s:fzsearch.popup(v) abort
 
     let self.list = a:v.list
     let self.type = a:v.type
+    " TODO depends on type
     let self.prr = a:v.eprfx
     let self.wd = ''
     let self.wda = []
@@ -930,7 +931,7 @@ fu! s:fzsearch.popup(v) abort
     if self.type == 'lm'
         cal setbufvar(winbufnr(self.rwid), '&filetype', &filetype)
     elseif self.type == 'flm'
-        cal setbufvar(winbufnr(self.rwid), '&filetype', 'vim')
+        cal setbufvar(winbufnr(self.rwid), '&filetype', 'txt')
     endif
 
     " get preview file
@@ -1121,7 +1122,7 @@ fu! s:fzsearch.list_upd() abort
     cal clearmatches(self.rwid)
     if !empty(self.wd)
         cal matchadd('FzMatch', self.mode == 'Fuzzy'
-                    \ ? printf('[%s]', escape(self.wd, '\[\]\-\.\*'))
+                    \ ? printf('\c[%s]', escape(self.wd, '\[\]\-\.\*'))
                     \ : '\c'.self.wd,
                     \ 16, -1, #{window: self.rwid})
     endif
@@ -1266,7 +1267,7 @@ endf
 
 aug FzColor
     au!
-    au ColorScheme * hi FzMatch cterm=BOLD,UNDERLINE ctermbg=238
+    au ColorScheme * hi FzMatch cterm=BOLD cterm=underline ctermfg=196 ctermbg=237
     au ColorScheme * hi FzWin ctermfg=114 ctermbg=237
     au ColorScheme * hi FzBWin cterm=BOLD ctermfg=145 ctermbg=238
     au ColorScheme * hi FzEWin ctermfg=39 ctermbg=237
@@ -1766,8 +1767,8 @@ fu! s:fmode.activate() abort
         au CursorMoved * cal s:fmode.set()
     aug End
     cal s:fmode.set()
-    nmap <silent>f :cal <SID>fmode_move('f')<CR>
-    nmap <silent>F :cal <SID>fmode_move('F')<CR>
+    "nmap <silent>f :cal <SID>fmode_move('f')<CR>
+    "nmap <silent>F :cal <SID>fmode_move('F')<CR>
 endf
 
 fu! s:fmode.deactivate() abort
@@ -1777,8 +1778,8 @@ fu! s:fmode.deactivate() abort
     let current_win = win_getid()
     windo cal getmatches()->filter({ _,v -> v.group =~ 'FScope.*' })->map('execute("cal matchdelete(v:val.id)")')
     cal win_gotoid(current_win)
-    unmap f
-    unmap F
+    "unmap f
+    "unmap F
 endf
 
 fu! s:fmode.toggle() abort
@@ -1887,7 +1888,7 @@ noremap <silent><Plug>(qikhl-clear) :<C-u>cal <SID>quickhlclear()<CR>
 " MattesGroeger/vim-bookmarks
 " ===================================================================
 " {{{
-sign define mk text=❤︎ texthl=DarkOrange
+sign define mk text=⛳︎ texthl=DarkOrange
 
 let s:mk = #{winid: 0, tle: 'marks', allwinid: 0, atle: 'marks-allfiles',
     \ path: $HOME.'/.mk',
@@ -2104,10 +2105,9 @@ let s:start.cheat_sheet_win = [
     \'       │ C-w v / s  | (window split)(vertical / horizontal) │           │ Space h    | (fzf)(histories)                   │',
     \'       │ ←↑↓→       | (window)(resize)                      │           │ Space b    | (fzf)(buffers)                     │',
     \'       │ C-hjkl     | (window)(forcus)                      │           │ Space m    | (marks)                            │',
-    \'       │ Space t    | (terminal)                            │           │ Space s    | (fuzzy search in file / quickfix)  │',
-    \'       │ Space z    | (Zen Mode)                            │           │ Space*2 s  | (grep current file)                │',
-    \'       ╰────────────────────────────────────────────────────╯           │ Space g    | (grep free interactive)            │',
-    \'                                                                        │ Space q    | (clear search highlight)           │',
+    \'       │ Space t/g  | (terminal)/(lazygit)                  │           │ Space s    | (fuzzy search in file / quickfix)  │',
+    \'       │ Space z    | (Zen Mode)                            │           │ Space*2 s  | (grep interactive)                 │',
+    \'       ╰────────────────────────────────────────────────────╯           │ Space q    | (clear search highlight)           │',
     \'                                                                        ╰─────────────────────────────────────────────────╯',
     \'',
     \'       ╭── Motion ───────────────────────────────────────────╮          ╭── Command ──────────────────────────────────────────╮',
@@ -2170,11 +2170,10 @@ fu! s:start.move() abort
 endf
 
 " only first call
-" TODO startify BufLeaveだと、explorer開いた時に、start menu画面でのハイライトが残ったまま。
 aug start_vim
     au!
     au VimEnter * cal s:start.exe()
-    au BufLeave * cal s:start.move()
+    au BufReadPre * cal s:start.move()
 aug END
 " }}}
 
@@ -2319,6 +2318,7 @@ let s:plug.repos = [
     \ 'puremourning/vimspector',
     \ 'github/copilot.vim',
     \ 'CoderCookE/vim-chatgpt',
+    \ 'sheerun/vim-polyglot'
     \ ]
 
 " coc extentions
