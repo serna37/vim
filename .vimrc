@@ -89,6 +89,7 @@ tnoremap <C-h> <C-k>h
 tnoremap <C-l> <C-k>l
 tnoremap <C-k> <C-k>k
 tnoremap <C-j> <C-k>j
+set splitright
 " window resize
 nnoremap <Left> 4<C-w><
 nnoremap <Right> 4<C-w>>
@@ -1310,7 +1311,8 @@ fu! s:fzf.files() abort
 
     " moved or first
     if stridx(pwd, self.searched) == -1
-                \ || (self.is_git && empty(self.gcache))
+                "\ || (self.is_git && empty(self.gcache))
+                \ || (self.is_git)
                 \ || (!self.is_git && empty(self.cache))
         let self.searched = pwd
 
@@ -2323,7 +2325,7 @@ let s:plug.repos = [
 
 " coc extentions
 let s:plug.coc_extentions = [
-    \ 'coc-explorer', 'coc-fzf-preview', 'coc-snippets',
+    \ 'coc-explorer', 'coc-pairs', 'coc-fzf-preview', 'coc-snippets',
     \ 'coc-sh', 'coc-vimlsp', 'coc-json', 'coc-sql', 'coc-html', 'coc-css',
     \ 'coc-tsserver', 'coc-clangd', 'coc-go', 'coc-pyright', 'coc-java',
     \ ]
