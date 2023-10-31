@@ -146,6 +146,8 @@ set backspace=indent,eol,start " backspace attitude on insert mode
 " parentheses
 set showmatch " jump pair of parentheses when write
 set matchtime=3 " jump term sec
+" row
+nnoremap vv ^v$
 " move cursor at insert mode
 inoremap <C-h> <C-o>h
 inoremap <C-l> <C-o>l
