@@ -54,6 +54,13 @@ curl https://raw.githubusercontent.com/serna37/vim/master/.vimrc > ~/.vimrc
 ```
 other commands / keymaps details are in cheat sheet.<br>
 ※ I chose yapf for python formatter, so need `python -m pip install yapf`
+※ To disable inlay hint on clangd
+`mkdir -p ~/Library/Preferences/clangd && vi ~/Library/Preferences/clangd/config.yaml`
+```
+ InlayHints:
+  Enabled: No
+```
+
 
 ## 4. [optional] setup [copilot](https://github.com/github/copilot.vim)
 ```

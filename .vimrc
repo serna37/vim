@@ -563,7 +563,7 @@ endf
 
 fu! Idemenu_exe(_, idx) abort
     if a:idx == 1
-        " TODO ide menu format 選択部分のみをしたい
+        " TODO ide menu format formatSelected がある 選択部のみ。ぐぐれ
         if exists(':Coc')
             cal CocActionAsync('format')
         else
@@ -2333,6 +2333,10 @@ let s:plug.coc_extentions = [
     \ 'coc-sh', 'coc-vimlsp', 'coc-json', 'coc-sql', 'coc-html', 'coc-css',
     \ 'coc-tsserver', 'coc-clangd', 'coc-go', 'coc-pyright', 'coc-java',
     \ ]
+" to disable inlay hint in clangd, create file
+" mkdir -p ~/Library/Preferences/clangd && vi ~/Library/Preferences/clangd/config.yaml
+" InlayHints:
+"  Enabled: No
 
 let s:plug.coc_config = ['{',
     \ '    "snippets.ultisnips.pythonPrompt": false,',
