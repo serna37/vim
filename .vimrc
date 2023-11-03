@@ -150,6 +150,8 @@ set matchtime=3 " jump term sec
 inoremap jj <Esc>:w<CR>
 " row visual
 nnoremap vv ^v$
+" save
+nnoremap <C-s> :w<CR>
 " move cursor at insert mode
 inoremap <C-h> <C-o>h
 inoremap <C-l> <C-o>l
