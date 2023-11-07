@@ -679,15 +679,16 @@ fu! AutoPairsDelete()
     retu "\<BS>"
 endf
 
-inoremap ( ()<LEFT>
-inoremap [ []<LEFT>
-inoremap { {}<LEFT>
-inoremap < <><LEFT>
-inoremap ' ''<LEFT>
-inoremap " ""<LEFT>
-inoremap ` ``<LEFT>
-" TODO auto pair ~の後ろで正規表現やりに行っちゃう。=は大丈夫
-inoremap <silent><expr><BS> AutoPairsDelete()
+" TODO FIXME
+"inoremap ( ()<LEFT>
+"inoremap [ []<LEFT>
+"inoremap { {}<LEFT>
+"inoremap < <><LEFT>
+"inoremap ' ''<LEFT>
+"inoremap " ""<LEFT>
+"inoremap ` ``<LEFT>
+"" TODO auto pair ~の後ろで正規表現やりに行っちゃう。=は大丈夫
+"inoremap <silent><expr><BS> AutoPairsDelete()
 ""inoremap <silent><BS> <C-r>=AutoPairsDelete()
 
 " TODO auto pair 直前に押したキーが(なら、()と入力しても良いってしたい
@@ -2326,12 +2327,13 @@ let s:plug.repos = [
     \ 'puremourning/vimspector',
     \ 'github/copilot.vim',
     \ 'CoderCookE/vim-chatgpt',
+    \ 'jiangmiao/auto-pairs',
     \ 'sheerun/vim-polyglot'
     \ ]
 
 " coc extentions
 let s:plug.coc_extentions = [
-    \ 'coc-explorer', 'coc-pairs', 'coc-fzf-preview', 'coc-snippets',
+    \ 'coc-explorer', 'coc-fzf-preview', 'coc-snippets',
     \ 'coc-sh', 'coc-vimlsp', 'coc-json', 'coc-sql', 'coc-html', 'coc-css',
     \ 'coc-tsserver', 'coc-clangd', 'coc-go', 'coc-pyright', 'coc-java',
     \ ]
